@@ -5,6 +5,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import CategoryBadge from '@/components/ui/CategoryBadge';
 import MacroDisplay from '@/components/ui/MacroDisplay';
+import RateRecipeForm from '@/components/recipe/RateRecipeForm';
 import { allRecipes, Recipe, RecipeStep, Ingredient } from '@/data/mockData';
 import { Clock, Flame, ChefHat, Users, ChevronLeft, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -93,7 +94,7 @@ const RecipeDetail: React.FC = () => {
               <span className="mx-2">/</span>
               <Link to="/recipes" className="hover:text-fitcooker-orange transition-colors">Receitas</Link>
               <span className="mx-2">/</span>
-              <span className="text-gray-700 truncate">{title}</span>
+              <span className="text-gray-700 truncate">{recipe?.title}</span>
             </div>
           </div>
         </div>
@@ -153,9 +154,9 @@ const RecipeDetail: React.FC = () => {
                   Voltar para receitas
                 </Link>
                 
-                <h1 className="heading-lg mb-3">{title}</h1>
+                <h1 className="heading-lg mb-3">{recipe?.title}</h1>
                 
-                <p className="text-gray-600 mb-6">{description}</p>
+                <p className="text-gray-600 mb-6">{recipe?.description}</p>
                 
                 <div className="flex items-center mb-6">
                   <div className="flex items-center mr-4">
@@ -210,10 +211,10 @@ const RecipeDetail: React.FC = () => {
                 
                 {/* Macros */}
                 <MacroDisplay 
-                  calories={macros.calories}
-                  protein={macros.protein}
-                  carbs={macros.carbs}
-                  fat={macros.fat}
+                  calories={recipe?.macros.calories || 0}
+                  protein={recipe?.macros.protein || 0}
+                  carbs={recipe?.macros.carbs || 0}
+                  fat={recipe?.macros.fat || 0}
                   className="mb-8"
                 />
                 
@@ -225,6 +226,11 @@ const RecipeDetail: React.FC = () => {
                   <button className="btn btn-outline flex-1">
                     Compartilhar
                   </button>
+                </div>
+                
+                {/* Add Rate Recipe Form */}
+                <div className="mt-6">
+                  <RateRecipeForm recipeId={id || ''} recipeName={recipe?.title || ''} />
                 </div>
               </div>
             </div>

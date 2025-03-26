@@ -1,284 +1,116 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { allRecipes } from '@/data/mockData';
-import { ChefHat, Star, TrendingUp, Search, Award, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Star, Search, Award, ChefHat } from 'lucide-react';
 
-interface Cook {
-  id: number;
-  name: string;
-  avatarUrl: string;
-  bio: string;
-  recipesCount: number;
-  averageRating: number;
-  followers: number;
-  specialties: string[];
-}
+// Mock data for cooks
+const mockCooks = [
+  { id: 1, name: 'Ana Silva', avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg' },
+  { id: 2, name: 'Carlos Oliveira', avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg' },
+  { id: 3, name: 'Juliana Santos', avatarUrl: 'https://randomuser.me/api/portraits/women/68.jpg' },
+  { id: 4, name: 'Ricardo Almeida', avatarUrl: 'https://randomuser.me/api/portraits/men/75.jpg' },
+  { id: 5, name: 'Fernanda Lima', avatarUrl: 'https://randomuser.me/api/portraits/women/90.jpg' },
+  { id: 6, name: 'Bruno Costa', avatarUrl: 'https://randomuser.me/api/portraits/men/40.jpg' },
+  { id: 7, name: 'Camila Mendes', avatarUrl: 'https://randomuser.me/api/portraits/women/15.jpg' },
+  { id: 8, name: 'André Souza', avatarUrl: 'https://randomuser.me/api/portraits/men/22.jpg' },
+];
 
 const Cooks: React.FC = () => {
-  const [cooks, setCooks] = useState<Cook[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   
-  useEffect(() => {
-    // Scroll to top when component mounts
-    window.scrollTo(0, 0);
-    
-    // Simulating API fetch
-    setTimeout(() => {
-      // Extract unique cooks from recipes and calculate their stats
-      const uniqueCooksMap = new Map();
-      
-      allRecipes.forEach(recipe => {
-        const { author } = recipe;
-        
-        if (!uniqueCooksMap.has(author.id)) {
-          uniqueCooksMap.set(author.id, {
-            id: author.id,
-            name: author.name,
-            avatarUrl: author.avatarUrl,
-            bio: author.bio || "Chef especializado em receitas fitness.",
-            recipes: [recipe],
-            totalRating: recipe.rating,
-            followers: Math.floor(Math.random() * 1000) + 100,
-            specialties: recipe.categories.slice(0, 3),
-          });
-        } else {
-          const cookData = uniqueCooksMap.get(author.id);
-          cookData.recipes.push(recipe);
-          cookData.totalRating += recipe.rating;
-          
-          // Add unique categories to specialties
-          recipe.categories.forEach(category => {
-            if (!cookData.specialties.includes(category) && cookData.specialties.length < 5) {
-              cookData.specialties.push(category);
-            }
-          });
-        }
-      });
-      
-      // Convert map to array and calculate stats
-      const cooksArray = Array.from(uniqueCooksMap.values()).map(cookData => ({
-        id: cookData.id,
-        name: cookData.name,
-        avatarUrl: cookData.avatarUrl,
-        bio: cookData.bio,
-        recipesCount: cookData.recipes.length,
-        averageRating: parseFloat((cookData.totalRating / cookData.recipes.length).toFixed(1)),
-        followers: cookData.followers,
-        specialties: cookData.specialties.slice(0, 3), // Limit to 3 specialties
-      }));
-      
-      // Sort by average rating (highest first)
-      cooksArray.sort((a, b) => b.averageRating - a.averageRating);
-      
-      setCooks(cooksArray);
-      setIsLoading(false);
-    }, 800);
-  }, []);
-  
-  const filteredCooks = cooks.filter(cook => 
-    cook.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cook.specialties.some(specialty => 
-      specialty.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  const filteredCooks = mockCooks.filter(cook => 
+    cook.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow pt-24">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="flex justify-center items-center h-[60vh]">
-              <div className="animate-pulse space-y-8 w-full max-w-4xl">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <div key={i} className="bg-gray-200 h-32 rounded-lg w-full"></div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-  
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow pt-24">
-        <section className="bg-gradient-to-b from-fitcooker-orange/10 to-gray-50 py-12">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="text-center mb-8">
-              <div className="inline-block mb-2">
-                <ChefHat size={40} className="text-fitcooker-orange mx-auto" />
-              </div>
-              <h1 className="heading-lg mb-2">Nossos Mestres da Cozinha Fit</h1>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Conheça os talentos que transformam ingredientes simples em deliciosas refeições saudáveis
+      <main className="flex-grow py-24">
+        <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto">
+            <header className="text-center mb-12">
+              <h1 className="heading-lg mb-4">Nossos Chefs Fit</h1>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                Conheça os cozinheiros mais talentosos da nossa comunidade. Eles são especialistas em criar receitas saudáveis e deliciosas.
               </p>
-            </div>
-            
-            {/* Search Bar */}
-            <div className="max-w-2xl mx-auto mb-12 relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+              
+              <div className="flex items-center max-w-md mx-auto mt-8 relative">
+                <Input
+                  type="text"
+                  placeholder="Buscar cozinheiros..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pr-10"
+                />
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               </div>
-              <input
-                type="text"
-                placeholder="Busque por nome ou especialidade..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-fitcooker-orange focus:border-transparent transition-all shadow-sm"
-              />
-            </div>
-          </div>
-        </section>
-        
-        <section className="py-12">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                <Award className="mr-2 text-yellow-500" />
-                Top Chefs
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {filteredCooks.slice(0, 3).map((cook, index) => (
-                  <div key={cook.id} className="group">
-                    <div className="relative bg-white rounded-xl overflow-hidden shadow-lg transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                      {/* Medal Badge */}
-                      <div className="absolute top-3 left-3 z-10">
-                        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                          index === 0 ? 'bg-yellow-400' : 
-                          index === 1 ? 'bg-gray-300' : 
-                          'bg-amber-700'
-                        } text-white font-bold text-sm shadow-md`}>
-                          {index + 1}
-                        </div>
-                      </div>
-                      
-                      {/* Background Pattern */}
-                      <div className="absolute inset-0 opacity-5">
-                        <div className="absolute inset-0 bg-pattern-chef"></div>
-                      </div>
-                      
-                      {/* Content */}
-                      <div className="p-8 flex flex-col items-center relative z-10">
-                        <div className="relative mb-5">
-                          <div className="w-24 h-24 rounded-full bg-gray-200 absolute inset-0 transform -translate-x-1 translate-y-1"></div>
-                          <img 
-                            src={cook.avatarUrl} 
-                            alt={cook.name} 
-                            className="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover relative z-10"
-                          />
-                          <div className="absolute -bottom-2 -right-2 bg-fitcooker-orange text-white rounded-full p-1">
-                            <ChefHat size={16} />
-                          </div>
-                        </div>
-                        
-                        <h3 className="text-xl font-bold text-gray-800 mb-1">{cook.name}</h3>
-                        <div className="flex items-center mb-3">
-                          <div className="flex items-center bg-yellow-100 px-2 py-1 rounded-full">
-                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 mr-1" />
-                            <span className="font-medium text-sm">{cook.averageRating}</span>
-                          </div>
-                          <span className="mx-2 text-gray-400">•</span>
-                          <div className="flex items-center text-gray-600 text-sm">
-                            <Clock className="w-3 h-3 mr-1" />
-                            <span>{cook.recipesCount} receitas</span>
-                          </div>
-                        </div>
-                        
-                        <p className="text-gray-600 text-center mb-5 text-sm line-clamp-2">{cook.bio}</p>
-                        
-                        <div className="flex flex-wrap gap-2 justify-center mb-5">
-                          {cook.specialties.map((specialty, idx) => (
-                            <span 
-                              key={idx}
-                              className="bg-gray-100 text-gray-800 text-xs px-3 py-1 rounded-full"
-                            >
-                              {specialty}
-                            </span>
-                          ))}
-                        </div>
-                        
-                        <div className="flex items-center text-gray-500 text-sm">
-                          <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
-                          <span>{cook.followers} seguidores</span>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-gradient-to-r from-fitcooker-orange to-fitcooker-yellow p-4 flex justify-center">
-                        <button className="bg-white text-fitcooker-orange px-4 py-2 rounded-lg font-medium transition-colors hover:bg-gray-50 shadow-sm group-hover:shadow-md">
-                          Ver Perfil
-                        </button>
+            </header>
+            
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredCooks.map((cook, index) => (
+                <div 
+                  key={cook.id}
+                  className="bg-white rounded-xl shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300"
+                >
+                  <div className="relative">
+                    <div className="h-32 bg-gradient-to-r from-fitcooker-orange to-yellow-500"></div>
+                    <div className="absolute bottom-0 transform translate-y-1/2 left-1/2 -translate-x-1/2">
+                      <div className="rounded-full border-4 border-white overflow-hidden">
+                        <img 
+                          src={cook.avatarUrl} 
+                          alt={cook.name}
+                          className="w-24 h-24 object-cover"
+                        />
                       </div>
                     </div>
+                    
+                    {index < 3 && (
+                      <div className="absolute top-3 right-3">
+                        <div className={`
+                          flex items-center justify-center w-8 h-8 rounded-full 
+                          ${index === 0 ? 'bg-yellow-400' : index === 1 ? 'bg-gray-300' : 'bg-amber-700'}
+                        `}>
+                          <Award className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                <ChefHat className="mr-2 text-fitcooker-orange" />
-                Todos os Cozinheiros
-              </h2>
-              <div className="space-y-4">
-                {filteredCooks.slice(3).map((cook) => (
-                  <div key={cook.id} className="bg-white rounded-lg shadow-md p-6 flex flex-col sm:flex-row items-center sm:items-start gap-4 transform transition-all duration-300 hover:shadow-lg border-l-4 border-fitcooker-orange">
-                    <div className="relative">
-                      <div className="w-16 h-16 rounded-full bg-gray-200 absolute inset-0 transform -translate-x-0.5 translate-y-0.5"></div>
-                      <img 
-                        src={cook.avatarUrl} 
-                        alt={cook.name}
-                        className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md relative z-10"
-                      />
+                  
+                  <div className="pt-16 pb-6 px-6 text-center">
+                    <h3 className="font-bold text-xl mb-1">{cook.name}</h3>
+                    <div className="flex items-center justify-center mb-4">
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      <Star className="w-4 h-4 text-gray-300" />
+                      <span className="ml-1 text-sm text-gray-600">(4.0)</span>
                     </div>
                     
-                    <div className="flex-1 text-center sm:text-left">
-                      <h3 className="text-lg font-bold text-gray-800">{cook.name}</h3>
-                      <div className="flex items-center justify-center sm:justify-start mb-2 flex-wrap gap-2">
-                        <div className="flex items-center bg-yellow-100 px-2 py-1 rounded-full">
-                          <Star className="w-3 h-3 text-yellow-500 fill-yellow-500 mr-1" />
-                          <span className="font-medium text-xs">{cook.averageRating}</span>
-                        </div>
-                        <div className="flex items-center text-gray-600 text-xs">
-                          <span className="px-2 py-1 rounded-full bg-gray-100">
-                            {cook.recipesCount} receitas
-                          </span>
-                        </div>
-                        <div className="flex items-center text-gray-600 text-xs">
-                          <span className="px-2 py-1 rounded-full bg-gray-100">
-                            {cook.followers} seguidores
-                          </span>
-                        </div>
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                      <div className="bg-fitcooker-orange/10 text-fitcooker-orange text-sm rounded-full px-3 py-1 flex items-center">
+                        <ChefHat className="w-3 h-3 mr-1" />
+                        12 receitas
                       </div>
-                      <p className="text-gray-600 text-sm mb-2 line-clamp-1">{cook.bio}</p>
-                      <div className="flex flex-wrap gap-1 justify-center sm:justify-start">
-                        {cook.specialties.map((specialty, idx) => (
-                          <span 
-                            key={idx}
-                            className="bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full"
-                          >
-                            {specialty}
-                          </span>
-                        ))}
+                      <div className="bg-green-100 text-green-700 text-sm rounded-full px-3 py-1">
+                        4.8K seguidores
                       </div>
                     </div>
                     
-                    <button className="px-4 py-2 bg-fitcooker-orange/10 text-fitcooker-orange rounded-lg hover:bg-fitcooker-orange/20 transition-colors font-medium shadow-sm mt-2 sm:mt-0">
+                    <Button variant="outline" size="sm" className="w-full">
                       Ver Perfil
-                    </button>
+                    </Button>
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              ))}
+            </section>
           </div>
-        </section>
+        </div>
       </main>
       
       <Footer />
