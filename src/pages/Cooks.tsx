@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { allRecipes } from '@/data/mockData';
-import { ChefHat, Star, TrendingUp, Search } from 'lucide-react';
+import { ChefHat, Star, TrendingUp, Search, Award, Clock } from 'lucide-react';
 
 interface Cook {
   id: number;
@@ -106,87 +106,116 @@ const Cooks: React.FC = () => {
   }
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
       
       <main className="flex-grow pt-24">
-        <section className="bg-gray-50 py-12">
+        <section className="bg-gradient-to-b from-fitcooker-orange/10 to-gray-50 py-12">
           <div className="container mx-auto px-4 md:px-6">
-            <h1 className="heading-lg text-center mb-2">Nossos Cozinheiros</h1>
-            <p className="text-gray-600 text-center mb-8">
-              Conheça os talentos por trás das receitas mais saudáveis e saborosas
-            </p>
+            <div className="text-center mb-8">
+              <div className="inline-block mb-2">
+                <ChefHat size={40} className="text-fitcooker-orange mx-auto" />
+              </div>
+              <h1 className="heading-lg mb-2">Nossos Mestres da Cozinha Fit</h1>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Conheça os talentos que transformam ingredientes simples em deliciosas refeições saudáveis
+              </p>
+            </div>
             
             {/* Search Bar */}
-            <div className="max-w-2xl mx-auto mb-8">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Busque por nome ou especialidade..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-fitcooker-orange focus:border-transparent transition-all"
-                />
+            <div className="max-w-2xl mx-auto mb-12 relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
               </div>
+              <input
+                type="text"
+                placeholder="Busque por nome ou especialidade..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-fitcooker-orange focus:border-transparent transition-all shadow-sm"
+              />
             </div>
           </div>
         </section>
         
         <section className="py-12">
           <div className="container mx-auto px-4 md:px-6">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Top Cozinheiros</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <Award className="mr-2 text-yellow-500" />
+                Top Chefs
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {filteredCooks.slice(0, 3).map((cook, index) => (
-                  <div key={cook.id} className="relative bg-white rounded-xl overflow-hidden shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                    <div className={`absolute top-0 left-0 w-0 h-0 border-solid ${
-                      index === 0 ? 'border-t-[80px] border-l-[80px] border-t-yellow-400 border-l-transparent border-r-transparent' :
-                      index === 1 ? 'border-t-[80px] border-l-[80px] border-t-gray-400 border-l-transparent border-r-transparent' :
-                      'border-t-[80px] border-l-[80px] border-t-amber-600 border-l-transparent border-r-transparent'
-                    }`}></div>
-                    <div className="absolute top-2 left-2 z-10 text-black font-bold text-xl">
-                      {index + 1}
-                    </div>
-                    
-                    <div className="p-6 flex flex-col items-center">
-                      <img 
-                        src={cook.avatarUrl} 
-                        alt={cook.name} 
-                        className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover mb-4"
-                      />
-                      <h3 className="text-xl font-bold text-gray-800 mb-1">{cook.name}</h3>
-                      <div className="flex items-center mb-3">
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 mr-1" />
-                        <span className="font-medium">{cook.averageRating}</span>
-                        <span className="mx-2 text-gray-400">•</span>
-                        <span>{cook.recipesCount} receitas</span>
-                      </div>
-                      <p className="text-gray-600 text-center mb-4 text-sm">{cook.bio}</p>
-                      
-                      <div className="flex flex-wrap gap-2 justify-center mb-4">
-                        {cook.specialties.map((specialty, idx) => (
-                          <span 
-                            key={idx}
-                            className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full"
-                          >
-                            {specialty}
-                          </span>
-                        ))}
+                  <div key={cook.id} className="group">
+                    <div className="relative bg-white rounded-xl overflow-hidden shadow-lg transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+                      {/* Medal Badge */}
+                      <div className="absolute top-3 left-3 z-10">
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                          index === 0 ? 'bg-yellow-400' : 
+                          index === 1 ? 'bg-gray-300' : 
+                          'bg-amber-700'
+                        } text-white font-bold text-sm shadow-md`}>
+                          {index + 1}
+                        </div>
                       </div>
                       
-                      <div className="flex items-center text-gray-500 text-sm">
-                        <TrendingUp className="w-4 h-4 mr-1 text-fitcooker-orange" />
-                        <span>{cook.followers} seguidores</span>
+                      {/* Background Pattern */}
+                      <div className="absolute inset-0 opacity-5">
+                        <div className="absolute inset-0 bg-pattern-chef"></div>
                       </div>
-                    </div>
-                    
-                    <div className="bg-gradient-to-r from-fitcooker-orange to-fitcooker-yellow p-4 flex justify-center">
-                      <button className="bg-white text-fitcooker-orange px-4 py-2 rounded-lg font-medium transition-colors hover:bg-gray-50">
-                        Ver Perfil
-                      </button>
+                      
+                      {/* Content */}
+                      <div className="p-8 flex flex-col items-center relative z-10">
+                        <div className="relative mb-5">
+                          <div className="w-24 h-24 rounded-full bg-gray-200 absolute inset-0 transform -translate-x-1 translate-y-1"></div>
+                          <img 
+                            src={cook.avatarUrl} 
+                            alt={cook.name} 
+                            className="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover relative z-10"
+                          />
+                          <div className="absolute -bottom-2 -right-2 bg-fitcooker-orange text-white rounded-full p-1">
+                            <ChefHat size={16} />
+                          </div>
+                        </div>
+                        
+                        <h3 className="text-xl font-bold text-gray-800 mb-1">{cook.name}</h3>
+                        <div className="flex items-center mb-3">
+                          <div className="flex items-center bg-yellow-100 px-2 py-1 rounded-full">
+                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 mr-1" />
+                            <span className="font-medium text-sm">{cook.averageRating}</span>
+                          </div>
+                          <span className="mx-2 text-gray-400">•</span>
+                          <div className="flex items-center text-gray-600 text-sm">
+                            <Clock className="w-3 h-3 mr-1" />
+                            <span>{cook.recipesCount} receitas</span>
+                          </div>
+                        </div>
+                        
+                        <p className="text-gray-600 text-center mb-5 text-sm line-clamp-2">{cook.bio}</p>
+                        
+                        <div className="flex flex-wrap gap-2 justify-center mb-5">
+                          {cook.specialties.map((specialty, idx) => (
+                            <span 
+                              key={idx}
+                              className="bg-gray-100 text-gray-800 text-xs px-3 py-1 rounded-full"
+                            >
+                              {specialty}
+                            </span>
+                          ))}
+                        </div>
+                        
+                        <div className="flex items-center text-gray-500 text-sm">
+                          <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
+                          <span>{cook.followers} seguidores</span>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gradient-to-r from-fitcooker-orange to-fitcooker-yellow p-4 flex justify-center">
+                        <button className="bg-white text-fitcooker-orange px-4 py-2 rounded-lg font-medium transition-colors hover:bg-gray-50 shadow-sm group-hover:shadow-md">
+                          Ver Perfil
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -194,32 +223,46 @@ const Cooks: React.FC = () => {
             </div>
             
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Todos os Cozinheiros</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <ChefHat className="mr-2 text-fitcooker-orange" />
+                Todos os Cozinheiros
+              </h2>
               <div className="space-y-4">
                 {filteredCooks.slice(3).map((cook) => (
-                  <div key={cook.id} className="bg-white rounded-lg shadow p-4 flex flex-col sm:flex-row items-center sm:items-start gap-4 transform transition-all duration-300 hover:shadow-md">
-                    <img 
-                      src={cook.avatarUrl} 
-                      alt={cook.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
+                  <div key={cook.id} className="bg-white rounded-lg shadow-md p-6 flex flex-col sm:flex-row items-center sm:items-start gap-4 transform transition-all duration-300 hover:shadow-lg border-l-4 border-fitcooker-orange">
+                    <div className="relative">
+                      <div className="w-16 h-16 rounded-full bg-gray-200 absolute inset-0 transform -translate-x-0.5 translate-y-0.5"></div>
+                      <img 
+                        src={cook.avatarUrl} 
+                        alt={cook.name}
+                        className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md relative z-10"
+                      />
+                    </div>
                     
                     <div className="flex-1 text-center sm:text-left">
                       <h3 className="text-lg font-bold text-gray-800">{cook.name}</h3>
-                      <div className="flex items-center justify-center sm:justify-start mb-2">
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 mr-1" />
-                        <span className="font-medium">{cook.averageRating}</span>
-                        <span className="mx-2 text-gray-400">•</span>
-                        <span>{cook.recipesCount} receitas</span>
-                        <span className="mx-2 text-gray-400">•</span>
-                        <span>{cook.followers} seguidores</span>
+                      <div className="flex items-center justify-center sm:justify-start mb-2 flex-wrap gap-2">
+                        <div className="flex items-center bg-yellow-100 px-2 py-1 rounded-full">
+                          <Star className="w-3 h-3 text-yellow-500 fill-yellow-500 mr-1" />
+                          <span className="font-medium text-xs">{cook.averageRating}</span>
+                        </div>
+                        <div className="flex items-center text-gray-600 text-xs">
+                          <span className="px-2 py-1 rounded-full bg-gray-100">
+                            {cook.recipesCount} receitas
+                          </span>
+                        </div>
+                        <div className="flex items-center text-gray-600 text-xs">
+                          <span className="px-2 py-1 rounded-full bg-gray-100">
+                            {cook.followers} seguidores
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-gray-600 text-sm mb-2">{cook.bio}</p>
-                      <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                      <p className="text-gray-600 text-sm mb-2 line-clamp-1">{cook.bio}</p>
+                      <div className="flex flex-wrap gap-1 justify-center sm:justify-start">
                         {cook.specialties.map((specialty, idx) => (
                           <span 
                             key={idx}
-                            className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full"
+                            className="bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full"
                           >
                             {specialty}
                           </span>
@@ -227,7 +270,7 @@ const Cooks: React.FC = () => {
                       </div>
                     </div>
                     
-                    <button className="px-4 py-2 border border-fitcooker-orange text-fitcooker-orange rounded-lg hover:bg-fitcooker-orange/5 transition-colors mt-2 sm:mt-0">
+                    <button className="px-4 py-2 bg-fitcooker-orange/10 text-fitcooker-orange rounded-lg hover:bg-fitcooker-orange/20 transition-colors font-medium shadow-sm mt-2 sm:mt-0">
                       Ver Perfil
                     </button>
                   </div>
