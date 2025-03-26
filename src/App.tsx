@@ -10,6 +10,8 @@ import { useEffect } from "react";
 import Index from "./pages/Index";
 import Recipes from "./pages/Recipes";
 import RecipeDetail from "./pages/RecipeDetail";
+import Cooks from "./pages/Cooks";
+import AddRecipe from "./pages/AddRecipe";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
@@ -50,6 +52,8 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/recipes" element={<Recipes />} />
             <Route path="/recipe/:id" element={<RecipeDetail />} />
+            <Route path="/cooks" element={<Cooks />} />
+            <Route path="/add-recipe" element={<AddRecipe />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

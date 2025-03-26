@@ -50,9 +50,17 @@ const Hero: React.FC = () => {
                 Fit<span className="text-fitcooker-orange">Cooker</span>
               </h1>
             </div>
-            <p className="text-white/90 text-xl md:text-2xl mt-4 mb-8">
-              Receitas fit para uma vida saudável e saborosa
+            <p className="text-white/90 text-xl md:text-3xl mt-4 mb-2 font-bold">
+              TRANSFORME SUA DIETA, CONQUISTE SEU CORPO
             </p>
+            <p className="text-white/80 text-lg md:text-xl mb-8 italic">
+              Receitas de alto desempenho para quem busca resultados extraordinários
+            </p>
+            <div className="flex justify-center gap-4 mt-4">
+              <span className="bg-fitcooker-orange px-3 py-1 rounded-full text-white text-sm font-medium">Alta Proteína</span>
+              <span className="bg-fitcooker-yellow px-3 py-1 rounded-full text-black text-sm font-medium">Baixo Carboidrato</span>
+              <span className="bg-white px-3 py-1 rounded-full text-fitcooker-black text-sm font-medium">Zero Açúcar</span>
+            </div>
           </div>
           
           {/* Search Bar */}
