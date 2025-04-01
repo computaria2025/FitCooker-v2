@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -137,132 +136,89 @@ const Cooks: React.FC = () => {
               {filteredCooks.map((cook, index) => (
                 <div 
                   key={cook.id}
-                  className="bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-lg"
+                  className="bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-lg h-full"
                 >
-                  <div 
-                    className="cursor-pointer"
-                    onClick={() => handleCookClick(cook.id)}
-                  >
-                    <div className="relative bg-gradient-to-r from-fitcooker-orange to-yellow-500 h-32 flex items-center justify-center">
-                      <div className="absolute inset-0 bg-black/10"></div>
-                      <div className="relative z-10">
-                        <div className="rounded-full border-4 border-white overflow-hidden mx-auto">
-                          <img 
-                            src={cook.avatarUrl} 
-                            alt={cook.name}
-                            className="w-24 h-24 object-cover"
-                          />
+                  <div className="flex flex-col h-full">
+                    <div className="flex flex-col md:flex-row">
+                      {/* Left side: Cook profile */}
+                      <div className="md:w-1/2 p-4 flex flex-col items-center border-r border-gray-100">
+                        <div className="relative">
+                          <div className="rounded-full border-4 border-fitcooker-orange/20 overflow-hidden mx-auto">
+                            <img 
+                              src={cook.avatarUrl} 
+                              alt={cook.name}
+                              className="w-24 h-24 object-cover"
+                            />
+                          </div>
+                          
+                          {index < 3 && (
+                            <div className="absolute -top-2 -right-2">
+                              <div className={`
+                                flex items-center justify-center w-8 h-8 rounded-full 
+                                ${index === 0 ? 'bg-yellow-400' : index === 1 ? 'bg-gray-300' : 'bg-amber-700'}
+                              `}>
+                                <Award className="w-5 h-5 text-white" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="mt-4 text-center">
+                          <h3 className="font-bold text-xl mb-1">{cook.name}</h3>
+                          <div className="flex items-center justify-center mb-2">
+                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                            <Star className="w-4 h-4 text-gray-300" />
+                            <span className="ml-1 text-sm text-gray-600">(4.0)</span>
+                          </div>
+                          
+                          <div className="flex items-center justify-center gap-2 mb-3">
+                            <div className="bg-fitcooker-orange/10 text-fitcooker-orange text-sm rounded-full px-3 py-1 flex items-center">
+                              <ChefHat className="w-3 h-3 mr-1" />
+                              {cook.recipes.length} receitas
+                            </div>
+                          </div>
                         </div>
                       </div>
                       
-                      {index < 3 && (
-                        <div className="absolute top-3 right-3">
-                          <div className={`
-                            flex items-center justify-center w-8 h-8 rounded-full 
-                            ${index === 0 ? 'bg-yellow-400' : index === 1 ? 'bg-gray-300' : 'bg-amber-700'}
-                          `}>
-                            <Award className="w-5 h-5 text-white" />
-                          </div>
+                      {/* Right side: Cook recipes */}
+                      <div className="md:w-1/2 p-4">
+                        <h4 className="font-medium text-sm mb-3">Receitas Populares:</h4>
+                        <div className="space-y-2">
+                          {cook.recipes.slice(0, 2).map(recipe => (
+                            <Link 
+                              key={recipe.id}
+                              to={`/recipe/${recipe.id}`}
+                              className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              <img 
+                                src={recipe.imageUrl}
+                                alt={recipe.title}
+                                className="w-10 h-10 rounded-md object-cover"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <h5 className="font-medium text-sm truncate">{recipe.title}</h5>
+                                <div className="flex items-center text-xs text-gray-500">
+                                  <Star className="w-3 h-3 text-yellow-500 fill-yellow-500 mr-1" />
+                                  4.5
+                                </div>
+                              </div>
+                            </Link>
+                          ))}
                         </div>
-                      )}
+                      </div>
                     </div>
                     
-                    <div className="pt-4 px-6 text-center">
-                      <h3 className="font-bold text-xl mb-1">{cook.name}</h3>
-                      <div className="flex items-center justify-center mb-2">
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                        <Star className="w-4 h-4 text-gray-300" />
-                        <span className="ml-1 text-sm text-gray-600">(4.0)</span>
-                      </div>
-                      
-                      <div className="flex items-center justify-center gap-2 mb-3">
-                        <div className="bg-fitcooker-orange/10 text-fitcooker-orange text-sm rounded-full px-3 py-1 flex items-center">
-                          <ChefHat className="w-3 h-3 mr-1" />
-                          {cook.recipes.length} receitas
-                        </div>
-                        <div className="bg-green-100 text-green-700 text-sm rounded-full px-3 py-1">
-                          4.8K seguidores
-                        </div>
-                      </div>
+                    <div className="mt-auto p-4 pt-0 border-t border-gray-100">
+                      <Link to={`/recipes?author=${cook.id}`} className="w-full">
+                        <Button variant="outline" size="sm" className="w-full">
+                          Ver Todas as Receitas
+                        </Button>
+                      </Link>
                     </div>
                   </div>
-                  
-                  {selectedCook === cook.id && (
-                    <div className="px-6 pb-6">
-                      <Tabs 
-                        defaultValue="profile" 
-                        value={activeTab}
-                        onValueChange={(value) => setActiveTab(value as 'profile' | 'recipes')}
-                        className="w-full"
-                      >
-                        <TabsList className="grid w-full grid-cols-2 mb-4">
-                          <TabsTrigger value="profile">Perfil</TabsTrigger>
-                          <TabsTrigger value="recipes">Receitas</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="profile">
-                          <div className="text-sm text-gray-600 space-y-2">
-                            <p>Especialidade: Cozinha Fitness</p>
-                            <p>Localização: São Paulo, SP</p>
-                            <p>Membro desde: Janeiro 2023</p>
-                            <p className="line-clamp-3">Bio: Apaixonado(a) por culinária saudável e inovadora. Sempre buscando criar receitas deliciosas e nutritivas para todos.</p>
-                          </div>
-                        </TabsContent>
-                        <TabsContent value="recipes">
-                          <div className="space-y-3">
-                            {cook.recipes.map(recipe => (
-                              <Link 
-                                key={recipe.id}
-                                to={`/recipe/${recipe.id}`}
-                                className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                              >
-                                <img 
-                                  src={recipe.imageUrl}
-                                  alt={recipe.title}
-                                  className="w-12 h-12 rounded-md object-cover"
-                                />
-                                <div>
-                                  <h4 className="font-medium text-sm">{recipe.title}</h4>
-                                  <div className="flex items-center text-xs text-gray-500">
-                                    <Star className="w-3 h-3 text-yellow-500 fill-yellow-500 mr-1" />
-                                    4.5
-                                  </div>
-                                </div>
-                              </Link>
-                            ))}
-                            <Link 
-                              to={`/recipes?author=${cook.id}`}
-                              className="text-sm text-fitcooker-orange flex items-center justify-center mt-2"
-                            >
-                              <Book className="w-4 h-4 mr-1" />
-                              Ver todas as receitas
-                            </Link>
-                          </div>
-                        </TabsContent>
-                      </Tabs>
-                      
-                      <div className="mt-4 pt-4 border-t">
-                        <Button variant="default" size="sm" className="w-full">
-                          Seguir
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {!selectedCook && (
-                    <div className="px-6 pb-6">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => handleCookClick(cook.id)}
-                      >
-                        Ver Perfil
-                      </Button>
-                    </div>
-                  )}
                 </div>
               ))}
             </section>

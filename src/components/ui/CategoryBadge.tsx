@@ -43,7 +43,7 @@ const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category, className }) =>
   return (
     <span 
       className={cn(
-        'category-badge transition-transform hover:scale-105', 
+        'category-badge inline-block px-3 py-1 rounded-full text-xs font-medium', 
         categoryColor,
         className
       )}
