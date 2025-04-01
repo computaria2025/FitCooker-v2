@@ -10,6 +10,22 @@ import { RecipeCategory } from '@/data/mockData';
 import MacroDisplay from '@/components/ui/MacroDisplay';
 import { Check, Plus, Search, X, ImagePlus, Video } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface IngredientInput {
   id: string;
@@ -30,6 +46,8 @@ interface RecipeStep {
 
 const AddRecipe: React.FC = () => {
   const { toast } = useToast();
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulate auth state
   
   // Recipe basic information
   const [title, setTitle] = useState('');
@@ -38,6 +56,8 @@ const AddRecipe: React.FC = () => {
   const [servings, setServings] = useState('');
   const [difficulty, setDifficulty] = useState('Médio');
   const [selectedCategories, setSelectedCategories] = useState<RecipeCategory[]>([]);
+  const [showNewCategoryDialog, setShowNewCategoryDialog] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
   
   // Images and media
   const [mainImage, setMainImage] = useState<File | null>(null);
@@ -56,6 +76,11 @@ const AddRecipe: React.FC = () => {
   const [steps, setSteps] = useState<RecipeStep[]>([
     { id: '1', order: 1, description: '' }
   ]);
+  
+  // Predefined options
+  const difficultyOptions = ['Fácil', 'Médio', 'Difícil'];
+  const servingsOptions = ['1', '2', '3', '4', '5', '6', '8', '10', '12'];
+  const unitOptions = ['g', 'kg', 'ml', 'l', 'unidade', 'colher de sopa', 'colher de chá', 'xícara'];
   
   // Calculate total macros
   const totalMacros = ingredients.reduce(
@@ -170,6 +195,19 @@ const AddRecipe: React.FC = () => {
     }
   };
   
+  // Handle adding new category
+  const handleAddNewCategory = () => {
+    if (newCategoryName.trim()) {
+      toast({
+        title: "Nova categoria sugerida",
+        description: "Sua sugestão será analisada pela nossa equipe.",
+        duration: 3000,
+      });
+      setNewCategoryName('');
+      setShowNewCategoryDialog(false);
+    }
+  };
+  
   // Handle image upload
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -203,10 +241,20 @@ const AddRecipe: React.FC = () => {
     );
   };
   
-  // Submit form
-  const handleSubmit = (e: React.FormEvent) => {
+  // Check if user is logged in before proceeding
+  const checkLoginBeforeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!isLoggedIn) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    
+    handleSubmit();
+  };
+  
+  // Submit form
+  const handleSubmit = () => {
     // Form validation
     if (!title || ingredients.some(ing => !ing.name || ing.quantity <= 0) || steps.some(step => !step.description)) {
       toast({
@@ -248,7 +296,7 @@ const AddRecipe: React.FC = () => {
           <div className="max-w-4xl mx-auto">
             <h1 className="heading-lg mb-6">Adicionar Nova Receita</h1>
             
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={checkLoginBeforeSubmit} className="space-y-8">
               {/* Basic Information */}
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <h2 className="text-xl font-bold mb-4">Informações Básicas</h2>
@@ -292,33 +340,53 @@ const AddRecipe: React.FC = () => {
                     
                     <div>
                       <Label htmlFor="servings">Porções *</Label>
-                      <Input
-                        id="servings"
-                        type="number"
-                        min="1"
+                      <Select
                         value={servings}
-                        onChange={(e) => setServings(e.target.value)}
-                        required
-                      />
+                        onValueChange={setServings}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {servingsOptions.map(option => (
+                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     
                     <div>
                       <Label htmlFor="difficulty">Dificuldade</Label>
-                      <select
-                        id="difficulty"
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      <Select
                         value={difficulty}
-                        onChange={(e) => setDifficulty(e.target.value)}
+                        onValueChange={setDifficulty}
                       >
-                        <option value="Fácil">Fácil</option>
-                        <option value="Médio">Médio</option>
-                        <option value="Difícil">Difícil</option>
-                      </select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {difficultyOptions.map(option => (
+                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   
                   <div>
-                    <Label className="block mb-2">Categorias</Label>
+                    <div className="flex justify-between items-center mb-2">
+                      <Label>Categorias</Label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowNewCategoryDialog(true)}
+                        className="text-xs text-fitcooker-orange hover:text-fitcooker-orange/80"
+                      >
+                        <Plus size={14} className="mr-1" />
+                        Sugerir nova categoria
+                      </Button>
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       {Object.values(RecipeCategory).map((category) => (
                         <button
@@ -436,6 +504,7 @@ const AddRecipe: React.FC = () => {
                                   }}
                                   placeholder="Digite o nome do ingrediente"
                                   required
+                                  autoComplete="off"
                                 />
                                 
                                 {ingredientSearchTerm && !ingredient.name && (
@@ -526,17 +595,23 @@ const AddRecipe: React.FC = () => {
                               
                               <div>
                                 <Label htmlFor={`ingredient-unit-${ingredient.id}`}>Unidade</Label>
-                                <Input
-                                  id={`ingredient-unit-${ingredient.id}`}
+                                <Select
                                   value={ingredient.unit}
-                                  onChange={(e) => {
+                                  onValueChange={(value) => {
                                     const newIngredients = [...ingredients];
-                                    newIngredients[index].unit = e.target.value;
+                                    newIngredients[index].unit = value;
                                     setIngredients(newIngredients);
                                   }}
-                                  placeholder="g, ml, unidade, etc."
-                                  required
-                                />
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {unitOptions.map(option => (
+                                      <SelectItem key={option} value={option}>{option}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                               </div>
                             </div>
                             
@@ -648,6 +723,50 @@ const AddRecipe: React.FC = () => {
           </div>
         </section>
       </main>
+      
+      {/* Suggest new category dialog */}
+      <Dialog open={showNewCategoryDialog} onOpenChange={setShowNewCategoryDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sugerir Nova Categoria</DialogTitle>
+            <DialogDescription>
+              Sugira uma nova categoria que você acredita que seria útil para classificar receitas.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="newCategory">Nome da Categoria</Label>
+            <Input
+              id="newCategory"
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              placeholder="Ex: Low Carb"
+              className="mt-1"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewCategoryDialog(false)}>Cancelar</Button>
+            <Button onClick={handleAddNewCategory}>Enviar Sugestão</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Login prompt dialog */}
+      <Dialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Login Necessário</DialogTitle>
+            <DialogDescription>
+              Para publicar receitas, você precisa estar logado na plataforma.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowLoginPrompt(false)}>Cancelar</Button>
+            <Button asChild>
+              <Link to="/login">Fazer Login</Link>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       
       <Footer />
     </div>

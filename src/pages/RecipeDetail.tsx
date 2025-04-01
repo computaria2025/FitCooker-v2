@@ -7,14 +7,80 @@ import CategoryBadge from '@/components/ui/CategoryBadge';
 import MacroDisplay from '@/components/ui/MacroDisplay';
 import RateRecipeForm from '@/components/recipe/RateRecipeForm';
 import { allRecipes, Recipe, RecipeStep, Ingredient } from '@/data/mockData';
-import { Clock, Flame, ChefHat, Users, ChevronLeft, Star } from 'lucide-react';
+import { Clock, Flame, ChefHat, Users, ChevronLeft, Star, MessageSquare, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
+
+// Mock reviews data
+interface Review {
+  id: number;
+  user: {
+    name: string;
+    avatarUrl: string;
+  };
+  rating: number;
+  comment: string;
+  date: string;
+  likes: number;
+}
+
+const mockReviews: Review[] = [
+  {
+    id: 1,
+    user: {
+      name: 'Maria Silva',
+      avatarUrl: 'https://randomuser.me/api/portraits/women/33.jpg'
+    },
+    rating: 5,
+    comment: 'Adorei essa receita! Ficou simplesmente deliciosa. Minha família toda aprovou!',
+    date: '2023-09-15',
+    likes: 12
+  },
+  {
+    id: 2,
+    user: {
+      name: 'João Pereira',
+      avatarUrl: 'https://randomuser.me/api/portraits/men/54.jpg'
+    },
+    rating: 4,
+    comment: 'Muito boa, mas diminuí um pouco o sal e ficou perfeita para o meu gosto.',
+    date: '2023-08-22',
+    likes: 5
+  },
+  {
+    id: 3,
+    user: {
+      name: 'Ana Costa',
+      avatarUrl: 'https://randomuser.me/api/portraits/women/72.jpg'
+    },
+    rating: 5,
+    comment: 'Fácil de fazer e muito nutritiva! Vou adicionar ao meu cardápio semanal.',
+    date: '2023-10-03',
+    likes: 8
+  }
+];
+
+// Mock similar recipes data
+const getSimilarRecipes = (currentRecipeId: number, category: string) => {
+  return allRecipes
+    .filter(recipe => 
+      recipe.id !== currentRecipeId && 
+      recipe.categories.includes(category)
+    )
+    .slice(0, 3);
+};
 
 const RecipeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'ingredients' | 'steps'>('ingredients');
+  const [activeMainTab, setActiveMainTab] = useState<'preparation' | 'nutrition' | 'reviews'>('preparation');
+  const [similarRecipes, setSimilarRecipes] = useState<Recipe[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { toast } = useToast();
   
   useEffect(() => {
     // Scroll to top when component mounts
@@ -24,9 +90,48 @@ const RecipeDetail: React.FC = () => {
     setTimeout(() => {
       const foundRecipe = allRecipes.find(r => r.id === Number(id));
       setRecipe(foundRecipe || null);
+      
+      if (foundRecipe && foundRecipe.categories.length > 0) {
+        setSimilarRecipes(getSimilarRecipes(foundRecipe.id, foundRecipe.categories[0]));
+      }
+      
       setIsLoading(false);
     }, 500);
   }, [id]);
+  
+  const handleLikeReview = (reviewId: number) => {
+    if (!isLoggedIn) {
+      toast({
+        title: "Login necessário",
+        description: "Faça login para curtir avaliações",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Handle like logic here
+    toast({
+      title: "Avaliação curtida",
+      description: "Você curtiu esta avaliação"
+    });
+  };
+  
+  const handleSaveRecipe = () => {
+    if (!isLoggedIn) {
+      toast({
+        title: "Login necessário",
+        description: "Faça login para salvar receitas",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Handle save recipe logic here
+    toast({
+      title: "Receita salva",
+      description: "Receita adicionada aos seus favoritos"
+    });
+  };
   
   if (isLoading) {
     return (
@@ -220,12 +325,16 @@ const RecipeDetail: React.FC = () => {
                 
                 {/* Actions */}
                 <div className="flex flex-wrap gap-4">
-                  <button className="btn btn-primary flex-1">
+                  <Button 
+                    className="btn btn-primary flex-1"
+                    onClick={handleSaveRecipe}
+                  >
+                    <Heart className="mr-2 h-4 w-4" />
                     Salvar Receita
-                  </button>
-                  <button className="btn btn-outline flex-1">
+                  </Button>
+                  <Button className="btn btn-outline flex-1">
                     Compartilhar
-                  </button>
+                  </Button>
                 </div>
                 
                 {/* Add Rate Recipe Form */}
@@ -237,70 +346,326 @@ const RecipeDetail: React.FC = () => {
           </div>
         </section>
         
-        {/* Content Tabs */}
+        {/* Main Tabs */}
         <section className="py-8 bg-gray-50">
           <div className="container mx-auto px-4 md:px-6">
-            {/* Tabs */}
-            <div className="flex border-b border-gray-200 mb-6">
-              <button
-                onClick={() => setActiveTab('ingredients')}
-                className={cn(
-                  'px-6 py-3 font-medium text-gray-600 hover:text-fitcooker-orange',
-                  activeTab === 'ingredients' && 'text-fitcooker-orange border-b-2 border-fitcooker-orange'
-                )}
-              >
-                Ingredientes
-              </button>
+            {/* Main Tabs */}
+            <Tabs 
+              defaultValue="preparation" 
+              value={activeMainTab}
+              onValueChange={(value) => setActiveMainTab(value as 'preparation' | 'nutrition' | 'reviews')}
+              className="w-full"
+            >
+              <TabsList className="w-full flex justify-center mb-6 bg-transparent">
+                <TabsTrigger 
+                  value="preparation"
+                  className={cn(
+                    "flex-1 max-w-[200px] data-[state=active]:bg-white",
+                    activeMainTab === "preparation" ? "text-fitcooker-orange font-medium" : ""
+                  )}
+                >
+                  Preparo
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="nutrition"
+                  className={cn(
+                    "flex-1 max-w-[200px] data-[state=active]:bg-white",
+                    activeMainTab === "nutrition" ? "text-fitcooker-orange font-medium" : ""
+                  )}
+                >
+                  Informação Nutricional
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="reviews"
+                  className={cn(
+                    "flex-1 max-w-[200px] data-[state=active]:bg-white",
+                    activeMainTab === "reviews" ? "text-fitcooker-orange font-medium" : ""
+                  )}
+                >
+                  Avaliações
+                </TabsTrigger>
+              </TabsList>
               
-              <button
-                onClick={() => setActiveTab('steps')}
-                className={cn(
-                  'px-6 py-3 font-medium text-gray-600 hover:text-fitcooker-orange',
-                  activeTab === 'steps' && 'text-fitcooker-orange border-b-2 border-fitcooker-orange'
-                )}
-              >
-                Modo de Preparo
-              </button>
-            </div>
-            
-            {/* Tabs Content */}
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              {activeTab === 'ingredients' ? (
-                <div>
-                  <h2 className="heading-md mb-4">Ingredientes</h2>
-                  <ul className="space-y-3">
-                    {ingredients.map((ingredient: Ingredient, index: number) => (
-                      <li key={index} className="flex items-center">
-                        <div className="w-2 h-2 rounded-full bg-fitcooker-orange mr-3"></div>
-                        <span className="font-medium">{ingredient.quantity} {ingredient.unit}</span>
-                        <span className="mx-2">de</span>
-                        <span>{ingredient.name}</span>
-                      </li>
-                    ))}
-                  </ul>
+              {/* Preparation Tab */}
+              <TabsContent value="preparation" className="mt-0">
+                <div className="bg-white p-6 rounded-xl shadow-sm">
+                  {/* Content Tabs */}
+                  <div className="flex border-b border-gray-200 mb-6">
+                    <button
+                      onClick={() => setActiveTab('ingredients')}
+                      className={cn(
+                        'px-6 py-3 font-medium text-gray-600 hover:text-fitcooker-orange',
+                        activeTab === 'ingredients' && 'text-fitcooker-orange border-b-2 border-fitcooker-orange'
+                      )}
+                    >
+                      Ingredientes
+                    </button>
+                    
+                    <button
+                      onClick={() => setActiveTab('steps')}
+                      className={cn(
+                        'px-6 py-3 font-medium text-gray-600 hover:text-fitcooker-orange',
+                        activeTab === 'steps' && 'text-fitcooker-orange border-b-2 border-fitcooker-orange'
+                      )}
+                    >
+                      Modo de Preparo
+                    </button>
+                  </div>
+                  
+                  {/* Tabs Content */}
+                  <div>
+                    {activeTab === 'ingredients' ? (
+                      <div>
+                        <h2 className="heading-md mb-4">Ingredientes</h2>
+                        <ul className="space-y-3">
+                          {ingredients.map((ingredient: Ingredient, index: number) => (
+                            <li key={index} className="flex items-center">
+                              <div className="w-2 h-2 rounded-full bg-fitcooker-orange mr-3"></div>
+                              <span className="font-medium">{ingredient.quantity} {ingredient.unit}</span>
+                              <span className="mx-2">de</span>
+                              <span>{ingredient.name}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <div>
+                        <h2 className="heading-md mb-4">Modo de Preparo</h2>
+                        <ol className="space-y-6">
+                          {steps.map((step: RecipeStep) => (
+                            <li key={step.order} className="flex">
+                              <div className="flex-shrink-0 mr-4">
+                                <div className="w-8 h-8 bg-fitcooker-orange/10 rounded-full flex items-center justify-center text-fitcooker-orange font-bold">
+                                  {step.order}
+                                </div>
+                              </div>
+                              <div className="pt-1">
+                                <p>{step.description}</p>
+                              </div>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <div>
-                  <h2 className="heading-md mb-4">Modo de Preparo</h2>
-                  <ol className="space-y-6">
-                    {steps.map((step: RecipeStep) => (
-                      <li key={step.order} className="flex">
-                        <div className="flex-shrink-0 mr-4">
-                          <div className="w-8 h-8 bg-fitcooker-orange/10 rounded-full flex items-center justify-center text-fitcooker-orange font-bold">
-                            {step.order}
+              </TabsContent>
+              
+              {/* Nutrition Tab */}
+              <TabsContent value="nutrition" className="mt-0">
+                <div className="bg-white p-6 rounded-xl shadow-sm">
+                  <h2 className="heading-md mb-4">Informação Nutricional</h2>
+                  
+                  <div className="mb-6">
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="font-medium">Valor Energético Total</h3>
+                      <span className="font-bold text-xl">{macros.calories} kcal</span>
+                    </div>
+                    
+                    <div className="bg-gray-100 rounded-full h-6 overflow-hidden">
+                      <div className="flex h-full">
+                        <div 
+                          className="bg-red-500 h-full flex items-center justify-center text-xs text-white"
+                          style={{ width: `${(macros.protein * 4 / macros.calories) * 100}%` }}
+                        >
+                          {Math.round((macros.protein * 4 / macros.calories) * 100)}%
+                        </div>
+                        <div 
+                          className="bg-blue-500 h-full flex items-center justify-center text-xs text-white"
+                          style={{ width: `${(macros.carbs * 4 / macros.calories) * 100}%` }}
+                        >
+                          {Math.round((macros.carbs * 4 / macros.calories) * 100)}%
+                        </div>
+                        <div 
+                          className="bg-yellow-500 h-full flex items-center justify-center text-xs text-white"
+                          style={{ width: `${(macros.fat * 9 / macros.calories) * 100}%` }}
+                        >
+                          {Math.round((macros.fat * 9 / macros.calories) * 100)}%
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between mt-2 text-sm">
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-red-500 rounded mr-1"></div>
+                        <span>Proteínas</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-blue-500 rounded mr-1"></div>
+                        <span>Carboidratos</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-yellow-500 rounded mr-1"></div>
+                        <span>Gorduras</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="border-b pb-3">
+                      <div className="flex justify-between">
+                        <span className="font-medium">Proteínas</span>
+                        <span>{macros.protein}g</span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Aproximadamente {Math.round((macros.protein * 4 / macros.calories) * 100)}% do valor energético total
+                      </p>
+                    </div>
+                    
+                    <div className="border-b pb-3">
+                      <div className="flex justify-between">
+                        <span className="font-medium">Carboidratos</span>
+                        <span>{macros.carbs}g</span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Aproximadamente {Math.round((macros.carbs * 4 / macros.calories) * 100)}% do valor energético total
+                      </p>
+                    </div>
+                    
+                    <div className="border-b pb-3">
+                      <div className="flex justify-between">
+                        <span className="font-medium">Gorduras</span>
+                        <span>{macros.fat}g</span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Aproximadamente {Math.round((macros.fat * 9 / macros.calories) * 100)}% do valor energético total
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Fibras</span>
+                        <span>~{Math.round(macros.carbs * 0.1)}g</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 bg-yellow-50 p-4 rounded-lg">
+                    <h3 className="font-medium text-yellow-800 mb-2">Nota sobre Valores Nutricionais</h3>
+                    <p className="text-sm text-yellow-700">
+                      Os valores nutricionais podem variar de acordo com a marca e qualidade dos ingredientes utilizados.
+                      Esta informação serve como uma estimativa e não deve substituir a orientação de um nutricionista.
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              {/* Reviews Tab */}
+              <TabsContent value="reviews" className="mt-0">
+                <div className="bg-white p-6 rounded-xl shadow-sm">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="heading-md">Avaliações e Comentários</h2>
+                    <RateRecipeForm recipeId={id || ''} recipeName={recipe?.title || ''} />
+                  </div>
+                  
+                  <div className="space-y-6">
+                    {mockReviews.map(review => (
+                      <div 
+                        key={review.id} 
+                        className="border-b border-gray-100 pb-6 last:border-0 last:pb-0"
+                      >
+                        <div className="flex items-start">
+                          <img 
+                            src={review.user.avatarUrl} 
+                            alt={review.user.name} 
+                            className="w-10 h-10 rounded-full object-cover mr-4"
+                          />
+                          <div className="flex-1">
+                            <div className="flex justify-between">
+                              <h3 className="font-medium">{review.user.name}</h3>
+                              <span className="text-sm text-gray-500">
+                                {new Date(review.date).toLocaleDateString('pt-BR')}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center mt-1 mb-3">
+                              {[...Array(5)].map((_, i) => (
+                                <Star 
+                                  key={i}
+                                  size={16} 
+                                  className={i < review.rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"} 
+                                />
+                              ))}
+                            </div>
+                            
+                            <p className="text-gray-700">{review.comment}</p>
+                            
+                            <div className="flex items-center mt-3">
+                              <button 
+                                onClick={() => handleLikeReview(review.id)}
+                                className="text-sm flex items-center text-gray-500 hover:text-fitcooker-orange"
+                              >
+                                <Heart size={14} className="mr-1" />
+                                <span>Curtir ({review.likes})</span>
+                              </button>
+                              
+                              <button 
+                                className="text-sm flex items-center text-gray-500 hover:text-fitcooker-orange ml-4"
+                                onClick={() => {
+                                  if (!isLoggedIn) {
+                                    toast({
+                                      title: "Login necessário",
+                                      description: "Faça login para responder avaliações",
+                                      variant: "destructive"
+                                    });
+                                    return;
+                                  }
+                                }}
+                              >
+                                <MessageSquare size={14} className="mr-1" />
+                                <span>Responder</span>
+                              </button>
+                            </div>
                           </div>
                         </div>
-                        <div className="pt-1">
-                          <p>{step.description}</p>
-                        </div>
-                      </li>
+                      </div>
                     ))}
-                  </ol>
+                  </div>
                 </div>
-              )}
-            </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </section>
+        
+        {/* Similar Recipes Section */}
+        {similarRecipes.length > 0 && (
+          <section className="py-12">
+            <div className="container mx-auto px-4 md:px-6">
+              <h2 className="heading-md mb-6">Receitas Semelhantes</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {similarRecipes.map(similarRecipe => (
+                  <Link 
+                    key={similarRecipe.id}
+                    to={`/recipe/${similarRecipe.id}`}
+                    className="bg-white rounded-xl shadow-sm overflow-hidden transform transition-transform hover:scale-[1.02]"
+                  >
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src={similarRecipe.imageUrl} 
+                        alt={similarRecipe.title} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    
+                    <div className="p-4">
+                      <h3 className="font-medium text-lg mb-2">{similarRecipe.title}</h3>
+                      
+                      <div className="flex items-center text-sm text-gray-600">
+                        <img 
+                          src={similarRecipe.author.avatarUrl} 
+                          alt={similarRecipe.author.name} 
+                          className="w-6 h-6 rounded-full mr-2"
+                        />
+                        <span>por {similarRecipe.author.name}</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
       </main>
       
       <Footer />
