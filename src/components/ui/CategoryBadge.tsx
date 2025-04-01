@@ -4,11 +4,11 @@ import { RecipeCategory } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
 interface CategoryBadgeProps {
-  category: RecipeCategory;
+  category: RecipeCategory | string;
   className?: string;
 }
 
-const getCategoryColor = (category: RecipeCategory): string => {
+const getCategoryColor = (category: RecipeCategory | string): string => {
   switch (category) {
     case RecipeCategory.BULKING:
       return 'bg-blue-500 text-white';
