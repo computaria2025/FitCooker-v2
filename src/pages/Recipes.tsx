@@ -6,7 +6,7 @@ import Footer from '@/components/layout/Footer';
 import RecipeCard from '@/components/ui/RecipeCard';
 import CategoryBadge from '@/components/ui/CategoryBadge';
 import { allRecipes, RecipeCategory } from '@/data/mockData';
-import { Search, Filter, ChevronDown, X, Utensils, PlusCircle } from 'lucide-react';
+import { Search, Filter, ChevronDown, X, Utensils, PlusCircle, SlidersHorizontal } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,9 +94,16 @@ const Recipes: React.FC = () => {
       <Navbar />
       
       <main className="flex-grow pt-24">
-        {/* Header with Background Pattern */}
-        <section className="relative py-16 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-fitcooker-orange/10 to-gray-50 -z-10"></div>
+        {/* Header with Better Background */}
+        <section className="relative py-16 overflow-hidden bg-gradient-to-b from-fitcooker-orange/5 to-gray-50">
+          {/* Food pattern background */}
+          <div className="absolute inset-0 opacity-5" 
+            style={{ 
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23f97316' fill-opacity='0.4'%3E%3Cpath d='M20 20c0-11.046 8.954-20 20-20s20 8.954 20 20-8.954 20-20 20S20 31.046 20 20zM0 60c0-11.046 8.954-20 20-20s20 8.954 20 20-8.954 20-20 20S0 71.046 0 60z'/%3E%3C/g%3E%3C/svg%3E")`,
+              backgroundSize: '80px 80px' 
+            }} 
+          />
+          
           {/* Decorative Elements */}
           <div className="absolute -top-10 -left-10 w-40 h-40 bg-yellow-300 rounded-full opacity-20 blur-3xl"></div>
           <div className="absolute top-40 -right-10 w-32 h-32 bg-fitcooker-orange rounded-full opacity-20 blur-3xl"></div>
@@ -131,160 +138,201 @@ const Recipes: React.FC = () => {
                 </div>
               </div>
             </div>
-            
-            {/* Filters Toggle Button (Mobile) */}
-            <div className="md:hidden mb-4">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm"
-              >
-                <div className="flex items-center">
-                  <Filter size={18} className="mr-2" />
-                  <span>Filtrar receitas</span>
-                </div>
-                <ChevronDown size={18} className={`transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-              </button>
-            </div>
-            
-            {/* Category Filters */}
-            <div className={`${showFilters || 'hidden md:block'} bg-white p-6 rounded-xl shadow-md mb-6 animation-fade-in`}>
-              <div className="flex flex-wrap gap-2">
-                {Object.values(RecipeCategory).map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => toggleFilter(category)}
-                    className={`category-badge transition-all ${
-                      activeFilters.includes(category)
-                        ? 'bg-fitcooker-orange text-white shadow-md'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
-                
-                {(activeFilters.length > 0 || searchTerm) && (
-                  <button
-                    onClick={clearFilters}
-                    className="category-badge bg-red-100 text-red-700 hover:bg-red-200 flex items-center"
-                  >
-                    <X size={14} className="mr-1" />
-                    Limpar filtros
-                  </button>
-                )}
-                
-                {/* Suggest New Category */}
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <button className="category-badge bg-green-100 text-green-700 hover:bg-green-200 flex items-center">
-                      <PlusCircle size={14} className="mr-1" />
-                      Sugerir categoria
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Sugerir Nova Categoria</DialogTitle>
-                      <DialogDescription>
-                        Não encontrou a categoria que procurava? Sugira uma nova categoria para nossas receitas.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="categoryName" className="text-right">
-                          Nome
-                        </Label>
-                        <Input
-                          id="categoryName"
-                          value={newCategoryName}
-                          onChange={(e) => setNewCategoryName(e.target.value)}
-                          className="col-span-3"
-                          placeholder="Ex: Low Carb, Sem Glúten, etc."
-                        />
-                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="categoryDescription" className="text-right">
-                          Descrição
-                        </Label>
-                        <Input
-                          id="categoryDescription"
-                          value={newCategoryDescription}
-                          onChange={(e) => setNewCategoryDescription(e.target.value)}
-                          className="col-span-3"
-                          placeholder="Descreva brevemente essa categoria"
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button type="submit" onClick={handleSuggestCategory}>Enviar sugestão</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-            
-            {/* Active Filters Summary */}
-            {activeFilters.length > 0 && (
-              <div className="flex items-center justify-center mb-4 flex-wrap gap-2">
-                <span className="text-sm text-gray-500">Filtros ativos:</span>
-                {activeFilters.map((filter) => (
-                  <div key={filter} className="flex items-center bg-fitcooker-orange/10 text-fitcooker-orange text-sm px-3 py-1 rounded-full">
-                    {filter}
-                    <button
-                      onClick={() => toggleFilter(filter)}
-                      className="ml-1 focus:outline-none"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </section>
         
-        {/* Recipe Grid */}
-        <section className="py-12 bg-gray-50">
+        {/* Filters Toggle Button (Mobile) */}
+        <div className="md:hidden px-4 mb-4">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+          >
+            <div className="flex items-center">
+              <Filter size={18} className="mr-2" />
+              <span>Filtrar receitas</span>
+            </div>
+            <ChevronDown size={18} className={`transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+        
+        {/* Recipe Grid with Sidebar Layout */}
+        <section className="py-8 bg-gray-50">
           <div className="container mx-auto px-4 md:px-6">
-            {filteredRecipes.length > 0 ? (
-              <>
-                <div className="flex justify-between items-center mb-8">
-                  <p className="text-gray-600">{filteredRecipes.length} receitas encontradas</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-600 text-sm">Ordenar por:</span>
-                    <select className="bg-white border border-gray-200 rounded-lg py-1 px-2 text-sm focus:outline-none focus:ring-1 focus:ring-fitcooker-orange">
-                      <option>Mais relevantes</option>
-                      <option>Melhor avaliadas</option>
-                      <option>Mais recentes</option>
-                      <option>Menos calorias</option>
-                    </select>
+            <div className="flex flex-col md:flex-row gap-6">
+              {/* Sidebar Filters - Left Column */}
+              <div className={`md:w-1/4 lg:w-1/5 ${showFilters || 'hidden md:block'}`}>
+                <div className="bg-white p-6 rounded-xl shadow-sm sticky top-24">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="font-bold text-lg flex items-center">
+                      <SlidersHorizontal size={18} className="mr-2 text-fitcooker-orange" />
+                      Filtros
+                    </h2>
+                    {(activeFilters.length > 0 || searchTerm) && (
+                      <button
+                        onClick={clearFilters}
+                        className="text-xs text-red-600 hover:text-red-800 flex items-center"
+                      >
+                        <X size={14} className="mr-1" />
+                        Limpar
+                      </button>
+                    )}
                   </div>
+                  
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold mb-2">Categorias</h3>
+                    <div className="flex flex-col gap-2">
+                      {Object.values(RecipeCategory).map((category) => (
+                        <button
+                          key={category}
+                          onClick={() => toggleFilter(category)}
+                          className={`text-left px-3 py-2 rounded-md transition-colors ${
+                            activeFilters.includes(category)
+                              ? 'bg-fitcooker-orange/10 text-fitcooker-orange font-medium'
+                              : 'hover:bg-gray-100'
+                          }`}
+                        >
+                          <div className="flex items-center">
+                            <div className={`w-3 h-3 rounded-full mr-2 ${
+                              activeFilters.includes(category) ? 'bg-fitcooker-orange' : 'bg-gray-300'
+                            }`}></div>
+                            {category}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Suggest New Category */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button className="mt-6 text-sm text-fitcooker-orange hover:text-fitcooker-orange/80 flex items-center w-full justify-center">
+                        <PlusCircle size={14} className="mr-1" />
+                        Sugerir nova categoria
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Sugerir Nova Categoria</DialogTitle>
+                        <DialogDescription>
+                          Não encontrou a categoria que procurava? Sugira uma nova categoria para nossas receitas.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="categoryName" className="text-right">
+                            Nome
+                          </Label>
+                          <Input
+                            id="categoryName"
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            className="col-span-3"
+                            placeholder="Ex: Low Carb, Sem Glúten, etc."
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="categoryDescription" className="text-right">
+                            Descrição
+                          </Label>
+                          <Input
+                            id="categoryDescription"
+                            value={newCategoryDescription}
+                            onChange={(e) => setNewCategoryDescription(e.target.value)}
+                            className="col-span-3"
+                            placeholder="Descreva brevemente essa categoria"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button type="submit" onClick={handleSuggestCategory}>Enviar sugestão</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                  
+                  {/* Active Filters Summary (Mobile) */}
+                  {activeFilters.length > 0 && (
+                    <div className="mt-6 md:hidden">
+                      <h3 className="text-sm font-semibold mb-2">Filtros ativos</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {activeFilters.map((filter) => (
+                          <div key={filter} className="flex items-center bg-fitcooker-orange/10 text-fitcooker-orange text-xs px-2 py-1 rounded-full">
+                            {filter}
+                            <button
+                              onClick={() => toggleFilter(filter)}
+                              className="ml-1 focus:outline-none"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {filteredRecipes.map((recipe) => (
-                    <RecipeCard key={recipe.id} recipe={recipe} />
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-12 bg-white rounded-xl shadow-sm">
-                <img 
-                  src="https://assets.website-files.com/5e51c674258ffe10d286d30a/5e535a0c9e6c1d737f20e2ac_peep-59.svg" 
-                  alt="No recipes found" 
-                  className="w-48 h-48 mx-auto mb-6"
-                />
-                <h3 className="heading-md mb-2">Nenhuma receita encontrada</h3>
-                <p className="text-gray-600 mb-6">
-                  Tente ajustar seus filtros ou buscar por outro termo.
-                </p>
-                <button 
-                  onClick={clearFilters}
-                  className="btn btn-primary"
-                >
-                  Limpar filtros
-                </button>
               </div>
-            )}
+              
+              {/* Recipe Content - Right Column */}
+              <div className="md:w-3/4 lg:w-4/5">
+                {filteredRecipes.length > 0 ? (
+                  <>
+                    <div className="flex justify-between items-center mb-6">
+                      <p className="text-gray-600">{filteredRecipes.length} receitas encontradas</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-600 text-sm">Ordenar por:</span>
+                        <select className="bg-white border border-gray-200 rounded-lg py-1 px-2 text-sm focus:outline-none focus:ring-1 focus:ring-fitcooker-orange">
+                          <option>Mais relevantes</option>
+                          <option>Melhor avaliadas</option>
+                          <option>Mais recentes</option>
+                          <option>Menos calorias</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    {/* Active Filters Summary (Desktop) */}
+                    {activeFilters.length > 0 && (
+                      <div className="hidden md:flex items-center mb-4 flex-wrap gap-2">
+                        <span className="text-sm text-gray-500">Filtros ativos:</span>
+                        {activeFilters.map((filter) => (
+                          <div key={filter} className="flex items-center bg-fitcooker-orange/10 text-fitcooker-orange text-sm px-3 py-1 rounded-full">
+                            {filter}
+                            <button
+                              onClick={() => toggleFilter(filter)}
+                              className="ml-1 focus:outline-none"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {filteredRecipes.map((recipe) => (
+                        <RecipeCard key={recipe.id} recipe={recipe} />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+                    <img 
+                      src="https://assets.website-files.com/5e51c674258ffe10d286d30a/5e535a0c9e6c1d737f20e2ac_peep-59.svg" 
+                      alt="No recipes found" 
+                      className="w-48 h-48 mx-auto mb-6"
+                    />
+                    <h3 className="heading-md mb-2">Nenhuma receita encontrada</h3>
+                    <p className="text-gray-600 mb-6">
+                      Tente ajustar seus filtros ou buscar por outro termo.
+                    </p>
+                    <button 
+                      onClick={clearFilters}
+                      className="btn btn-primary"
+                    >
+                      Limpar filtros
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </section>
       </main>
