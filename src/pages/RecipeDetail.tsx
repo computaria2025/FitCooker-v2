@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
@@ -557,7 +558,7 @@ const RecipeDetail: React.FC = () => {
           </div>
         </section>
         
-        {/* Similar Recipes Section - keeping this section unchanged */}
+        {/* Similar Recipes Section */}
         {similarRecipes.length > 0 && (
           <section className="py-12">
             <div className="container mx-auto px-4 md:px-6">
