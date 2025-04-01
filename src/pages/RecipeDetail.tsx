@@ -76,8 +76,7 @@ const RecipeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'ingredients' | 'steps'>('ingredients');
-  const [activeMainTab, setActiveMainTab] = useState<'preparation' | 'nutrition' | 'reviews'>('preparation');
+  const [activeTab, setActiveTab] = useState<'ingredients' | 'steps' | 'nutrition' | 'reviews'>('ingredients');
   const [similarRecipes, setSimilarRecipes] = useState<Recipe[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { toast } = useToast();
@@ -346,7 +345,7 @@ const RecipeDetail: React.FC = () => {
           </div>
         </section>
         
-        {/* Recipe Content Section with New Tabs Layout */}
+        {/* Recipe Content Section with Horizontal Tabs Layout */}
         <section className="py-8 bg-gray-50">
           <div className="container mx-auto px-4 md:px-6">
             <div className="bg-white p-6 rounded-xl shadow-sm">
