@@ -4,7 +4,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Code, PenTool, Database, FileSearch, Figma, ChefHat, Heart } from 'lucide-react';
+import { Code, PenTool, Database, FileSearch, Figma } from 'lucide-react';
 
 // Team member data - Reordered with Ígor in the middle (3rd position)
 const teamMembers = [
@@ -27,8 +27,7 @@ const teamMembers = [
     role: 'Desenvolvedor Fullstack',
     description: 'Responsável pelo desenvolvimento da aplicação, integrando o frontend com o backend.',
     avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-    icon: <Code className="h-10 w-10" />,
-    isMainDev: true
+    icon: <Code className="h-10 w-10" />
   },
   {
     name: 'Gabriel',
@@ -75,7 +74,7 @@ const About: React.FC = () => {
       <Navbar />
       
       <main className="flex-grow">
-        {/* Hero Section */}
+        {/* Hero Section - Updated with better text contrast */}
         <section className="relative bg-gradient-to-r from-fitcooker-orange to-fitcooker-yellow py-24 overflow-hidden">
           <div className="absolute inset-0 bg-pattern-chef opacity-10"></div>
           <div className="container mx-auto px-4 md:px-6 relative z-10">
@@ -88,7 +87,7 @@ const About: React.FC = () => {
               </p>
               <div className="space-x-4">
                 <Link to="/recipes">
-                  <Button variant="default" size="lg" className="bg-white text-fitcooker-orange hover:bg-white/90">
+                  <Button variant="default" size="lg" className="bg-white text-fitcooker-orange hover:bg-white/90 text-black">
                     Explorar Receitas
                   </Button>
                 </Link>
@@ -163,7 +162,7 @@ const About: React.FC = () => {
           </div>
         </section>
         
-        {/* Team Section - Updated to align members horizontally with Igor in the middle */}
+        {/* Team Section - Updated to use a code-inspired design with all cards the same style */}
         <section id="team" className="py-20 bg-gray-50">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center mb-16 animate-on-scroll">
@@ -202,24 +201,24 @@ function FitCooker() {
   );
 }
 
-// The best recipe platform in Brazil
+// A melhor plataforma de receitas do Brasil
 export default FitCooker;
                   `}
                 </pre>
               </div>
             </div>
             
-            {/* Team members in a row with Igor in the middle */}
+            {/* Team members in a row - All cards with the same style */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-6xl mx-auto">
               {teamMembers.map((member, index) => (
                 <div 
                   key={index} 
-                  className={`animate-on-scroll ${member.isMainDev ? 'transform scale-110' : ''}`} 
+                  className="animate-on-scroll" 
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className={`bg-white rounded-xl shadow-md p-6 h-full transition-all duration-300 hover:shadow-lg transform hover:-translate-y-2 ${member.isMainDev ? 'border-t-4 border-fitcooker-orange ring-2 ring-fitcooker-orange/20' : 'border-t-2 border-fitcooker-orange/60'}`}>
+                  <div className="bg-black text-white rounded-xl shadow-md p-6 h-full transition-all duration-300 hover:shadow-lg transform hover:-translate-y-2 border border-gray-700">
                     <div className="flex flex-col items-center text-center">
-                      <div className={`${member.isMainDev ? 'w-24 h-24' : 'w-20 h-20'} rounded-full overflow-hidden mb-4 border-2 ${member.isMainDev ? 'border-fitcooker-orange' : 'border-gray-100'}`}>
+                      <div className="w-20 h-20 rounded-full overflow-hidden mb-4 border-2 border-gray-700">
                         <img 
                           src={member.avatar} 
                           alt={member.name}
@@ -227,11 +226,11 @@ export default FitCooker;
                         />
                       </div>
                       
-                      <h3 className={`${member.isMainDev ? 'text-2xl' : 'text-xl'} font-bold mb-1`}>{member.name}</h3>
-                      <p className="text-fitcooker-orange text-sm font-medium mb-4">{member.role}</p>
-                      <p className="text-gray-600 text-sm mb-6">{member.description}</p>
+                      <h3 className="text-xl font-bold mb-1">{member.name}</h3>
+                      <p className="text-green-400 text-sm font-medium mb-4">{member.role}</p>
+                      <p className="text-gray-400 text-sm mb-6">{member.description}</p>
                       
-                      <div className={`p-2 ${member.isMainDev ? 'bg-fitcooker-orange text-white' : 'bg-fitcooker-orange/10 text-fitcooker-orange'} rounded-full mt-auto`}>
+                      <div className="p-2 bg-gray-800 text-green-400 rounded-full mt-auto">
                         {member.icon}
                       </div>
                     </div>

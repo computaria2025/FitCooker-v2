@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -115,7 +116,13 @@ const Cooks: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-7xl mx-auto">
             <header className="text-center mb-12">
-              <h1 className="heading-lg mb-4">Nossos Chefs Fit</h1>
+              {/* Added decorative background for the title */}
+              <div className="relative mb-8">
+                <div className="absolute inset-x-0 top-1/2 transform -translate-y-1/2 h-1 bg-gradient-to-r from-transparent via-fitcooker-orange/80 to-transparent"></div>
+                <div className="relative z-10 inline-block bg-white px-8 py-2">
+                  <h1 className="heading-lg mb-0">Nossos Chefs Fit</h1>
+                </div>
+              </div>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto">
                 Conheça os cozinheiros mais talentosos da nossa comunidade. Eles são especialistas em criar receitas saudáveis e deliciosas.
               </p>
