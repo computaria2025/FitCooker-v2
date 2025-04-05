@@ -1,10 +1,11 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ChefHat, TrendingUp } from 'lucide-react';
 
 const Hero: React.FC = () => {
   const heroRef = useRef<HTMLDivElement>(null);
+  const [scrollOpacity, setScrollOpacity] = useState(1);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -16,12 +17,16 @@ const Hero: React.FC = () => {
         heroElement.style.backgroundPositionY = `${scrollPosition * 0.5}px`;
         
         // Opacity effect for content
-        const opacity = Math.max(1 - scrollPosition / 700, 0);
+        const contentOpacity = Math.max(1 - scrollPosition / 700, 0);
         const content = heroElement.querySelector('.hero-content') as HTMLElement;
         if (content) {
-          content.style.opacity = opacity.toString();
+          content.style.opacity = contentOpacity.toString();
           content.style.transform = `translateY(${scrollPosition * 0.2}px)`;
         }
+        
+        // Scroll indicator fade out effect
+        const scrollIndicatorOpacity = Math.max(1 - scrollPosition / 300, 0);
+        setScrollOpacity(scrollIndicatorOpacity);
       }
     };
     
@@ -127,8 +132,14 @@ const Hero: React.FC = () => {
         </div>
       </div>
       
-      {/* Scroll Down Indicator */}
-      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+      {/* Scroll Down Indicator - Now centered and fades out */}
+      <div 
+        className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce transition-opacity duration-300"
+        style={{ 
+          opacity: scrollOpacity,
+          visibility: scrollOpacity === 0 ? 'hidden' : 'visible'
+        }}
+      >
         <div className="w-10 h-10 rounded-full border-2 border-white flex items-center justify-center">
           <svg 
             xmlns="http://www.w3.org/2000/svg" 

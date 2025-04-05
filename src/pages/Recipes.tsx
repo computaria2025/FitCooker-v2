@@ -6,7 +6,7 @@ import Footer from '@/components/layout/Footer';
 import RecipeCard from '@/components/ui/RecipeCard';
 import CategoryBadge from '@/components/ui/CategoryBadge';
 import { allRecipes, RecipeCategory } from '@/data/mockData';
-import { Search, Filter, ChevronDown, X, Utensils, PlusCircle, SlidersHorizontal } from 'lucide-react';
+import { Search, Filter, ChevronDown, X, Utensils, PlusCircle, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,25 +94,25 @@ const Recipes: React.FC = () => {
       <Navbar />
       
       <main className="flex-grow pt-24">
-        {/* Header with Better Background */}
-        <section className="relative py-16 overflow-hidden bg-gradient-to-b from-fitcooker-orange/5 to-gray-50">
-          {/* Food pattern background */}
-          <div className="absolute inset-0 opacity-5" 
-            style={{ 
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23f97316' fill-opacity='0.4'%3E%3Cpath d='M20 20c0-11.046 8.954-20 20-20s20 8.954 20 20-8.954 20-20 20S20 31.046 20 20zM0 60c0-11.046 8.954-20 20-20s20 8.954 20 20-8.954 20-20 20S0 71.046 0 60z'/%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: '80px 80px' 
-            }} 
-          />
+        {/* Header with Beautiful Food Background */}
+        <section className="relative py-16 overflow-hidden bg-gradient-to-b from-fitcooker-orange/10 to-white">
+          {/* Stylish background patterns */}
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1606787366850-de6330128bfc?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')] bg-cover bg-center opacity-10"></div>
           
           {/* Decorative Elements */}
-          <div className="absolute -top-10 -left-10 w-40 h-40 bg-yellow-300 rounded-full opacity-20 blur-3xl"></div>
-          <div className="absolute top-40 -right-10 w-32 h-32 bg-fitcooker-orange rounded-full opacity-20 blur-3xl"></div>
+          <div className="absolute -top-20 -left-20 w-60 h-60 bg-yellow-300 rounded-full opacity-10 blur-3xl"></div>
+          <div className="absolute top-40 -right-20 w-60 h-60 bg-fitcooker-orange rounded-full opacity-10 blur-3xl"></div>
           
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <div className="text-center">
-              <div className="inline-block p-2 bg-white/30 backdrop-blur-sm rounded-full shadow-sm mb-4">
-                <Utensils className="h-8 w-8 text-fitcooker-orange" />
+              <div className="relative inline-block">
+                <div className="absolute -top-3 -left-3 w-6 h-6 bg-fitcooker-yellow/80 rounded-full animate-pulse-light"></div>
+                <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-fitcooker-orange/80 rounded-full animate-pulse-light" style={{ animationDelay: "0.5s" }}></div>
+                <div className="inline-block p-2 bg-white/60 backdrop-blur-sm rounded-full shadow-md mb-4">
+                  <Utensils className="h-8 w-8 text-fitcooker-orange" />
+                </div>
               </div>
+              
               <h1 className="heading-lg text-center mb-2">Nossas Receitas</h1>
               <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">
                 Descubra receitas fit para todos os objetivos - do bulking ao cutting, 
@@ -161,7 +161,7 @@ const Recipes: React.FC = () => {
             <div className="flex flex-col md:flex-row gap-6">
               {/* Sidebar Filters - Left Column */}
               <div className={`md:w-1/4 lg:w-1/5 ${showFilters || 'hidden md:block'}`}>
-                <div className="bg-white p-6 rounded-xl shadow-sm sticky top-24">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 sticky top-24">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="font-bold text-lg flex items-center">
                       <SlidersHorizontal size={18} className="mr-2 text-fitcooker-orange" />
@@ -185,9 +185,9 @@ const Recipes: React.FC = () => {
                         <button
                           key={category}
                           onClick={() => toggleFilter(category)}
-                          className={`text-left px-3 py-2 rounded-md transition-colors ${
+                          className={`text-left px-3 py-2 rounded-md transition-all ${
                             activeFilters.includes(category)
-                              ? 'bg-fitcooker-orange/10 text-fitcooker-orange font-medium'
+                              ? 'bg-gradient-to-r from-fitcooker-orange/20 to-fitcooker-orange/5 text-fitcooker-orange font-medium'
                               : 'hover:bg-gray-100'
                           }`}
                         >
@@ -196,6 +196,9 @@ const Recipes: React.FC = () => {
                               activeFilters.includes(category) ? 'bg-fitcooker-orange' : 'bg-gray-300'
                             }`}></div>
                             {category}
+                            {activeFilters.includes(category) && (
+                              <Sparkles size={12} className="ml-2 text-fitcooker-orange animate-pulse-light" />
+                            )}
                           </div>
                         </button>
                       ))}
@@ -293,7 +296,7 @@ const Recipes: React.FC = () => {
                       <div className="hidden md:flex items-center mb-4 flex-wrap gap-2">
                         <span className="text-sm text-gray-500">Filtros ativos:</span>
                         {activeFilters.map((filter) => (
-                          <div key={filter} className="flex items-center bg-fitcooker-orange/10 text-fitcooker-orange text-sm px-3 py-1 rounded-full">
+                          <div key={filter} className="flex items-center bg-gradient-to-r from-fitcooker-orange/20 to-fitcooker-orange/5 text-fitcooker-orange text-sm px-3 py-1 rounded-full">
                             {filter}
                             <button
                               onClick={() => toggleFilter(filter)}
@@ -308,12 +311,12 @@ const Recipes: React.FC = () => {
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                       {filteredRecipes.map((recipe) => (
-                        <RecipeCard key={recipe.id} recipe={recipe} />
+                        <RecipeCard key={recipe.id} recipe={recipe} className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all" />
                       ))}
                     </div>
                   </>
                 ) : (
-                  <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+                  <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
                     <img 
                       src="https://assets.website-files.com/5e51c674258ffe10d286d30a/5e535a0c9e6c1d737f20e2ac_peep-59.svg" 
                       alt="No recipes found" 

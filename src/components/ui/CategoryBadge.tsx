@@ -1,53 +1,44 @@
 
 import React from 'react';
 import { RecipeCategory } from '@/data/mockData';
-import { cn } from '@/lib/utils';
 
-interface CategoryBadgeProps {
+type CategoryBadgeProps = {
   category: RecipeCategory | string;
-  className?: string;
-}
-
-const getCategoryColor = (category: RecipeCategory | string): string => {
-  switch (category) {
-    case RecipeCategory.BULKING:
-      return 'bg-blue-500 text-white';
-    case RecipeCategory.CUTTING:
-      return 'bg-green-500 text-white';
-    case RecipeCategory.CHEATMEAL:
-      return 'bg-red-500 text-white';
-    case RecipeCategory.HIGHPROTEIN:
-      return 'bg-purple-500 text-white';
-    case RecipeCategory.LOWCARB:
-      return 'bg-teal-500 text-white';
-    case RecipeCategory.VEGETARIAN:
-      return 'bg-emerald-500 text-white';
-    case RecipeCategory.VEGAN:
-      return 'bg-lime-500 text-white';
-    case RecipeCategory.BREAKFAST:
-      return 'bg-yellow-500 text-black';
-    case RecipeCategory.LUNCH:
-      return 'bg-amber-500 text-black';
-    case RecipeCategory.DINNER:
-      return 'bg-indigo-500 text-white';
-    case RecipeCategory.SNACK:
-      return 'bg-pink-500 text-white';
-    default:
-      return 'bg-gray-500 text-white';
-  }
 };
 
-const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category, className }) => {
-  const categoryColor = getCategoryColor(category);
+const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category }) => {
+  const getColor = (cat: RecipeCategory | string) => {
+    // Convert category to string for comparison
+    const categoryStr = String(cat);
+    
+    switch (categoryStr) {
+      case 'Bulking':
+        return 'bg-green-500 text-white';
+      case 'Cutting':
+        return 'bg-blue-500 text-white';
+      case 'LowCarb':
+        return 'bg-yellow-500 text-black';
+      case 'HighProtein':
+        return 'bg-fitcooker-orange text-white';
+      case 'Vegetariano':
+        return 'bg-emerald-500 text-white';
+      case 'Vegano':
+        return 'bg-teal-500 text-white';
+      case 'SemGlúten':
+        return 'bg-amber-400 text-black';
+      case 'SemLactose':
+        return 'bg-purple-500 text-white';
+      case 'Keto':
+        return 'bg-red-500 text-white';
+      case 'Paleo':
+        return 'bg-rose-500 text-white';
+      default:
+        return 'bg-gray-500 text-white';
+    }
+  };
   
   return (
-    <span 
-      className={cn(
-        'category-badge inline-block px-3 py-1 rounded-full text-xs font-medium', 
-        categoryColor,
-        className
-      )}
-    >
+    <span className={`category-badge ${getColor(category)} px-2 py-0.5 rounded-full text-xs font-medium`}>
       {category}
     </span>
   );
