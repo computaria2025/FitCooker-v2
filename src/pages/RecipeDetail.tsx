@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
@@ -26,12 +27,49 @@ interface Review {
   likes: number;
 }
 
+// Sample mock reviews
+const mockReviews: Review[] = [
+  {
+    id: 1,
+    user: {
+      name: "Maria Silva",
+      avatarUrl: "https://randomuser.me/api/portraits/women/12.jpg"
+    },
+    rating: 5,
+    comment: "Receita maravilhosa! Fácil de fazer e muito saborosa. Toda a família adorou.",
+    date: "2024-03-10",
+    likes: 8
+  },
+  {
+    id: 2,
+    user: {
+      name: "João Santos",
+      avatarUrl: "https://randomuser.me/api/portraits/men/22.jpg"
+    },
+    rating: 4,
+    comment: "Muito boa receita, apenas ajustei um pouco o tempero para o meu gosto.",
+    date: "2024-03-05",
+    likes: 3
+  },
+  {
+    id: 3,
+    user: {
+      name: "Ana Oliveira",
+      avatarUrl: "https://randomuser.me/api/portraits/women/33.jpg"
+    },
+    rating: 5,
+    comment: "Perfeita para minha dieta low-carb! Os macronutrientes batem certinho.",
+    date: "2024-02-28",
+    likes: 5
+  }
+];
+
 // Mock similar recipes data
-const getSimilarRecipes = (currentRecipeId: number, category: string) => {
+const getSimilarRecipes = (currentRecipeId: number, category: RecipeCategory | string) => {
   return allRecipes
     .filter(recipe => 
       recipe.id !== currentRecipeId && 
-      recipe.categories.includes(category)
+      recipe.categories.includes(category as RecipeCategory)
     )
     .slice(0, 3);
 };

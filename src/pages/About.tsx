@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -5,16 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Code, PenTool, Database, FileSearch, Figma, ChefHat, Heart } from 'lucide-react';
 
-// Team member data
+// Team member data - Reordered with Ígor in the middle (3rd position)
 const teamMembers = [
-  {
-    name: 'Ígor',
-    role: 'Desenvolvedor Fullstack',
-    description: 'Responsável pelo desenvolvimento da aplicação, integrando o frontend com o backend.',
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-    icon: <Code className="h-10 w-10" />,
-    isMainDev: true
-  },
   {
     name: 'Erick',
     role: 'Engenheiro de Dados',
@@ -28,6 +21,14 @@ const teamMembers = [
     description: 'Combina habilidades de design e desenvolvimento para criar interfaces intuitivas.',
     avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
     icon: <PenTool className="h-10 w-10" />
+  },
+  {
+    name: 'Ígor',
+    role: 'Desenvolvedor Fullstack',
+    description: 'Responsável pelo desenvolvimento da aplicação, integrando o frontend com o backend.',
+    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+    icon: <Code className="h-10 w-10" />,
+    isMainDev: true
   },
   {
     name: 'Gabriel',
@@ -162,7 +163,7 @@ const About: React.FC = () => {
           </div>
         </section>
         
-        {/* Team Section */}
+        {/* Team Section - Updated to align members horizontally with Igor in the middle */}
         <section id="team" className="py-20 bg-gray-50">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center mb-16 animate-on-scroll">
@@ -172,49 +173,53 @@ const About: React.FC = () => {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto">
-              {/* Main Developer - Centered and Highlighted */}
-              {teamMembers.filter(member => member.isMainDev).map((member, index) => (
+            {/* Code-inspired background design */}
+            <div className="relative mb-16">
+              <div className="absolute inset-0 opacity-5 overflow-hidden">
+                <pre className="text-xs text-left">
+                  {`
+function FitCooker() {
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  
+  useEffect(() => {
+    // Load our amazing recipes
+    fetchRecipes().then(data => {
+      setRecipes(data);
+      setLoading(false);
+    });
+  }, []);
+  
+  return (
+    <div className="app">
+      <Header />
+      <main>
+        <Team members={teamMembers} />
+        <RecipesList recipes={recipes} />
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+// The best recipe platform in Brazil
+export default FitCooker;
+                  `}
+                </pre>
+              </div>
+            </div>
+            
+            {/* Team members in a row with Igor in the middle */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-6xl mx-auto">
+              {teamMembers.map((member, index) => (
                 <div 
                   key={index} 
-                  className="md:col-span-3 animate-on-scroll"
-                >
-                  <div className="relative bg-white rounded-2xl shadow-lg p-8 transition-all duration-300 hover:shadow-xl transform hover:-translate-y-2 border-t-4 border-fitcooker-orange">
-                    <div className="absolute -top-10 left-1/2 transform -translate-x-1/2">
-                      <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-md">
-                        <img 
-                          src={member.avatar} 
-                          alt={member.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="pt-12 text-center">
-                      <h3 className="text-2xl font-bold mb-1">{member.name}</h3>
-                      <p className="text-fitcooker-orange font-medium mb-4">{member.role}</p>
-                      <p className="text-gray-600 mb-6">{member.description}</p>
-                      
-                      <div className="flex justify-center">
-                        <div className="p-3 bg-fitcooker-orange/10 rounded-full text-fitcooker-orange">
-                          {member.icon}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              
-              {/* Other Team Members */}
-              {teamMembers.filter(member => !member.isMainDev).map((member, index) => (
-                <div 
-                  key={index} 
-                  className="animate-on-scroll" 
+                  className={`animate-on-scroll ${member.isMainDev ? 'transform scale-110' : ''}`} 
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="bg-white rounded-xl shadow-md p-6 h-full transition-all duration-300 hover:shadow-lg transform hover:-translate-y-2 border-t-2 border-fitcooker-orange/60">
+                  <div className={`bg-white rounded-xl shadow-md p-6 h-full transition-all duration-300 hover:shadow-lg transform hover:-translate-y-2 ${member.isMainDev ? 'border-t-4 border-fitcooker-orange ring-2 ring-fitcooker-orange/20' : 'border-t-2 border-fitcooker-orange/60'}`}>
                     <div className="flex flex-col items-center text-center">
-                      <div className="w-20 h-20 rounded-full overflow-hidden mb-4 border-2 border-gray-100">
+                      <div className={`${member.isMainDev ? 'w-24 h-24' : 'w-20 h-20'} rounded-full overflow-hidden mb-4 border-2 ${member.isMainDev ? 'border-fitcooker-orange' : 'border-gray-100'}`}>
                         <img 
                           src={member.avatar} 
                           alt={member.name}
@@ -222,11 +227,11 @@ const About: React.FC = () => {
                         />
                       </div>
                       
-                      <h3 className="text-xl font-bold mb-1">{member.name}</h3>
+                      <h3 className={`${member.isMainDev ? 'text-2xl' : 'text-xl'} font-bold mb-1`}>{member.name}</h3>
                       <p className="text-fitcooker-orange text-sm font-medium mb-4">{member.role}</p>
                       <p className="text-gray-600 text-sm mb-6">{member.description}</p>
                       
-                      <div className="p-2 bg-fitcooker-orange/10 rounded-full text-fitcooker-orange mt-auto">
+                      <div className={`p-2 ${member.isMainDev ? 'bg-fitcooker-orange text-white' : 'bg-fitcooker-orange/10 text-fitcooker-orange'} rounded-full mt-auto`}>
                         {member.icon}
                       </div>
                     </div>
