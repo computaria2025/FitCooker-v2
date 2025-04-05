@@ -17,8 +17,10 @@ const CategoryBadge: React.FC<CategoryBadgeProps> = ({ category }) => {
       case 'Cutting':
         return 'bg-blue-500 text-white';
       case 'LowCarb':
+      case 'Low Carb':
         return 'bg-yellow-500 text-black';
       case 'HighProtein':
+      case 'Alto Proteína':
         return 'bg-fitcooker-orange text-white';
       case 'Vegetariano':
         return 'bg-emerald-500 text-white';
