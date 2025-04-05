@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { motion } from 'framer-motion';
 
 const Recipes: React.FC = () => {
   const location = useLocation();
@@ -89,13 +90,36 @@ const Recipes: React.FC = () => {
     return matchesCategory && matchesSearch;
   });
   
+  // Animation variants for staggered animations
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 50
+      }
+    }
+  };
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
       <main className="flex-grow pt-24">
-        {/* Header with Beautiful Food Background */}
-        <section className="relative py-16 overflow-hidden bg-gradient-to-b from-fitcooker-orange/10 to-white">
+        {/* Header with Beautiful Food Background - REDUCED HEIGHT */}
+        <section className="relative py-10 overflow-hidden bg-gradient-to-b from-fitcooker-orange/10 to-white">
           {/* Stylish background patterns */}
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1606787366850-de6330128bfc?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')] bg-cover bg-center opacity-10"></div>
           
@@ -113,14 +137,31 @@ const Recipes: React.FC = () => {
                 </div>
               </div>
               
-              <h1 className="heading-lg text-center mb-2">Nossas Receitas</h1>
-              <p className="text-gray-600 text-center max-w-2xl mx-auto mb-8">
+              <motion.h1 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="heading-lg text-center mb-2"
+              >
+                Nossas Receitas
+              </motion.h1>
+              <motion.p 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="text-gray-600 text-center max-w-2xl mx-auto mb-4"
+              >
                 Descubra receitas fit para todos os objetivos - do bulking ao cutting, 
                 com ingredientes nutritivos e deliciosos para seu dia a dia
-              </p>
+              </motion.p>
               
               {/* Search Bar with Decorative Elements */}
-              <div className="max-w-2xl mx-auto relative mb-10">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="max-w-2xl mx-auto relative mb-6"
+              >
                 <div className="absolute -top-3 -left-3 w-8 h-8 bg-fitcooker-yellow rounded-lg opacity-50 transform rotate-12"></div>
                 <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-fitcooker-orange rounded-lg opacity-50 transform -rotate-12"></div>
                 
@@ -136,7 +177,7 @@ const Recipes: React.FC = () => {
                     className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-fitcooker-orange focus:border-transparent transition-all shadow-md"
                   />
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </section>
@@ -156,7 +197,7 @@ const Recipes: React.FC = () => {
         </div>
         
         {/* Recipe Grid with Sidebar Layout */}
-        <section className="py-8 bg-gray-50">
+        <section className="py-6 bg-gray-50">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col md:flex-row gap-6">
               {/* Sidebar Filters - Left Column */}
@@ -309,11 +350,19 @@ const Recipes: React.FC = () => {
                       </div>
                     )}
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <motion.div 
+                      variants={containerVariants}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true, amount: 0.1 }}
+                      className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
+                    >
                       {filteredRecipes.map((recipe) => (
-                        <RecipeCard key={recipe.id} recipe={recipe} className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all" />
+                        <motion.div key={recipe.id} variants={itemVariants} className="h-full">
+                          <RecipeCard recipe={recipe} className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all h-full" />
+                        </motion.div>
                       ))}
-                    </div>
+                    </motion.div>
                   </>
                 ) : (
                   <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">

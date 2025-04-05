@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ChefHat, TrendingUp } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const Hero: React.FC = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -48,7 +49,12 @@ const Hero: React.FC = () => {
       {/* Content */}
       <div className="container mx-auto px-4 md:px-6 relative z-10 hero-content">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-8 animate-fade-in">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-8 animate-fade-in"
+          >
             <div className="flex items-center justify-center mb-2">
               <ChefHat size={40} className="text-fitcooker-orange mr-2" />
               <h1 className="text-4xl md:text-6xl font-bold text-white">
@@ -66,10 +72,15 @@ const Hero: React.FC = () => {
               <span className="bg-fitcooker-yellow px-3 py-1 rounded-full text-black text-sm font-medium">Baixo Carboidrato</span>
               <span className="bg-white px-3 py-1 rounded-full text-fitcooker-black text-sm font-medium">Zero Açúcar</span>
             </div>
-          </div>
+          </motion.div>
           
           {/* Search Bar */}
-          <div className="mb-12 animate-fade-in" style={{ animationDelay: '200ms' }}>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mb-12 animate-fade-in"
+          >
             <div className="relative mx-auto max-w-2xl">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
@@ -83,10 +94,15 @@ const Hero: React.FC = () => {
                 Buscar
               </button>
             </div>
-          </div>
+          </motion.div>
           
           {/* Categories */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in" style={{ animationDelay: '400ms' }}>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in"
+          >
             <Link 
               to="/recipes?category=bulking"
               className="bg-white/10 backdrop-blur-md rounded-lg p-4 text-center transition-all duration-300 hover:bg-white/20 hover:transform hover:scale-105"
@@ -118,32 +134,37 @@ const Hero: React.FC = () => {
               <TrendingUp className="h-8 w-8 mx-auto mb-2 text-blue-500" />
               <span className="text-white font-medium">Low Carb</span>
             </Link>
-          </div>
+          </motion.div>
           
           {/* CTA Button */}
-          <div className="mt-12 text-center animate-fade-in" style={{ animationDelay: '600ms' }}>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="mt-12 text-center animate-fade-in"
+          >
             <Link
               to="/recipes"
               className="btn btn-primary inline-flex items-center space-x-2"
             >
               <span>Explorar Todas as Receitas</span>
             </Link>
-          </div>
+          </motion.div>
         </div>
       </div>
       
-      {/* Scroll Down Indicator - Now centered and fades out */}
+      {/* Scroll Down Indicator - Now centered and smaller */}
       <div 
-        className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce transition-opacity duration-300"
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce transition-opacity duration-300 mx-auto"
         style={{ 
           opacity: scrollOpacity,
           visibility: scrollOpacity === 0 ? 'hidden' : 'visible'
         }}
       >
-        <div className="w-10 h-10 rounded-full border-2 border-white flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center">
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
-            className="h-6 w-6 text-white" 
+            className="h-4 w-4 text-white" 
             fill="none" 
             viewBox="0 0 24 24" 
             stroke="currentColor"

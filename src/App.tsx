@@ -26,7 +26,7 @@ const App = () => {
       const elements = document.querySelectorAll('.animate-on-scroll');
       elements.forEach((el) => {
         const rect = el.getBoundingClientRect();
-        const isVisible = rect.top < window.innerHeight * 0.8;
+        const isVisible = rect.top < window.innerHeight * 0.85; // Increased threshold for earlier animations
         
         if (isVisible) {
           el.classList.add('active');
@@ -41,6 +41,26 @@ const App = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
+  }, []);
+  
+  // Add smooth scroll behavior to all anchor links
+  useEffect(() => {
+    const smoothScrollLinks = document.querySelectorAll('a[href^="#"]');
+    smoothScrollLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href')?.substring(1);
+        if (targetId) {
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }
+      });
+    });
   }, []);
   
   return (

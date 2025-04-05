@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Card, CardContent } from '@/components/ui/card';
+import { Code, Terminal, Laptop, Github, Database, Braces, Server } from 'lucide-react';
 
 const About: React.FC = () => {
   useEffect(() => {
@@ -38,37 +39,47 @@ const About: React.FC = () => {
     {
       id: 1,
       name: "Ana Silva",
-      role: "Fundadora & Nutricionista",
-      bio: "Especialista em nutrição esportiva com foco em alta performance.",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+      role: "Desenvolvedora Frontend",
+      bio: "Especialista em React e interfaces responsivas",
+      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+      tech: ["React", "TypeScript", "Tailwind"],
+      icon: <Code className="h-6 w-6 text-purple-500" />
     },
     {
       id: 2, 
       name: "Carlos Mendes",
-      role: "Chef de Cozinha",
-      bio: "Criador de receitas saudáveis e deliciosas para todos os objetivos.",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+      role: "Desenvolvedor Backend",
+      bio: "Arquiteto de APIs e soluções escaláveis",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+      tech: ["Node.js", "Express", "MongoDB"],
+      icon: <Server className="h-6 w-6 text-green-500" />
     },
     {
       id: 3,
       name: "Mariana Costa",
-      role: "Especialista em Dados",
-      bio: "Responsável pelo cálculo nutricional preciso de todas as receitas.",
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+      role: "Engenheira de Dados",
+      bio: "Especialista em processamento e visualização de dados",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+      tech: ["Python", "SQL", "Data Science"],
+      icon: <Database className="h-6 w-6 text-blue-500" />
     },
     {
       id: 4,
       name: "Paulo Oliveira",
       role: "Desenvolvedor Fullstack",
-      bio: "Transformando ideias em soluções digitais acessíveis.",
-      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+      bio: "Transformando ideias em soluções digitais acessíveis",
+      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+      tech: ["JavaScript", "React", "Node.js"],
+      icon: <Laptop className="h-6 w-6 text-orange-500" />
     },
     {
       id: 5,
       name: "Júlia Santos",
-      role: "Especialista em UX/UI",
-      bio: "Criando experiências intuitivas para todos os usuários.",
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+      role: "DevOps Engineer",
+      bio: "Especialista em CI/CD e infraestrutura como código",
+      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+      tech: ["Docker", "Kubernetes", "AWS"],
+      icon: <Terminal className="h-6 w-6 text-red-500" />
     }
   ];
   
@@ -81,6 +92,10 @@ const About: React.FC = () => {
         <section className="relative overflow-hidden bg-gradient-to-b from-fitcooker-orange/10 to-white py-20">
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-white to-transparent opacity-40"></div>
+          
+          {/* Code brackets background elements */}
+          <div className="absolute left-10 top-20 text-gray-200 opacity-10 text-8xl font-mono">{`{`}</div>
+          <div className="absolute right-10 bottom-10 text-gray-200 opacity-10 text-8xl font-mono">{`}`}</div>
           
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <div className="max-w-3xl mx-auto text-center mb-12">
@@ -217,18 +232,34 @@ const About: React.FC = () => {
           </div>
         </section>
         
-        {/* Team Section */}
+        {/* Team Section - Improved for developer theme */}
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center mb-12">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="inline-block mb-4"
+              >
+                <Terminal className="h-12 w-12 mx-auto text-purple-600" />
+                <div className="text-xs font-mono text-purple-600 mt-1">{'<Team />'}</div>
+              </motion.div>
               <h2 className="heading-lg mb-4">Conheça Nossa Equipe</h2>
               <p className="text-gray-700 max-w-3xl mx-auto">
-                Um time multidisciplinar unido pela paixão em tornar a alimentação saudável acessível para todos.
+                Um time de desenvolvedores apaixonados por tecnologia e nutrição, unidos para transformar a maneira como as pessoas se alimentam.
               </p>
+              <div className="mt-4 flex justify-center gap-1">
+                <span className="inline-block w-3 h-3 rounded-full bg-purple-500"></span>
+                <span className="inline-block w-3 h-3 rounded-full bg-blue-500"></span>
+                <span className="inline-block w-3 h-3 rounded-full bg-green-500"></span>
+                <span className="inline-block w-3 h-3 rounded-full bg-orange-500"></span>
+                <span className="inline-block w-3 h-3 rounded-full bg-red-500"></span>
+              </div>
             </div>
             
             <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"
+              className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6"
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
@@ -237,24 +268,74 @@ const About: React.FC = () => {
               {teamMembers.map((member) => (
                 <motion.div 
                   key={member.id}
-                  className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 transition-transform hover:shadow-md hover:-translate-y-1"
+                  className="glassmorphism transition-transform hover:-translate-y-2 duration-300"
                   variants={itemVariants}
                 >
-                  <div className="aspect-w-1 aspect-h-1">
-                    <img 
-                      src={member.image} 
-                      alt={member.name} 
-                      className="object-cover w-full h-full"
-                    />
+                  <div className="relative overflow-hidden">
+                    <div className="aspect-w-1 aspect-h-1">
+                      <img 
+                        src={member.image} 
+                        alt={member.name} 
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                    {/* Code pattern overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-purple-900/70 to-transparent opacity-50"></div>
+                    
+                    {/* Tech tags */}
+                    <div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1">
+                      {member.tech.map((tech, i) => (
+                        <span key={i} className="text-[10px] bg-black/50 text-white px-2 py-0.5 rounded-full font-mono">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                  <div className="p-5 text-center">
-                    <h3 className="font-bold text-lg mb-1">{member.name}</h3>
-                    <p className="text-fitcooker-orange text-sm mb-2">{member.role}</p>
+                  
+                  <div className="p-5 bg-gray-50 border-t border-purple-100">
+                    <div className="flex items-center mb-2">
+                      {member.icon}
+                      <h3 className="font-bold text-lg ml-2">{member.name}</h3>
+                    </div>
+                    <p className="text-purple-600 text-sm mb-2 font-mono">{member.role}</p>
                     <p className="text-gray-600 text-sm">{member.bio}</p>
+                    
+                    <div className="mt-3 pt-3 border-t border-gray-200 flex justify-end gap-2">
+                      <a href="#" className="text-gray-600 hover:text-purple-600 transition-colors">
+                        <Github size={16} />
+                      </a>
+                      <a href="#" className="text-gray-600 hover:text-purple-600 transition-colors">
+                        <Braces size={16} />
+                      </a>
+                    </div>
                   </div>
                 </motion.div>
               ))}
             </motion.div>
+            
+            {/* Code snippet decoration */}
+            <div className="flex justify-center mt-12">
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6 }}
+                className="bg-gray-900 p-4 rounded-lg shadow-lg max-w-lg"
+              >
+                <pre className="text-green-400 text-xs font-mono overflow-x-auto">
+                  <code>{`class DevelopmentTeam {
+  constructor() {
+    this.passion = "Creating amazing solutions";
+    this.goal = "Make healthy eating accessible";
+  }
+
+  buildFitCooker() {
+    return "The best recipe platform in Brazil";
+  }
+}`}</code>
+                </pre>
+              </motion.div>
+            </div>
           </div>
         </section>
         
@@ -271,12 +352,19 @@ const About: React.FC = () => {
                 Acreditamos que a informação de qualidade é o primeiro passo para transformar hábitos, 
                 e trabalhamos incansavelmente para levar esse conhecimento a cada vez mais pessoas.
               </p>
-              <Card className="bg-white/50 backdrop-blur-sm border-fitcooker-orange/20">
-                <CardContent className="p-6 italic text-gray-700">
-                  "Nosso sonho é ver o FitCooker se tornar o recurso número um para qualquer pessoa que deseje comer melhor, 
-                  com uma biblioteca de receitas que atenda a qualquer objetivo, restrição alimentar ou preferência de paladar."
-                </CardContent>
-              </Card>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className="bg-white/50 backdrop-blur-sm border-fitcooker-orange/20">
+                  <CardContent className="p-6 italic text-gray-700">
+                    "Nosso sonho é ver o FitCooker se tornar o recurso número um para qualquer pessoa que deseje comer melhor, 
+                    com uma biblioteca de receitas que atenda a qualquer objetivo, restrição alimentar ou preferência de paladar."
+                  </CardContent>
+                </Card>
+              </motion.div>
             </div>
           </div>
         </section>
@@ -285,21 +373,38 @@ const About: React.FC = () => {
         <section className="py-16 bg-fitcooker-black text-white">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-3xl md:text-4xl font-bold mb-6"
+              >
                 Faça Parte dessa Jornada
-              </h2>
-              <p className="text-gray-300 mb-8">
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="text-gray-300 mb-8"
+              >
                 Compartilhe suas receitas, dê feedback e nos ajude a construir uma comunidade cada vez mais forte.
                 Juntos, podemos transformar a maneira como as pessoas se alimentam.
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
+              </motion.p>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+                className="flex flex-col sm:flex-row justify-center gap-4"
+              >
                 <a href="/signup" className="btn btn-primary">
                   Criar Conta Grátis
                 </a>
                 <a href="/add-recipe" className="btn bg-white text-fitcooker-black hover:bg-gray-100">
                   Compartilhar Receita
                 </a>
-              </div>
+              </motion.div>
             </div>
           </div>
         </section>
