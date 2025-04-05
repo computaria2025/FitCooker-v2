@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import CategoryBadge from '@/components/ui/CategoryBadge';
@@ -26,42 +26,6 @@ interface Review {
   likes: number;
 }
 
-const mockReviews: Review[] = [
-  {
-    id: 1,
-    user: {
-      name: 'Maria Silva',
-      avatarUrl: 'https://randomuser.me/api/portraits/women/33.jpg'
-    },
-    rating: 5,
-    comment: 'Adorei essa receita! Ficou simplesmente deliciosa. Minha família toda aprovou!',
-    date: '2023-09-15',
-    likes: 12
-  },
-  {
-    id: 2,
-    user: {
-      name: 'João Pereira',
-      avatarUrl: 'https://randomuser.me/api/portraits/men/54.jpg'
-    },
-    rating: 4,
-    comment: 'Muito boa, mas diminuí um pouco o sal e ficou perfeita para o meu gosto.',
-    date: '2023-08-22',
-    likes: 5
-  },
-  {
-    id: 3,
-    user: {
-      name: 'Ana Costa',
-      avatarUrl: 'https://randomuser.me/api/portraits/women/72.jpg'
-    },
-    rating: 5,
-    comment: 'Fácil de fazer e muito nutritiva! Vou adicionar ao meu cardápio semanal.',
-    date: '2023-10-03',
-    likes: 8
-  }
-];
-
 // Mock similar recipes data
 const getSimilarRecipes = (currentRecipeId: number, category: string) => {
   return allRecipes
@@ -80,6 +44,7 @@ const RecipeDetail: React.FC = () => {
   const [similarRecipes, setSimilarRecipes] = useState<Recipe[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   useEffect(() => {
     // Scroll to top when component mounts
@@ -323,7 +288,7 @@ const RecipeDetail: React.FC = () => {
                 />
                 
                 {/* Actions */}
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-4 mb-6">
                   <Button 
                     className="btn btn-primary flex-1"
                     onClick={handleSaveRecipe}
@@ -336,9 +301,14 @@ const RecipeDetail: React.FC = () => {
                   </Button>
                 </div>
                 
-                {/* Add Rate Recipe Form */}
-                <div className="mt-6">
-                  <RateRecipeForm recipeId={id || ''} recipeName={recipe?.title || ''} />
+                {/* Add prominent Rate Recipe button */}
+                <div className="mt-4">
+                  <RateRecipeForm 
+                    recipeId={id || ''} 
+                    recipeName={recipe?.title || ''} 
+                    isLoggedIn={isLoggedIn}
+                    prominentDisplay={true}
+                  />
                 </div>
               </div>
             </div>
@@ -434,44 +404,69 @@ const RecipeDetail: React.FC = () => {
                   <div>
                     <h2 className="heading-md mb-4">Informação Nutricional</h2>
                     
-                    <Table>
-                      <TableHeader>
+                    <Table className="border-collapse border border-gray-200 rounded-lg overflow-hidden">
+                      <TableHeader className="bg-gradient-to-r from-fitcooker-orange/20 to-fitcooker-orange/10">
                         <TableRow>
-                          <TableHead className="w-[180px]">Nutriente</TableHead>
-                          <TableHead>Quantidade</TableHead>
-                          <TableHead>% do Valor Diário*</TableHead>
+                          <TableHead className="w-[180px] font-bold text-gray-700 py-3">Nutriente</TableHead>
+                          <TableHead className="font-bold text-gray-700 py-3">Quantidade</TableHead>
+                          <TableHead className="font-bold text-gray-700 py-3">% do Valor Diário*</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        <TableRow>
-                          <TableCell className="font-medium">Valor Energético</TableCell>
-                          <TableCell>{macros.calories} kcal</TableCell>
-                          <TableCell>{Math.round((macros.calories / 2000) * 100)}%</TableCell>
+                        <TableRow className="hover:bg-orange-50 transition-colors">
+                          <TableCell className="font-medium border-t border-gray-200 text-fitcooker-orange">Valor Energético</TableCell>
+                          <TableCell className="border-t border-gray-200">{macros.calories} kcal</TableCell>
+                          <TableCell className="border-t border-gray-200">
+                            <div className="flex items-center">
+                              <div className="h-2 bg-fitcooker-orange rounded-full w-16 mr-2" style={{ width: `${Math.min(100, Math.round((macros.calories / 2000) * 100))}px` }}></div>
+                              {Math.round((macros.calories / 2000) * 100)}%
+                            </div>
+                          </TableCell>
                         </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">Proteínas</TableCell>
-                          <TableCell>{macros.protein}g</TableCell>
-                          <TableCell>{Math.round((macros.protein / 50) * 100)}%</TableCell>
+                        <TableRow className="hover:bg-red-50 transition-colors">
+                          <TableCell className="font-medium border-t border-gray-200 text-red-500">Proteínas</TableCell>
+                          <TableCell className="border-t border-gray-200">{macros.protein}g</TableCell>
+                          <TableCell className="border-t border-gray-200">
+                            <div className="flex items-center">
+                              <div className="h-2 bg-red-500 rounded-full w-16 mr-2" style={{ width: `${Math.min(100, Math.round((macros.protein / 50) * 100))}px` }}></div>
+                              {Math.round((macros.protein / 50) * 100)}%
+                            </div>
+                          </TableCell>
                         </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">Carboidratos</TableCell>
-                          <TableCell>{macros.carbs}g</TableCell>
-                          <TableCell>{Math.round((macros.carbs / 300) * 100)}%</TableCell>
+                        <TableRow className="hover:bg-yellow-50 transition-colors">
+                          <TableCell className="font-medium border-t border-gray-200 text-yellow-500">Carboidratos</TableCell>
+                          <TableCell className="border-t border-gray-200">{macros.carbs}g</TableCell>
+                          <TableCell className="border-t border-gray-200">
+                            <div className="flex items-center">
+                              <div className="h-2 bg-yellow-500 rounded-full w-16 mr-2" style={{ width: `${Math.min(100, Math.round((macros.carbs / 300) * 100))}px` }}></div>
+                              {Math.round((macros.carbs / 300) * 100)}%
+                            </div>
+                          </TableCell>
                         </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">Gorduras Totais</TableCell>
-                          <TableCell>{macros.fat}g</TableCell>
-                          <TableCell>{Math.round((macros.fat / 65) * 100)}%</TableCell>
+                        <TableRow className="hover:bg-blue-50 transition-colors">
+                          <TableCell className="font-medium border-t border-gray-200 text-blue-500">Gorduras Totais</TableCell>
+                          <TableCell className="border-t border-gray-200">{macros.fat}g</TableCell>
+                          <TableCell className="border-t border-gray-200">
+                            <div className="flex items-center">
+                              <div className="h-2 bg-blue-500 rounded-full w-16 mr-2" style={{ width: `${Math.min(100, Math.round((macros.fat / 65) * 100))}px` }}></div>
+                              {Math.round((macros.fat / 65) * 100)}%
+                            </div>
+                          </TableCell>
                         </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">Fibra Alimentar</TableCell>
-                          <TableCell>~{Math.round(macros.carbs * 0.1)}g</TableCell>
-                          <TableCell>{Math.round(((macros.carbs * 0.1) / 25) * 100)}%</TableCell>
+                        <TableRow className="hover:bg-green-50 transition-colors">
+                          <TableCell className="font-medium border-t border-gray-200 text-green-500">Fibra Alimentar</TableCell>
+                          <TableCell className="border-t border-gray-200">~{Math.round(macros.carbs * 0.1)}g</TableCell>
+                          <TableCell className="border-t border-gray-200">
+                            <div className="flex items-center">
+                              <div className="h-2 bg-green-500 rounded-full w-16 mr-2" style={{ width: `${Math.min(100, Math.round(((macros.carbs * 0.1) / 25) * 100))}px` }}></div>
+                              {Math.round(((macros.carbs * 0.1) / 25) * 100)}%
+                            </div>
+                          </TableCell>
                         </TableRow>
                       </TableBody>
                     </Table>
                     
-                    <div className="mt-6 bg-yellow-50 p-4 rounded-lg text-sm">
+                    <div className="mt-6 bg-yellow-50 p-4 rounded-lg text-sm border border-yellow-200">
                       <p className="text-yellow-700">
                         * Percentual de valores diários fornecidos pela dieta de 2.000 kcal.
                         Os valores podem variar dependendo das suas necessidades energéticas.
@@ -482,9 +477,15 @@ const RecipeDetail: React.FC = () => {
                 
                 {activeTab === 'reviews' && (
                   <div>
-                    <div className="flex justify-between items-center mb-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                       <h2 className="heading-md">Avaliações e Comentários</h2>
-                      <RateRecipeForm recipeId={id || ''} recipeName={recipe?.title || ''} />
+                      
+                      <RateRecipeForm 
+                        recipeId={id || ''} 
+                        recipeName={recipe?.title || ''} 
+                        isLoggedIn={isLoggedIn}
+                        prominentDisplay={true}
+                      />
                     </div>
                     
                     <div className="space-y-6">

@@ -27,17 +27,17 @@ const Login: React.FC = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-grow flex items-center justify-center py-20">
+      <main className="flex-grow flex items-center justify-center py-24">
         <div className="container mx-auto px-4 md:px-6">
           <div className="max-w-md mx-auto">
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-center mb-2">
-                <ChefHat size={32} className="text-fitcooker-orange mr-2" />
-                <h1 className="text-3xl font-bold">
+            <div className="text-center mb-12">
+              <div className="flex items-center justify-center mb-4">
+                <ChefHat size={40} className="text-fitcooker-orange mr-2" />
+                <h1 className="text-4xl font-bold">
                   Fit<span className="text-fitcooker-orange">Cooker</span>
                 </h1>
               </div>
-              <h2 className="heading-md mb-2">Bem-vindo de volta!</h2>
+              <h2 className="heading-md mb-3">Bem-vindo de volta!</h2>
               <p className="text-gray-600">
                 Entre para acessar suas receitas favoritas e mais
               </p>
