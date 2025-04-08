@@ -4,7 +4,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Code, PenTool, Database, FileSearch, Figma } from 'lucide-react';
+import { Code, PenTool, Database, FileSearch, Figma, ChefHat, Heart } from 'lucide-react';
 
 // Team member data - Reordered with Ígor in the middle (3rd position)
 const teamMembers = [
