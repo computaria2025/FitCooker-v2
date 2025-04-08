@@ -74,13 +74,14 @@ const About: React.FC = () => {
       <Navbar />
       
       <main className="flex-grow">
-        {/* Hero Section - Updated with more subtle orange background and black logo */}
+        {/* Hero Section - Updated with gradient text and animated underline */}
         <section className="relative bg-gradient-to-r from-fitcooker-orange/30 to-fitcooker-yellow/30 py-24 overflow-hidden">
           <div className="absolute inset-0 bg-pattern-chef opacity-5"></div>
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-black text-4xl md:text-5xl lg:text-6xl font-bold mb-6 drop-shadow-sm animate-fade-in">
-                Sobre o <span className="text-black">FitCooker</span>
+              <h1 className="text-black text-4xl md:text-5xl lg:text-6xl font-bold mb-6 drop-shadow-sm animate-fade-in relative inline-block">
+                Sobre o <span className="bg-clip-text text-transparent bg-gradient-to-r from-fitcooker-orange to-fitcooker-orange/80">FitCooker</span>
+                <span className="absolute -bottom-1 left-0 w-full h-1 bg-gradient-to-r from-fitcooker-orange to-fitcooker-yellow transform scale-x-0 transition-transform duration-700 origin-left animate-on-scroll active:scale-x-100"></span>
               </h1>
               <p className="text-gray-800 text-lg md:text-xl mb-8 animate-fade-in" style={{animationDelay: "0.2s"}}>
                 Criando soluções incríveis para uma alimentação saudável e acessível para todos.
@@ -103,13 +104,13 @@ const About: React.FC = () => {
           <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent"></div>
         </section>
         
-        {/* Mission Section - Animation added to heading */}
+        {/* Mission Section - Improved heading with animated underline */}
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-6xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                 <div className="animate-on-scroll">
-                  <h2 className="relative inline-block heading-lg mb-6 text-gray-900 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-gradient-to-r after:from-fitcooker-orange/50 after:to-fitcooker-yellow/50">
+                  <h2 className="relative inline-block text-3xl md:text-4xl font-bold mb-6 text-gray-900 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-gradient-to-r after:from-fitcooker-orange after:to-fitcooker-yellow after:origin-left after:transform after:scale-x-0 after:transition-all after:duration-500">
                     Nossa Missão
                   </h2>
                   <p className="text-lg text-gray-700 mb-8">
@@ -164,12 +165,13 @@ const About: React.FC = () => {
           </div>
         </section>
         
-        {/* Team Section - Updated with animated title */}
+        {/* Team Section - Enhanced heading with animation */}
         <section id="team" className="py-20 bg-gray-50">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center mb-16 animate-on-scroll">
-              <h2 className="heading-lg mb-4 inline-block relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-gradient-to-r after:from-fitcooker-orange/50 after:to-fitcooker-yellow/50">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 inline-block relative bg-clip-text text-transparent bg-gradient-to-r from-black to-gray-700 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-gradient-to-r after:from-fitcooker-orange after:to-fitcooker-yellow after:origin-center">
                 Nossa Equipe
+                <span className="block w-24 h-1 bg-fitcooker-orange mx-auto mt-2 rounded"></span>
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Conheça os profissionais dedicados que transformam a visão do FitCooker em realidade.
