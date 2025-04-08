@@ -81,7 +81,7 @@ const About: React.FC = () => {
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-black text-4xl md:text-5xl lg:text-6xl font-bold mb-6 drop-shadow-sm animate-fade-in relative inline-block">
                 Sobre o <span className="bg-clip-text text-transparent bg-gradient-to-r from-fitcooker-orange to-fitcooker-orange/80">FitCooker</span>
-                <span className="absolute -bottom-1 left-0 w-full h-1 bg-gradient-to-r from-fitcooker-orange to-fitcooker-yellow transform scale-x-0 transition-transform duration-700 origin-left animate-on-scroll active:scale-x-100"></span>
+                
               </h1>
               <p className="text-gray-800 text-lg md:text-xl mb-8 animate-fade-in" style={{animationDelay: "0.2s"}}>
                 Criando soluções incríveis para uma alimentação saudável e acessível para todos.
@@ -111,7 +111,8 @@ const About: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                 <div className="animate-on-scroll">
                   <h2 className="relative inline-block text-3xl md:text-4xl font-bold mb-6 text-gray-900 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-gradient-to-r after:from-fitcooker-orange after:to-fitcooker-yellow after:origin-left after:transform after:scale-x-0 after:transition-all after:duration-500">
-                    Nossa Missão
+                    Nossa Missão <br/>
+                    <span className="absolute -bottom-1 left-0 w-full h-1 bg-gradient-to-r from-fitcooker-orange to-fitcooker-yellow transform scale-x-0 transition-transform duration-700 origin-left animate-on-scroll active:scale-x-100"></span>
                   </h2>
                   <p className="text-lg text-gray-700 mb-8">
                     Fazendo comida saudável tornar-se acessível para todos, independentemente do nível de 
