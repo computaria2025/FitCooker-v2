@@ -74,25 +74,25 @@ const About: React.FC = () => {
       <Navbar />
       
       <main className="flex-grow">
-        {/* Hero Section - Updated with better text contrast */}
-        <section className="relative bg-gradient-to-r from-fitcooker-orange to-fitcooker-yellow py-24 overflow-hidden">
-          <div className="absolute inset-0 bg-pattern-chef opacity-10"></div>
+        {/* Hero Section - Updated with more subtle orange background and black logo */}
+        <section className="relative bg-gradient-to-r from-fitcooker-orange/30 to-fitcooker-yellow/30 py-24 overflow-hidden">
+          <div className="absolute inset-0 bg-pattern-chef opacity-5"></div>
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-bold mb-6 drop-shadow-md">
-                Sobre o FitCooker
+              <h1 className="text-black text-4xl md:text-5xl lg:text-6xl font-bold mb-6 drop-shadow-sm animate-fade-in">
+                Sobre o <span className="text-black">FitCooker</span>
               </h1>
-              <p className="text-white/90 text-lg md:text-xl mb-8">
+              <p className="text-gray-800 text-lg md:text-xl mb-8 animate-fade-in" style={{animationDelay: "0.2s"}}>
                 Criando soluções incríveis para uma alimentação saudável e acessível para todos.
               </p>
-              <div className="space-x-4">
+              <div className="space-x-4 animate-fade-in" style={{animationDelay: "0.4s"}}>
                 <Link to="/recipes">
-                  <Button variant="default" size="lg" className="bg-white text-fitcooker-orange hover:bg-white/90 text-black">
+                  <Button variant="default" size="lg" className="bg-black text-white hover:bg-fitcooker-orange hover:text-black transition-all duration-300">
                     Explorar Receitas
                   </Button>
                 </Link>
                 <a href="#team">
-                  <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
+                  <Button variant="outline" size="lg" className="border-black text-black hover:bg-black hover:text-white transition-all duration-300">
                     Conhecer Equipe
                   </Button>
                 </a>
@@ -103,13 +103,15 @@ const About: React.FC = () => {
           <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent"></div>
         </section>
         
-        {/* Mission Section */}
+        {/* Mission Section - Animation added to heading */}
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-6xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                 <div className="animate-on-scroll">
-                  <h2 className="heading-lg mb-6 text-gray-900">Nossa Missão</h2>
+                  <h2 className="relative inline-block heading-lg mb-6 text-gray-900 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-gradient-to-r after:from-fitcooker-orange/50 after:to-fitcooker-yellow/50">
+                    Nossa Missão
+                  </h2>
                   <p className="text-lg text-gray-700 mb-8">
                     Fazendo comida saudável tornar-se acessível para todos, independentemente do nível de 
                     experiência na cozinha ou conhecimento nutricional.
@@ -162,11 +164,13 @@ const About: React.FC = () => {
           </div>
         </section>
         
-        {/* Team Section - Updated to use a code-inspired design with all cards the same style */}
+        {/* Team Section - Updated with animated title */}
         <section id="team" className="py-20 bg-gray-50">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center mb-16 animate-on-scroll">
-              <h2 className="heading-lg mb-4">Nossa Equipe</h2>
+              <h2 className="heading-lg mb-4 inline-block relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-gradient-to-r after:from-fitcooker-orange/50 after:to-fitcooker-yellow/50">
+                Nossa Equipe
+              </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Conheça os profissionais dedicados que transformam a visão do FitCooker em realidade.
               </p>

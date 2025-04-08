@@ -68,9 +68,9 @@ const Hero: React.FC = () => {
               Receitas de alto desempenho para quem busca resultados extraordinários
             </p>
             <div className="flex justify-center gap-4 mt-4">
-              <span className="bg-fitcooker-orange px-3 py-1 rounded-full text-white text-sm font-medium">Alta Proteína</span>
-              <span className="bg-fitcooker-yellow px-3 py-1 rounded-full text-black text-sm font-medium">Baixo Carboidrato</span>
-              <span className="bg-white px-3 py-1 rounded-full text-fitcooker-black text-sm font-medium">Zero Açúcar</span>
+              <span className="bg-fitcooker-orange px-3 py-1 rounded-full text-white text-sm font-medium inline-flex items-center justify-center h-8">Alta Proteína</span>
+              <span className="bg-fitcooker-yellow px-3 py-1 rounded-full text-black text-sm font-medium inline-flex items-center justify-center h-8">Baixo Carboidrato</span>
+              <span className="bg-white px-3 py-1 rounded-full text-fitcooker-black text-sm font-medium inline-flex items-center justify-center h-8">Zero Açúcar</span>
             </div>
           </motion.div>
           
@@ -153,12 +153,13 @@ const Hero: React.FC = () => {
         </div>
       </div>
       
-      {/* Scroll Down Indicator - Now centered and smaller */}
+      {/* Scroll Down Indicator - With much slower animation */}
       <div 
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce transition-opacity duration-300 mx-auto"
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-opacity duration-300 mx-auto"
         style={{ 
           opacity: scrollOpacity,
-          visibility: scrollOpacity === 0 ? 'hidden' : 'visible'
+          visibility: scrollOpacity === 0 ? 'hidden' : 'visible',
+          animation: "float 5s ease-in-out infinite" // Much slower animation (was 'animate-bounce')
         }}
       >
         <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center">
