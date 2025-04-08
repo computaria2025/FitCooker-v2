@@ -3,7 +3,7 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ImagePlus, Video, Check, X } from 'lucide-react';
+import { ImagePlus, Video, Check, X, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MediaItem {

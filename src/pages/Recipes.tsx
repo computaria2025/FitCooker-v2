@@ -23,13 +23,13 @@ const Recipes: React.FC = () => {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
   
-  // Parse URL params for category filter
+  // Parse URL params for category filter and search
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const categoryParam = params.get('category');
     
+    // Handle category parameter
+    const categoryParam = params.get('category');
     if (categoryParam) {
-      // Convert URL param to RecipeCategory enum value
       const categoryKey = Object.keys(RecipeCategory).find(
         (key) => key.toLowerCase() === categoryParam.toLowerCase()
       );
@@ -38,6 +38,12 @@ const Recipes: React.FC = () => {
         const category = RecipeCategory[categoryKey as keyof typeof RecipeCategory];
         setActiveFilters([category]);
       }
+    }
+    
+    // Handle search parameter
+    const searchParam = params.get('search');
+    if (searchParam) {
+      setSearchTerm(searchParam);
     }
     
     // Scroll to top when component mounts
@@ -85,7 +91,10 @@ const Recipes: React.FC = () => {
     // Filter by search term
     const matchesSearch = searchTerm === '' || 
       recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      recipe.description.toLowerCase().includes(searchTerm.toLowerCase());
+      recipe.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      recipe.categories.some(category => 
+        category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     
     return matchesCategory && matchesSearch;
   });

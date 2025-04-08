@@ -3,10 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChefHat, Search, User, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import SearchDialog from './SearchDialog';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const location = useLocation();
   
   useEffect(() => {
@@ -25,6 +27,10 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location]);
+  
+  const handleOpenSearch = () => {
+    setIsSearchOpen(true);
+  };
   
   return (
     <header 
@@ -72,6 +78,7 @@ const Navbar: React.FC = () => {
             <button 
               className="p-2 rounded-full hover:bg-gray-100 transition-colors"
               aria-label="Buscar receitas"
+              onClick={handleOpenSearch}
             >
               <Search size={20} />
             </button>
@@ -93,13 +100,23 @@ const Navbar: React.FC = () => {
           </div>
           
           {/* Mobile Menu Toggle */}
-          <button 
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu"}
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="flex md:hidden items-center space-x-2">
+            <button 
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Buscar receitas"
+              onClick={handleOpenSearch}
+            >
+              <Search size={20} />
+            </button>
+            
+            <button 
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu"}
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </nav>
       </div>
       
@@ -136,6 +153,12 @@ const Navbar: React.FC = () => {
           </div>
         </nav>
       </div>
+      
+      {/* Search Dialog */}
+      <SearchDialog 
+        open={isSearchOpen} 
+        onOpenChange={setIsSearchOpen} 
+      />
     </header>
   );
 };
