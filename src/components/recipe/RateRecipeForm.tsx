@@ -50,7 +50,7 @@ const RateRecipeForm: React.FC<RateRecipeFormProps> = ({
     // Redirect to login page after a short delay
     setTimeout(() => {
       navigate('/login', { state: { returnUrl: `/recipe/${recipeId}` } });
-    }, 1500);
+    }, 500);
   };
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -95,14 +95,17 @@ const RateRecipeForm: React.FC<RateRecipeFormProps> = ({
         {prominentDisplay ? (
           <Button
             variant="default"
-            className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white flex items-center gap-2 w-full md:w-auto text-center justify-center shadow-md hover:shadow-lg transform transition-all duration-200 hover:-translate-y-1"
+            className="bg-black hover:bg-fitcooker-orange text-white flex items-center gap-2 w-full md:w-auto text-center justify-center shadow-md hover:shadow-lg transform transition-all duration-300 hover:-translate-y-1"
             size="lg"
           >
             <Star className="w-5 h-5 fill-white" />
             Avalie Esta Receita
           </Button>
         ) : (
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2 bg-black text-white hover:bg-fitcooker-orange hover:text-white transition-all duration-300"
+          >
             <Star className="w-4 h-4" />
             Avaliar Receita
           </Button>
@@ -123,7 +126,10 @@ const RateRecipeForm: React.FC<RateRecipeFormProps> = ({
               <h4 className="font-semibold">Login Necessário</h4>
               <p className="text-sm mt-1">Você precisa estar logado para avaliar receitas.</p>
               <div className="mt-4 flex gap-3">
-                <Button variant="default" onClick={handleLoginRedirect}>
+                <Button 
+                  variant="default" 
+                  onClick={handleLoginRedirect}
+                >
                   Fazer Login
                 </Button>
                 <DialogClose asChild>

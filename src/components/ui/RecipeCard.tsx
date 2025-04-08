@@ -11,9 +11,10 @@ interface RecipeCardProps {
   recipe: Recipe;
   className?: string;
   featured?: boolean;
+  similar?: boolean;
 }
 
-const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, className, featured = false }) => {
+const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, className, featured = false, similar = false }) => {
   const { id, title, description, imageUrl, preparationTime, difficulty, macros, author, categories } = recipe;
   
   return (
@@ -21,6 +22,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, className, featured = f
       className={cn(
         'recipe-card group overflow-hidden h-full flex flex-col',
         featured ? 'md:flex-row' : '',
+        similar ? 'transform transition-all duration-500 hover:scale-105 hover:shadow-2xl' : '',
         className
       )}
     >
@@ -32,10 +34,13 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, className, featured = f
           <img 
             src={imageUrl} 
             alt={title}
-            className="recipe-image w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            className={cn(
+              "recipe-image w-full h-full object-cover",
+              similar ? "transition-transform duration-700 group-hover:scale-110" : ""
+            )}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-            <span className="text-white font-medium">Ver receita</span>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-4">
+            <span className="text-white font-medium transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">Ver receita</span>
           </div>
         </Link>
         
@@ -53,7 +58,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, className, featured = f
       
       <div className={cn(
         'p-5 flex flex-col flex-grow',
-        featured ? 'md:w-1/2' : ''
+        featured ? 'md:w-1/2' : '',
+        similar ? 'transform transition-all duration-500 group-hover:bg-gray-50' : ''
       )}>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-1 text-sm text-gray-500">
@@ -70,7 +76,10 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, className, featured = f
         </div>
         
         <Link to={`/recipe/${id}`} className="group-hover:text-fitcooker-orange transition-colors">
-          <h3 className="heading-sm mb-2 line-clamp-2">{title}</h3>
+          <h3 className={cn(
+            "heading-sm mb-2 line-clamp-2",
+            similar ? "transform transition-all duration-500 group-hover:translate-x-1" : ""
+          )}>{title}</h3>
         </Link>
         
         {featured && (

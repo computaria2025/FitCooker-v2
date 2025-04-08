@@ -56,6 +56,15 @@ interface RecipeStep {
   description: string;
 }
 
+interface MediaItem {
+  id: string;
+  type: 'image' | 'video';
+  file?: File;
+  preview?: string;
+  url?: string;
+  isMain: boolean;
+}
+
 const AddRecipe: React.FC = () => {
   const { toast } = useToast();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
@@ -72,8 +81,7 @@ const AddRecipe: React.FC = () => {
   const [newCategoryName, setNewCategoryName] = useState('');
   
   // Images and media
-  const [mainImage, setMainImage] = useState<File | null>(null);
-  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [videoUrl, setVideoUrl] = useState('');
   
   // Ingredients management
@@ -124,6 +132,75 @@ const AddRecipe: React.FC = () => {
   const filteredIngredients = ingredientsDatabase.filter(
     ing => ing.name.toLowerCase().includes(ingredientSearchTerm.toLowerCase())
   );
+  
+  // Handler for multiple image uploads
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      
+      const newMediaItems: MediaItem[] = files.map((file, index) => {
+        // Create preview for each file
+        const reader = new FileReader();
+        let preview = '';
+        
+        reader.onloadend = () => {
+          preview = reader.result as string;
+        };
+        reader.readAsDataURL(file);
+        
+        return {
+          id: Date.now().toString() + index,
+          type: 'image',
+          file: file,
+          preview: preview,
+          isMain: mediaItems.length === 0 && index === 0 // First image is main by default
+        };
+      });
+      
+      setMediaItems(prev => [...prev, ...newMediaItems]);
+    }
+  };
+  
+  // Handler for adding video URL
+  const handleAddVideoUrl = () => {
+    if (videoUrl.trim()) {
+      const newMediaItem: MediaItem = {
+        id: Date.now().toString(),
+        type: 'video',
+        url: videoUrl,
+        isMain: false
+      };
+      
+      setMediaItems(prev => [...prev, newMediaItem]);
+      setVideoUrl('');
+    }
+  };
+  
+  // Handler for removing media item
+  const handleRemoveMediaItem = (id: string) => {
+    const updatedMediaItems = mediaItems.filter(item => item.id !== id);
+    
+    // If removing the main image, set first available image as main
+    if (mediaItems.find(item => item.id === id)?.isMain && updatedMediaItems.length > 0) {
+      const itemsWithMain = updatedMediaItems.map((item, index) => ({
+        ...item,
+        isMain: index === 0
+      }));
+      setMediaItems(itemsWithMain);
+    } else {
+      setMediaItems(updatedMediaItems);
+    }
+  };
+  
+  // Handler for setting an image as main
+  const handleSetMainImage = (id: string) => {
+    const updatedMediaItems = mediaItems.map(item => ({
+      ...item,
+      isMain: item.id === id
+    }));
+    
+    setMediaItems(updatedMediaItems);
+  };
   
   // Handler for selecting an ingredient from search
   const handleSelectIngredient = (index: number, ingredient: typeof ingredientsDatabase[0]) => {
@@ -230,21 +307,6 @@ const AddRecipe: React.FC = () => {
     }
   };
   
-  // Handle image upload
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setMainImage(file);
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setMainImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-  
   // Update ingredient quantity
   const updateIngredientQuantity = (id: string, quantity: number) => {
     setIngredients(
@@ -269,6 +331,7 @@ const AddRecipe: React.FC = () => {
       title.trim() !== '' &&
       selectedCategories.length > 0 &&
       preparationTime !== '' &&
+      mediaItems.length > 0 &&
       ingredients.length > 0 && 
       !ingredients.some(ing => !ing.name || ing.quantity <= 0) &&
       steps.length > 0 && 
@@ -314,11 +377,16 @@ const AddRecipe: React.FC = () => {
     setServings('');
     setDifficulty('Médio');
     setSelectedCategories([]);
-    setMainImage(null);
-    setMainImagePreview(null);
+    setMediaItems([]);
     setVideoUrl('');
     setIngredients([{ id: '1', name: '', quantity: 0, unit: 'g', protein: 0, carbs: 0, fat: 0, calories: 0 }]);
     setSteps([{ id: '1', order: 1, description: '' }]);
+  };
+  
+  // Get main image preview
+  const getMainImagePreview = () => {
+    const mainItem = mediaItems.find(item => item.isMain);
+    return mainItem?.preview || null;
   };
   
   return (
@@ -448,58 +516,119 @@ const AddRecipe: React.FC = () => {
                 <div className="bg-white rounded-xl shadow-sm p-6">
                   <h2 className="text-xl font-bold mb-4">Mídia</h2>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-6">
+                    {/* Media gallery */}
                     <div>
-                      <Label className="block mb-2">Imagem Principal</Label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                        {mainImagePreview ? (
-                          <div className="relative">
-                            <img 
-                              src={mainImagePreview} 
-                              alt="Preview" 
-                              className="mx-auto h-48 object-cover rounded-lg"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setMainImage(null);
-                                setMainImagePreview(null);
-                              }}
-                              className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
-                            >
-                              <X size={16} />
-                            </button>
-                          </div>
-                        ) : (
-                          <label className="cursor-pointer block">
-                            <div className="flex flex-col items-center justify-center py-6">
-                              <ImagePlus className="w-12 h-12 text-gray-400 mb-2" />
-                              <span className="text-sm text-gray-500">Clique para fazer upload</span>
-                              <span className="text-xs text-gray-400 mt-1">JPG, PNG (Max 5MB)</span>
+                      <div className="flex justify-between items-center mb-2">
+                        <Label className="block">Imagens da Receita</Label>
+                        <p className="text-xs text-gray-500">* Marque uma das imagens como principal</p>
+                      </div>
+                      
+                      {mediaItems.length > 0 && (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-4">
+                          {mediaItems.filter(item => item.type === 'image').map((item) => (
+                            <div key={item.id} className="relative group">
+                              <div className={cn(
+                                "h-24 w-full rounded-lg overflow-hidden border-2",
+                                item.isMain ? "border-fitcooker-orange" : "border-transparent"
+                              )}>
+                                <img 
+                                  src={item.preview} 
+                                  alt="Imagem da receita" 
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="absolute top-2 right-2 flex space-x-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveMediaItem(item.id)}
+                                  className="bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
+                                  title="Remover imagem"
+                                >
+                                  <X size={14} />
+                                </button>
+                                {!item.isMain && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSetMainImage(item.id)}
+                                    className="bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
+                                    title="Definir como principal"
+                                  >
+                                    <Check size={14} />
+                                  </button>
+                                )}
+                              </div>
+                              {item.isMain && (
+                                <div className="absolute bottom-0 left-0 w-full bg-fitcooker-orange text-white text-xs py-1 text-center">
+                                  Principal
+                                </div>
+                              )}
                             </div>
-                            <input 
-                              type="file" 
-                              className="hidden"
-                              accept="image/*"
-                              onChange={handleImageChange}
-                            />
-                          </label>
-                        )}
+                          ))}
+                        </div>
+                      )}
+                      
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                        <label className="cursor-pointer block">
+                          <div className="flex flex-col items-center justify-center py-6">
+                            <ImagePlus className="w-12 h-12 text-gray-400 mb-2" />
+                            <span className="text-sm text-gray-500">Clique para fazer upload</span>
+                            <span className="text-xs text-gray-400 mt-1">JPG, PNG (Max 5MB por imagem)</span>
+                          </div>
+                          <input 
+                            type="file" 
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            multiple
+                          />
+                        </label>
                       </div>
                     </div>
                     
+                    {/* Video section */}
                     <div>
-                      <Label htmlFor="videoUrl" className="block mb-2">URL do Vídeo (YouTube, Vimeo)</Label>
+                      <Label className="block mb-2">Vídeos (opcional)</Label>
+                      
+                      {mediaItems.filter(item => item.type === 'video').length > 0 && (
+                        <div className="space-y-2 mb-4">
+                          {mediaItems.filter(item => item.type === 'video').map((item) => (
+                            <div key={item.id} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
+                              <div className="flex items-center">
+                                <Video className="text-gray-400 mr-2" size={20} />
+                                <span className="text-sm truncate max-w-xs">{item.url}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveMediaItem(item.id)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X size={18} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
                       <div className="flex items-center space-x-2">
-                        <Video className="text-gray-400" size={20} />
-                        <Input
-                          id="videoUrl"
-                          value={videoUrl}
-                          onChange={(e) => setVideoUrl(e.target.value)}
-                          placeholder="Ex: https://youtube.com/watch?v=..."
-                        />
+                        <div className="flex-grow">
+                          <Input
+                            value={videoUrl}
+                            onChange={(e) => setVideoUrl(e.target.value)}
+                            placeholder="Ex: https://youtube.com/watch?v=..."
+                          />
+                        </div>
+                        <Button 
+                          type="button" 
+                          variant="outline"
+                          onClick={handleAddVideoUrl}
+                          disabled={!videoUrl.trim()}
+                        >
+                          <Plus size={16} className="mr-2" />
+                          Adicionar
+                        </Button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">Opcional: Adicione um vídeo para demonstrar o preparo</p>
+                      <p className="text-xs text-gray-500 mt-1">YouTube, Vimeo e outros links de vídeo</p>
                     </div>
                   </div>
                 </div>
@@ -678,8 +807,8 @@ const AddRecipe: React.FC = () => {
                 </h2>
                 
                 <div className="border border-gray-200 rounded-lg overflow-hidden">
-                  {mainImagePreview ? (
-                    <img src={mainImagePreview} alt="Preview" className="w-full h-48 object-cover" />
+                  {getMainImagePreview() ? (
+                    <img src={getMainImagePreview() || ''} alt="Preview" className="w-full h-48 object-cover" />
                   ) : (
                     <div className="bg-gray-100 h-40 flex items-center justify-center">
                       <p className="text-gray-500 text-center">Imagem da receita</p>
@@ -748,6 +877,12 @@ const AddRecipe: React.FC = () => {
                     <li className="flex items-start">
                       <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${preparationTime ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
                       <span className={preparationTime ? 'text-gray-800' : 'text-gray-500'}>Tempo de preparo</span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${mediaItems.length > 0 ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
+                      <span className={mediaItems.length > 0 ? 'text-gray-800' : 'text-gray-500'}>
+                        Pelo menos uma imagem adicionada
+                      </span>
                     </li>
                     <li className="flex items-start">
                       <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${!ingredients.some(ing => !ing.name || ing.quantity <= 0) && ingredients.length > 0 ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
