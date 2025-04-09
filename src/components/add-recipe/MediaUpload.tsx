@@ -36,14 +36,14 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
 }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
-      <h2 className="text-xl font-bold mb-4">Mídia</h2>
+      <h2 className="text-xl font-bold mb-4">Mídia (Opcional)</h2>
       
       <div className="space-y-6">
         {/* Media gallery */}
         <div>
           <div className="flex justify-between items-center mb-2">
             <Label className="block">Imagens da Receita</Label>
-            <p className="text-xs text-gray-500">* Marque uma das imagens como principal</p>
+            <p className="text-xs text-gray-500">* Marque uma das imagens como principal para preview</p>
           </div>
           
           {mediaItems.length > 0 && (

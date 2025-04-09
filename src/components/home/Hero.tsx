@@ -14,10 +14,10 @@ const Hero: React.FC = () => {
       const heroElement = heroRef.current;
       
       if (heroElement) {
-        // Parallax effect for background
-        heroElement.style.backgroundPositionY = `${scrollPosition * 0.5}px`;
+        // Remove parallax effect for background - fixing issue #3
+        // heroElement.style.backgroundPositionY = `${scrollPosition * 0.5}px`;
         
-        // Opacity effect for content
+        // Only apply opacity effect for content
         const contentOpacity = Math.max(1 - scrollPosition / 700, 0);
         const content = heroElement.querySelector('.hero-content') as HTMLElement;
         if (content) {
@@ -38,7 +38,7 @@ const Hero: React.FC = () => {
   return (
     <div 
       ref={heroRef}
-      className="min-h-screen relative flex items-center justify-center bg-cover bg-center"
+      className="min-h-screen relative flex items-center justify-center bg-cover bg-center bg-fixed"
       style={{
         backgroundImage: 'url(public/hero-back-2.jpg)',
       }}

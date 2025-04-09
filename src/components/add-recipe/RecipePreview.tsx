@@ -45,10 +45,14 @@ const RecipePreview: React.FC<RecipePreviewProps> = ({
       
       <div className="border border-gray-200 rounded-lg overflow-hidden">
         {getMainImagePreview() ? (
-          <img src={getMainImagePreview() || ''} alt="Preview" className="w-full h-48 object-cover" />
+          <img 
+            src={getMainImagePreview() || ''} 
+            alt="Preview" 
+            className="w-full h-48 object-cover"
+          />
         ) : (
           <div className="bg-gray-100 h-40 flex items-center justify-center">
-            <p className="text-gray-500 text-center">Imagem da receita</p>
+            <p className="text-gray-500 text-center">Adicione uma imagem principal</p>
           </div>
         )}
         
@@ -118,7 +122,7 @@ const RecipePreview: React.FC<RecipePreviewProps> = ({
           <li className="flex items-start">
             <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${getMainImagePreview() ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
             <span className={getMainImagePreview() ? 'text-gray-800' : 'text-gray-500'}>
-              Pelo menos uma imagem adicionada
+              Pelo menos uma imagem adicionada (opcional)
             </span>
           </li>
           <li className="flex items-start">

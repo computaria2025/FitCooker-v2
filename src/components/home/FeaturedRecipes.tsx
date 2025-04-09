@@ -7,37 +7,6 @@ import { ChefHat } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const FeaturedRecipes: React.FC = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Add animation classes when section comes into view
-            const cards = entry.target.querySelectorAll('.animate-on-scroll');
-            cards.forEach((card, index) => {
-              setTimeout(() => {
-                card.classList.add('active');
-              }, index * 150); // Staggered animation
-            });
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-    
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-    
-    return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
-    };
-  }, []);
-  
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -50,25 +19,39 @@ const FeaturedRecipes: React.FC = () => {
   };
   
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
+    hidden: { y: 50, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
       transition: {
         type: "spring",
-        stiffness: 50
+        stiffness: 50,
+        damping: 20,
+        mass: 1
+      }
+    }
+  };
+  
+  const titleVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.7,
+        ease: "easeOut"
       }
     }
   };
   
   return (
-    <section ref={sectionRef} className="section-padding bg-white">
+    <section className="section-padding bg-white">
       <div className="container mx-auto px-4 md:px-6">
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          variants={titleVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
           className="flex flex-col md:flex-row md:items-end justify-between mb-12"
         >
           <div>
@@ -92,7 +75,7 @@ const FeaturedRecipes: React.FC = () => {
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: true, amount: 0.2, margin: "-100px" }}
           className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12"
         >
           {featuredRecipes.slice(0, 2).map((recipe) => (
@@ -106,7 +89,7 @@ const FeaturedRecipes: React.FC = () => {
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.1 }}
+          viewport={{ once: true, amount: 0.1, margin: "-100px" }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
         >
           {featuredRecipes.slice(2).map((recipe) => (

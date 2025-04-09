@@ -87,7 +87,7 @@
   }
 
   .card-hover {
-    @apply transition-all duration-300 ease-in-out transform hover:-translate-y-2 hover:shadow-xl;
+    @apply transition-all duration-500 ease-in-out transform hover:-translate-y-2 hover:shadow-xl;
   }
   
   .section-padding {
@@ -111,11 +111,11 @@
   }
 
   .recipe-card {
-    @apply overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300 hover:shadow-xl;
+    @apply overflow-hidden rounded-xl bg-white shadow-md transition-all duration-500 hover:shadow-xl;
   }
   
   .recipe-image {
-    @apply h-48 w-full object-cover transition-all duration-500 hover:scale-105;
+    @apply h-48 w-full object-cover transition-all duration-700 hover:scale-105;
   }
   
   .category-badge {
@@ -127,10 +127,11 @@
   }
 }
 
+/* Improved animations for scroll */
 .animate-on-scroll {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
 
 .animate-on-scroll.active {
@@ -157,16 +158,16 @@
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
 }
 
-/* Custom page transition animations */
+/* Improved page transition animations */
 .page-transition-enter {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(30px);
 }
 
 .page-transition-enter-active {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 500ms, transform 500ms;
+  transition: opacity 700ms, transform 700ms;
 }
 
 .page-transition-exit {
@@ -176,8 +177,8 @@
 
 .page-transition-exit-active {
   opacity: 0;
-  transform: translateY(-20px);
-  transition: opacity 500ms, transform 500ms;
+  transform: translateY(-30px);
+  transition: opacity 700ms, transform 700ms;
 }
 
 /* Background pattern for chef cards */
@@ -187,13 +188,13 @@
 
 /* Animation for elements */
 .animation-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+  animation: fadeIn 0.7s ease-out forwards;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -215,13 +216,13 @@
   animation: float 6s ease-in-out infinite;
 }
 
-/* Animações para cards de receitas similares */
+/* Improved animations for recipe cards */
 .similar-recipe-card {
-  transition: all 0.5s ease;
+  transition: all 0.7s ease;
 }
 
 .similar-recipe-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-10px);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
@@ -230,14 +231,38 @@
 }
 
 .similar-recipe-image {
-  transition: transform 0.8s ease;
+  transition: transform 1s ease;
 }
 
 .similar-recipe-title {
-  transition: transform 0.4s ease, color 0.3s ease;
+  transition: transform 0.5s ease, color 0.3s ease;
 }
 
 .similar-recipe-card:hover .similar-recipe-title {
   color: #ff6b00;
   transform: translateX(4px);
+}
+
+/* Scroll reveal animations */
+.reveal-from-bottom {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.reveal-from-left {
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.reveal-from-right {
+  opacity: 0;
+  transform: translateX(50px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.reveal-active {
+  opacity: 1;
+  transform: translate(0);
 }
