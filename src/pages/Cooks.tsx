@@ -20,11 +20,11 @@ import CategoryBadge from '@/components/ui/CategoryBadge';
 const mockCooks = [
   { 
     id: 1, 
-    name: 'Ana Silva', 
+    name: 'Tiago Leite', 
     avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
     recipes: [
-      { id: 101, title: 'Frango ao Curry', imageUrl: 'https://source.unsplash.com/random/300x200?chicken' },
-      { id: 102, title: 'Salada Fitness', imageUrl: 'https://source.unsplash.com/random/300x200?salad' }
+      { id: 101, title: 'Frango ao Curry', imageUrl: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?q=80&w=2484&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
+      { id: 102, title: 'Salada Fitness', imageUrl: 'https://images.unsplash.com/photo-1636044731923-6a80c14ec1c5?q=80&w=2371&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' }
     ]
   },
   { 
