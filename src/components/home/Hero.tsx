@@ -84,7 +84,7 @@ const Hero: React.FC = () => {
       ref={heroRef}
       className="min-h-screen relative flex items-center justify-center bg-cover bg-center bg-fixed"
       style={{
-        backgroundImage: 'url(public/hero-back-2.jpg)',
+        backgroundImage: 'url(https://static.vecteezy.com/ti/fotos-gratis/p1/2754160-fitness-equipment-and-health-food-on-blue-wooden-background-gratis-foto.JPG)',
       }}
     >
       {/* Overlay */}
