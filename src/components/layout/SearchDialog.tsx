@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, X, ArrowRight, Category, User, Clock } from 'lucide-react';
+import { Search, X, ArrowRight, Tag, User, Clock } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent,
@@ -190,7 +190,7 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ open, onOpenChange }) => {
                               className="w-full justify-start text-left border-gray-200 hover:border-fitcooker-orange hover:text-fitcooker-orange"
                               onClick={() => handleCategoryClick(category)}
                             >
-                              <Category size={16} className="mr-2 flex-shrink-0" />
+                              <Tag size={16} className="mr-2 flex-shrink-0" />
                               <span className="truncate">{category}</span>
                             </Button>
                           </motion.div>

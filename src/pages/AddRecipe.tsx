@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -444,13 +443,14 @@ const AddRecipe: React.FC = () => {
                 getMainImagePreview={getMainImagePreview}
                 isRecipeValid={isRecipeValid()}
                 checkLoginBeforeSubmit={checkLoginBeforeSubmit}
+                ingredientsCount={ingredients.filter(ing => ing.name.trim() !== '').length}
+                stepsCount={steps.filter(step => step.description.trim() !== '').length}
               />
             </div>
           </div>
         </section>
       </main>
       
-      {/* Dialogs */}
       <IngredientSelector 
         showIngredientSelector={showIngredientSelector}
         setShowIngredientSelector={setShowIngredientSelector}
