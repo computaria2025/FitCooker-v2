@@ -125,13 +125,13 @@ const Hero: React.FC = () => {
                 variants={itemVariants}
                 className="bg-fitcooker-yellow px-3 py-1 rounded-full text-black text-sm font-medium inline-flex items-center justify-center h-8"
               >
-                Baixo Carboidrato
+                Almoço
               </motion.span>
               <motion.span 
                 variants={itemVariants}
                 className="bg-white px-3 py-1 rounded-full text-fitcooker-black text-sm font-medium inline-flex items-center justify-center h-8"
               >
-                Zero Açúcar
+                Vegetariano
               </motion.span>
             </div>
           </motion.div>
