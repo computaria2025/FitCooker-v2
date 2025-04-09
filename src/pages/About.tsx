@@ -11,36 +11,36 @@ const teamMembers = [
   {
     name: 'Erick',
     role: 'Engenheiro de Dados',
-    description: 'Gerencia a infraestrutura de dados e implementa soluções para análise de informações.',
-    avatar: 'https://randomuser.me/api/portraits/men/41.jpg',
+    description: 'Cuida da gerência da infraestrutura, conexões e cuidados com banco de dados.',
+    avatar: 'public/erick.png',
     icon: <Database className="h-10 w-10" />
   },
   {
     name: 'Andrei Barone',
     role: 'Designer e Desenvolvedor',
-    description: 'Combina habilidades de design e desenvolvimento para criar interfaces intuitivas.',
-    avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+    description: 'Combina habilidades de design, lógica e desenvolvimento para criar aplicações.',
+    avatar: 'public/andrei.png',
     icon: <PenTool className="h-10 w-10" />
   },
   {
     name: 'Ígor',
     role: 'Desenvolvedor Fullstack',
-    description: 'Responsável pelo desenvolvimento da aplicação, integrando o frontend com o backend.',
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+    description: 'Responsável pelo desenvolvimento da aplicação, interface frontend e backend.',
+    avatar: 'public/igor.png',
     icon: <Code className="h-10 w-10" />
   },
   {
     name: 'Gabriel',
     role: 'Analista de Requisitos',
-    description: 'Identifica e documenta as necessidades dos usuários para guiar o desenvolvimento.',
-    avatar: 'https://randomuser.me/api/portraits/men/36.jpg',
+    description: 'Identifica e documenta as necessidades dos usuários para guiar o desenvolvimento. Além de cuidar de toda documentação do projeto.',
+    avatar: 'public/gabriel.png',
     icon: <FileSearch className="h-10 w-10" />
   },
   {
     name: 'Isaac Machado',
     role: 'Designer Figma e UI/UX',
     description: 'Cria protótipos e designs que priorizam a experiência do usuário.',
-    avatar: 'https://randomuser.me/api/portraits/men/59.jpg',
+    avatar: 'public/isaac.png',
     icon: <Figma className="h-10 w-10" />
   }
 ];
@@ -147,7 +147,7 @@ const About: React.FC = () => {
                 <div className="relative animate-on-scroll">
                   <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-xl">
                     <img 
-                      src="https://images.unsplash.com/photo-1499364615650-ec38552f4f34?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2072&q=80" 
+                      src="https://images.pexels.com/photos/2130134/pexels-photo-2130134.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
                       alt="Equipe FitCooker" 
                       className="w-full h-full object-cover"
                     />
