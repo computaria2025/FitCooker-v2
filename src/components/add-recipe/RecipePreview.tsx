@@ -22,6 +22,8 @@ interface RecipePreviewProps {
   getMainImagePreview: () => string | null;
   isRecipeValid: boolean;
   checkLoginBeforeSubmit: (e: React.FormEvent) => void;
+  ingredientsCount: number;
+  stepsCount: number;
 }
 
 const RecipePreview: React.FC<RecipePreviewProps> = ({
@@ -34,7 +36,9 @@ const RecipePreview: React.FC<RecipePreviewProps> = ({
   totalMacros,
   getMainImagePreview,
   isRecipeValid,
-  checkLoginBeforeSubmit
+  checkLoginBeforeSubmit,
+  ingredientsCount,
+  stepsCount
 }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
@@ -120,16 +124,16 @@ const RecipePreview: React.FC<RecipePreviewProps> = ({
             <span className={preparationTime ? 'text-gray-800' : 'text-gray-500'}>Tempo de preparo</span>
           </li>
           <li className="flex items-start">
-            <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${getMainImagePreview() ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
-            <span className={getMainImagePreview() ? 'text-gray-800' : 'text-gray-500'}>
-              Pelo menos uma imagem adicionada (opcional)
-            </span>
+            <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${servings ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
+            <span className={servings ? 'text-gray-800' : 'text-gray-500'}>Porções</span>
           </li>
           <li className="flex items-start">
-            <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${isRecipeValid ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
-            <span className={isRecipeValid ? 'text-gray-800' : 'text-gray-500'}>
-              Todos os campos obrigatórios preenchidos
-            </span>
+            <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${ingredientsCount > 0 ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
+            <span className={ingredientsCount > 0 ? 'text-gray-800' : 'text-gray-500'}>Pelo menos um ingrediente selecionado</span>
+          </li>
+          <li className="flex items-start">
+            <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${stepsCount > 0 ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
+            <span className={stepsCount > 0 ? 'text-gray-800' : 'text-gray-500'}>Pelo menos um passo adicionado</span>
           </li>
         </ul>
         

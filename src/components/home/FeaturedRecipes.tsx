@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { featuredRecipes } from '@/data/mockData';
 import RecipeCard from '@/components/ui/RecipeCard';
@@ -13,7 +13,8 @@ const FeaturedRecipes: React.FC = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
+        staggerChildren: 0.15,
+        delayChildren: 0.1
       }
     }
   };
@@ -43,6 +44,13 @@ const FeaturedRecipes: React.FC = () => {
       }
     }
   };
+
+  const hoverVariants = {
+    hover: {
+      scale: 1.03,
+      transition: { duration: 0.3 }
+    }
+  };
   
   return (
     <section className="section-padding bg-white">
@@ -63,12 +71,17 @@ const FeaturedRecipes: React.FC = () => {
               Explore nossas receitas mais populares, cuidadosamente selecionadas para garantir sabor e nutrição.
             </p>
           </div>
-          <Link
-            to="/recipes"
-            className="mt-4 md:mt-0 btn btn-outline self-start md:self-auto"
+          <motion.div 
+            whileHover="hover"
+            variants={hoverVariants}
           >
-            Ver Todas
-          </Link>
+            <Link
+              to="/recipes"
+              className="mt-4 md:mt-0 btn btn-outline self-start md:self-auto"
+            >
+              Ver Todas
+            </Link>
+          </motion.div>
         </motion.div>
         
         <motion.div 
@@ -79,7 +92,14 @@ const FeaturedRecipes: React.FC = () => {
           className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12"
         >
           {featuredRecipes.slice(0, 2).map((recipe) => (
-            <motion.div key={recipe.id} variants={itemVariants}>
+            <motion.div 
+              key={recipe.id} 
+              variants={itemVariants}
+              whileHover={{ 
+                y: -8,
+                transition: { duration: 0.3 }
+              }}
+            >
               <RecipeCard recipe={recipe} featured={true} />
             </motion.div>
           ))}
@@ -93,7 +113,14 @@ const FeaturedRecipes: React.FC = () => {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
         >
           {featuredRecipes.slice(2).map((recipe) => (
-            <motion.div key={recipe.id} variants={itemVariants}>
+            <motion.div 
+              key={recipe.id} 
+              variants={itemVariants}
+              whileHover={{ 
+                y: -8,
+                transition: { duration: 0.3 }
+              }}
+            >
               <RecipeCard recipe={recipe} />
             </motion.div>
           ))}

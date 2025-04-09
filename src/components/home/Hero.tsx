@@ -14,9 +14,6 @@ const Hero: React.FC = () => {
       const heroElement = heroRef.current;
       
       if (heroElement) {
-        // Remove parallax effect for background - fixing issue #3
-        // heroElement.style.backgroundPositionY = `${scrollPosition * 0.5}px`;
-        
         // Only apply opacity effect for content
         const contentOpacity = Math.max(1 - scrollPosition / 700, 0);
         const content = heroElement.querySelector('.hero-content') as HTMLElement;
@@ -35,6 +32,53 @@ const Hero: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.2,
+        delayChildren: 0.3
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 20
+      }
+    }
+  };
+  
+  const cardVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 70,
+        damping: 20
+      }
+    },
+    hover: { 
+      y: -8,
+      scale: 1.05,
+      boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 10
+      }
+    }
+  };
+  
   return (
     <div 
       ref={heroRef}
@@ -48,11 +92,14 @@ const Hero: React.FC = () => {
       
       {/* Content */}
       <div className="container mx-auto px-4 md:px-6 relative z-10 hero-content">
-        <div className="max-w-3xl mx-auto">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="max-w-3xl mx-auto"
+        >
           <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            variants={itemVariants}
             className="text-center mb-8 animate-fade-in"
           >
             <div className="flex items-center justify-center mb-2">
@@ -68,17 +115,30 @@ const Hero: React.FC = () => {
               Receitas de alto desempenho para quem busca resultados extraordinários
             </p>
             <div className="flex justify-center gap-4 mt-4">
-              <span className="bg-fitcooker-orange px-3 py-1 rounded-full text-white text-sm font-medium inline-flex items-center justify-center h-8">Alta Proteína</span>
-              <span className="bg-fitcooker-yellow px-3 py-1 rounded-full text-black text-sm font-medium inline-flex items-center justify-center h-8">Baixo Carboidrato</span>
-              <span className="bg-white px-3 py-1 rounded-full text-fitcooker-black text-sm font-medium inline-flex items-center justify-center h-8">Zero Açúcar</span>
+              <motion.span 
+                variants={itemVariants}
+                className="bg-fitcooker-orange px-3 py-1 rounded-full text-white text-sm font-medium inline-flex items-center justify-center h-8"
+              >
+                Alta Proteína
+              </motion.span>
+              <motion.span 
+                variants={itemVariants}
+                className="bg-fitcooker-yellow px-3 py-1 rounded-full text-black text-sm font-medium inline-flex items-center justify-center h-8"
+              >
+                Baixo Carboidrato
+              </motion.span>
+              <motion.span 
+                variants={itemVariants}
+                className="bg-white px-3 py-1 rounded-full text-fitcooker-black text-sm font-medium inline-flex items-center justify-center h-8"
+              >
+                Zero Açúcar
+              </motion.span>
             </div>
           </motion.div>
           
           {/* Search Bar */}
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            variants={itemVariants}
             className="mb-12 animate-fade-in"
           >
             <div className="relative mx-auto max-w-2xl">
@@ -90,67 +150,80 @@ const Hero: React.FC = () => {
                 placeholder="Busque por receitas, ingredientes ou categoria..."
                 className="w-full py-4 pl-12 pr-4 border-none rounded-lg text-gray-900 focus:ring-2 focus:ring-fitcooker-orange transition-all duration-300 shadow-lg"
               />
-              <button className="absolute right-2 top-2 bottom-2 px-4 bg-fitcooker-orange text-white rounded-md hover:bg-opacity-90 transition-colors">
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="absolute right-2 top-2 bottom-2 px-4 bg-fitcooker-orange text-white rounded-md hover:bg-opacity-90 transition-colors"
+              >
                 Buscar
-              </button>
+              </motion.button>
             </div>
           </motion.div>
           
           {/* Categories */}
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            variants={containerVariants}
             className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in"
           >
-            <Link 
-              to="/recipes?category=bulking"
-              className="bg-white/10 backdrop-blur-md rounded-lg p-4 text-center transition-all duration-300 hover:bg-white/20 hover:transform hover:scale-105"
-            >
-              <TrendingUp className="h-8 w-8 mx-auto mb-2 text-fitcooker-orange" />
-              <span className="text-white font-medium">Bulking</span>
-            </Link>
+            <motion.div variants={cardVariants} whileHover="hover">
+              <Link 
+                to="/recipes?category=bulking"
+                className="bg-white/10 backdrop-blur-md rounded-lg p-4 text-center block h-full transition-all duration-300"
+              >
+                <TrendingUp className="h-8 w-8 mx-auto mb-2 text-fitcooker-orange" />
+                <span className="text-white font-medium">Bulking</span>
+              </Link>
+            </motion.div>
             
-            <Link 
-              to="/recipes?category=cutting"
-              className="bg-white/10 backdrop-blur-md rounded-lg p-4 text-center transition-all duration-300 hover:bg-white/20 hover:transform hover:scale-105"
-            >
-              <TrendingUp className="h-8 w-8 mx-auto mb-2 text-fitcooker-yellow" />
-              <span className="text-white font-medium">Cutting</span>
-            </Link>
+            <motion.div variants={cardVariants} whileHover="hover">
+              <Link 
+                to="/recipes?category=cutting"
+                className="bg-white/10 backdrop-blur-md rounded-lg p-4 text-center block h-full transition-all duration-300"
+              >
+                <TrendingUp className="h-8 w-8 mx-auto mb-2 text-fitcooker-yellow" />
+                <span className="text-white font-medium">Cutting</span>
+              </Link>
+            </motion.div>
             
-            <Link 
-              to="/recipes?category=highprotein"
-              className="bg-white/10 backdrop-blur-md rounded-lg p-4 text-center transition-all duration-300 hover:bg-white/20 hover:transform hover:scale-105"
-            >
-              <TrendingUp className="h-8 w-8 mx-auto mb-2 text-green-500" />
-              <span className="text-white font-medium">Alto Proteína</span>
-            </Link>
+            <motion.div variants={cardVariants} whileHover="hover">
+              <Link 
+                to="/recipes?category=highprotein"
+                className="bg-white/10 backdrop-blur-md rounded-lg p-4 text-center block h-full transition-all duration-300"
+              >
+                <TrendingUp className="h-8 w-8 mx-auto mb-2 text-green-500" />
+                <span className="text-white font-medium">Alto Proteína</span>
+              </Link>
+            </motion.div>
             
-            <Link 
-              to="/recipes?category=lowcarb"
-              className="bg-white/10 backdrop-blur-md rounded-lg p-4 text-center transition-all duration-300 hover:bg-white/20 hover:transform hover:scale-105"
-            >
-              <TrendingUp className="h-8 w-8 mx-auto mb-2 text-blue-500" />
-              <span className="text-white font-medium">Low Carb</span>
-            </Link>
+            <motion.div variants={cardVariants} whileHover="hover">
+              <Link 
+                to="/recipes?category=lowcarb"
+                className="bg-white/10 backdrop-blur-md rounded-lg p-4 text-center block h-full transition-all duration-300"
+              >
+                <TrendingUp className="h-8 w-8 mx-auto mb-2 text-blue-500" />
+                <span className="text-white font-medium">Low Carb</span>
+              </Link>
+            </motion.div>
           </motion.div>
           
           {/* CTA Button */}
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
+            variants={itemVariants}
             className="mt-12 text-center animate-fade-in"
           >
-            <Link
-              to="/recipes"
-              className="btn btn-primary inline-flex items-center space-x-2"
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <span>Explorar Todas as Receitas</span>
-            </Link>
+              <Link
+                to="/recipes"
+                className="btn btn-primary inline-flex items-center space-x-2"
+              >
+                <span>Explorar Todas as Receitas</span>
+              </Link>
+            </motion.div>
           </motion.div>
-        </div>
+        </motion.div>
       </div>
       
       {/* Scroll Down Indicator - With much slower animation */}
@@ -159,10 +232,18 @@ const Hero: React.FC = () => {
         style={{ 
           opacity: scrollOpacity,
           visibility: scrollOpacity === 0 ? 'hidden' : 'visible',
-          animation: "float 5s ease-in-out infinite" // Much slower animation (was 'animate-bounce')
+          animation: "float 5s ease-in-out infinite" // Much slower animation
         }}
       >
-        <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center">
+        <motion.div 
+          animate={{ y: [0, 10, 0] }}
+          transition={{ 
+            duration: 2.5,
+            repeat: Infinity,
+            ease: "easeInOut" 
+          }}
+          className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center"
+        >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
             className="h-4 w-4 text-white" 
@@ -172,7 +253,7 @@ const Hero: React.FC = () => {
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
