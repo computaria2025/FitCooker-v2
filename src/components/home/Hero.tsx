@@ -40,7 +40,7 @@ const Hero: React.FC = () => {
       ref={heroRef}
       className="min-h-screen relative flex items-center justify-center bg-cover bg-center"
       style={{
-        backgroundImage: 'url(https://images.unsplash.com/photo-1490818387583-1baba5e638af?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80)',
+        backgroundImage: 'url(public/hero-back-2.jpg)',
       }}
     >
       {/* Overlay */}
