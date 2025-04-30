@@ -19,28 +19,28 @@ const teamMembers = [
     name: 'Andrei Barone',
     role: 'Designer e Desenvolvedor',
     description: 'Combina habilidades de design, lógica e desenvolvimento para criar aplicações.',
-    avatar: 'public/andrei.png',
+    avatar: 'andrei.png',
     icon: <PenTool className="h-10 w-10" />
   },
   {
     name: 'Ígor',
     role: 'Desenvolvedor Fullstack',
     description: 'Responsável pelo desenvolvimento da aplicação, interface frontend e backend.',
-    avatar: 'public/igor.png',
+    avatar: 'igor.png',
     icon: <Code className="h-10 w-10" />
   },
   {
     name: 'Gabriel',
     role: 'Analista de Requisitos',
     description: 'Identifica e documenta as necessidades dos usuários para guiar o desenvolvimento. Além de cuidar de toda documentação do projeto.',
-    avatar: 'public/gabriel.png',
+    avatar: 'gabriel.png',
     icon: <FileSearch className="h-10 w-10" />
   },
   {
     name: 'Isaac Machado',
     role: 'Designer Figma e UI/UX',
     description: 'Cria protótipos e designs que priorizam a experiência do usuário.',
-    avatar: 'public/isaac.png',
+    avatar: 'isaac.png',
     icon: <Figma className="h-10 w-10" />
   }
 ];
