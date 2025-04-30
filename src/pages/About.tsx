@@ -12,7 +12,7 @@ const teamMembers = [
     name: 'Erick',
     role: 'Engenheiro de Dados',
     description: 'Cuida da gerência da infraestrutura, conexões e cuidados com banco de dados.',
-    avatar: 'public/erick.png',
+    avatar: 'erick.png',
     icon: <Database className="h-10 w-10" />
   },
   {
