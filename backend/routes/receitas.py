@@ -4,16 +4,12 @@ from db import get_db_connection
 
 receitas_bp = Blueprint('receitas', __name__)
 
-@receitas_bp.route('/receitas', methods=['GET'])
-@jwt_required()
+@receitas_bp.route('/api/receitas', methods=['GET']) 
 def listar_receitas():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM receitas")
-    receitas = cursor.fetchall()
-    cursor.close()
+    receitas = conn.execute('SELECT * FROM receitas').fetchall()
     conn.close()
-    return jsonify(receitas)
+    return jsonify([dict(recipe) for recipe in receitas])  # Converter Row para dict
 
 @receitas_bp.route('/receitas', methods=['POST'])
 @jwt_required()

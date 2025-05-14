@@ -5,7 +5,10 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import RecipeCard from '@/components/ui/RecipeCard';
 import CategoryBadge from '@/components/ui/CategoryBadge';
-import { allRecipes, RecipeCategory } from '@/data/mockData';
+
+// import { allRecipes, RecipeCategory } from '@/data/mockData';
+import { RecipeCategory } from '@/data/mockData';
+
 import { Search, Filter, ChevronDown, X, Utensils, PlusCircle, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -13,6 +16,46 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { motion } from 'framer-motion';
+
+// TESTE IMPLEMENTAÇÃO
+interface DBRecipe {
+  id: number;
+  titulo: string;
+  descricao: string;
+  tempo_preparo: number;
+  porcoes: number;
+  imagem_principal: string;
+  id_categoria: number;
+  data_criacao: string;
+}
+
+interface Recipe {
+  id: number;
+  title: string;
+  description: string;
+  preparationTime: number;
+  servings: number;
+  imageUrl: string;
+  categories: RecipeCategory[];
+  difficulty: string;
+  macros: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  };
+  author: {
+    id: number;
+    name: string;
+    avatarUrl: string;
+  };
+  rating: number;
+  createdAt: string;
+  ingredients: any[];
+  steps: any[];
+}
+//
+
 
 const Recipes: React.FC = () => {
   const location = useLocation();
@@ -22,6 +65,8 @@ const Recipes: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
+  const [recipes, setRecipes] = useState<Recipe[]>([]); // <-- Adicione esta linha
+  const [isLoading, setIsLoading] = useState(true); // <-- E esta
   
   // Parse URL params for category filter and search
   useEffect(() => {
@@ -82,22 +127,17 @@ const Recipes: React.FC = () => {
     }
   };
   
-  // Filter recipes based on active filters and search term
-  const filteredRecipes = allRecipes.filter(recipe => {
-    // Filter by category if there are active filters
+  
+  const filteredRecipes = recipes.filter(recipe => {
     const matchesCategory = activeFilters.length === 0 || 
       recipe.categories.some(category => activeFilters.includes(category));
-    
-    // Filter by search term
     const matchesSearch = searchTerm === '' || 
       recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      recipe.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      recipe.categories.some(category => 
-        category.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    
+      recipe.description.toLowerCase().includes(searchTerm.toLowerCase());
+
     return matchesCategory && matchesSearch;
   });
+
   
   // Animation variants for staggered animations
   const containerVariants = {
@@ -326,71 +366,78 @@ const Recipes: React.FC = () => {
               
               {/* Recipe Content - Right Column */}
               <div className="md:w-3/4 lg:w-4/5">
-                {filteredRecipes.length > 0 ? (
-                  <>
-                    <div className="flex justify-between items-center mb-6">
-                      <p className="text-gray-600">{filteredRecipes.length} receitas encontradas</p>
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-600 text-sm">Ordenar por:</span>
-                        <select className="bg-white border border-gray-200 rounded-lg py-1 px-2 text-sm focus:outline-none focus:ring-1 focus:ring-fitcooker-orange">
-                          <option>Mais relevantes</option>
-                          <option>Melhor avaliadas</option>
-                          <option>Mais recentes</option>
-                          <option>Menos calorias</option>
-                        </select>
+                {isLoading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-fitcooker-orange mx-auto"></div>
+                    <p className="mt-4">Carregando receitas...</p>
+                  </div> 
+                ) : filteredRecipes.length > 0 ? (
+                    <>
+                      <div className="flex justify-between items-center mb-6">
+                        <p className="text-gray-600">
+                          {filteredRecipes.length} receita{filteredRecipes.length !== 1 ? 's' : ''} encontrada{filteredRecipes.length !== 1 ? 's' : ''}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-600 text-sm">Ordenar por:</span>
+                          <select className="bg-white border border-gray-200 rounded-lg py-1 px-2 text-sm focus:outline-none focus:ring-1 focus:ring-fitcooker-orange">
+                            <option>Mais relevantes</option>
+                            <option>Melhor avaliadas</option>
+                            <option>Mais recentes</option>
+                            <option>Menos calorias</option>
+                          </select>
+                        </div>
                       </div>
-                    </div>
-                    
-                    {/* Active Filters Summary (Desktop) */}
-                    {activeFilters.length > 0 && (
-                      <div className="hidden md:flex items-center mb-4 flex-wrap gap-2">
-                        <span className="text-sm text-gray-500">Filtros ativos:</span>
-                        {activeFilters.map((filter) => (
-                          <div key={filter} className="flex items-center bg-gradient-to-r from-fitcooker-orange/20 to-fitcooker-orange/5 text-fitcooker-orange text-sm px-3 py-1 rounded-full">
-                            {filter}
-                            <button
-                              onClick={() => toggleFilter(filter)}
-                              className="ml-1 focus:outline-none"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
+                      
+                      {/* Active Filters Summary (Desktop) */}
+                      {activeFilters.length > 0 && (
+                        <div className="hidden md:flex items-center mb-4 flex-wrap gap-2">
+                          <span className="text-sm text-gray-500">Filtros ativos:</span>
+                          {activeFilters.map((filter) => (
+                            <div key={filter} className="flex items-center bg-gradient-to-r from-fitcooker-orange/20 to-fitcooker-orange/5 text-fitcooker-orange text-sm px-3 py-1 rounded-full">
+                              {filter}
+                              <button
+                                onClick={() => toggleFilter(filter)}
+                                className="ml-1 focus:outline-none"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <motion.div 
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, amount: 0.1 }}
+                        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
+                      >
+                        {filteredRecipes.map((recipe) => (
+                          <motion.div key={recipe.id} variants={itemVariants} className="h-full">
+                            <RecipeCard recipe={recipe} className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all h-full" />
+                          </motion.div>
                         ))}
-                      </div>
-                    )}
-                    
-                    <motion.div 
-                      variants={containerVariants}
-                      initial="hidden"
-                      whileInView="visible"
-                      viewport={{ once: true, amount: 0.1 }}
-                      className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
-                    >
-                      {filteredRecipes.map((recipe) => (
-                        <motion.div key={recipe.id} variants={itemVariants} className="h-full">
-                          <RecipeCard recipe={recipe} className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all h-full" />
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  </>
-                ) : (
-                  <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <img 
-                      src="https://assets.website-files.com/5e51c674258ffe10d286d30a/5e535a0c9e6c1d737f20e2ac_peep-59.svg" 
-                      alt="No recipes found" 
-                      className="w-48 h-48 mx-auto mb-6"
-                    />
-                    <h3 className="heading-md mb-2">Nenhuma receita encontrada</h3>
-                    <p className="text-gray-600 mb-6">
-                      Tente ajustar seus filtros ou buscar por outro termo.
-                    </p>
-                    <button 
-                      onClick={clearFilters}
-                      className="btn btn-primary"
-                    >
-                      Limpar filtros
-                    </button>
-                  </div>
+                      </motion.div>
+                    </>
+                  ) : (
+                    <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
+                      <img 
+                        src="https://assets.website-files.com/5e51c674258ffe10d286d30a/5e535a0c9e6c1d737f20e2ac_peep-59.svg" 
+                        alt="No recipes found" 
+                        className="w-48 h-48 mx-auto mb-6"
+                      />
+                      <h3 className="heading-md mb-2">Nenhuma receita encontrada</h3>
+                      <p className="text-gray-600 mb-6">
+                        Tente ajustar seus filtros ou buscar por outro termo.
+                      </p>
+                      <button 
+                        onClick={clearFilters}
+                        className="btn btn-primary"
+                      >
+                        Limpar filtros
+                      </button>
+                    </div>
                 )}
               </div>
             </div>

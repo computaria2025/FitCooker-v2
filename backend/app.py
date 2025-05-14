@@ -9,7 +9,7 @@ from routes.categorias import categorias_bp
 from config.config import load_env
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Configuração mais específica
 load_env(app)
 
 jwt = JWTManager(app)
