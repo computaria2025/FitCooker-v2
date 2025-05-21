@@ -7,7 +7,8 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
 // Pages
-import Index from "./pages/Index";
+import Home from "./pages/Home";
+import FeaturedPage from "./pages/FeaturedPage";
 import Recipes from "./pages/Recipes";
 import RecipeDetail from "./pages/RecipeDetail";
 import Cooks from "./pages/Cooks";
@@ -79,7 +80,8 @@ const AppContent = () => {
     <>
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/destaques" element={<FeaturedPage />} />
         <Route path="/recipes" element={<Recipes />} />
         <Route path="/recipe/:id" element={<RecipeDetail />} />
         <Route path="/cooks" element={<Cooks />} />
