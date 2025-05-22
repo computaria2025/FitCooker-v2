@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
@@ -18,7 +17,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger, // Added DialogTrigger import here
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Star, Search, Award, ChefHat, Book, Users, Heart, MessageSquare, Filter, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -340,7 +339,8 @@ const Cooks: React.FC = () => {
                       </TabsList>
                       
                       <TabsContent value="recipes">
-                        <h3 className="text-2xl font-bold mb-6 relative inline-block after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-gradient-to-r after:from-fitcooker-orange/50 after:to-fitcooker-yellow/50">
+                        <h3 className="text-2xl font-bold mb-6 relative inline-block after:content-[''] after:absolute after:bottom-0 after:left-0 
+                                   after:w-full after:h-1 after:bg-gradient-to-r after:from-fitcooker-orange/50 after:to-fitcooker-yellow/50">
                           Receitas de {selectedCookData.name}
                         </h3>
                         
@@ -423,23 +423,29 @@ const Cooks: React.FC = () => {
               // Cooks listing view
               <>
                 <header className="text-center mb-12">
-                  {/* Added decorative background for the title with animation */}
+                  {/* Redesigned title section with more visual impact */}
                   <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7 }}
-                    className="relative mb-8"
+                    className="relative mb-12"
                   >
                     <div className="absolute inset-x-0 top-1/2 transform -translate-y-1/2 h-1 bg-gradient-to-r from-transparent via-fitcooker-orange/80 to-transparent"></div>
-                    <div className="relative z-10 inline-block bg-white px-8 py-2">
-                      <h1 className="text-4xl font-bold mb-0 relative 
+                    <div className="relative z-10 inline-block bg-gradient-to-r from-white via-white to-white px-8 py-4">
+                      <div className="flex flex-col items-center">
+                        <div className="mb-2">
+                          <ChefHat className="h-12 w-12 text-fitcooker-orange" />
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-bold mb-2 relative text-fitcooker-black
                                    after:content-[''] after:absolute after:bottom-0 after:left-0 
                                    after:w-full after:h-1 after:bg-fitcooker-yellow/50 
                                    after:scale-x-0 after:origin-left 
                                    after:transition-transform after:duration-700 
                                    after:animate-[scale-in_1s_ease_forwards]">
-                        Nossos Chefs Fit
-                      </h1>
+                          Mestres da Culinária Fit
+                        </h1>
+                        <p className="text-fitcooker-orange font-semibold text-xl tracking-wider mt-1">ENCONTRE SEU CHEF INSPIRADOR</p>
+                      </div>
                     </div>
                   </motion.div>
                   
@@ -449,7 +455,7 @@ const Cooks: React.FC = () => {
                     transition={{ duration: 0.7, delay: 0.2 }}
                     className="text-lg text-gray-600 max-w-3xl mx-auto"
                   >
-                    Conheça os cozinheiros mais talentosos da nossa comunidade. Eles são especialistas em criar receitas saudáveis e deliciosas.
+                    Conheça os cozinheiros mais talentosos da nossa comunidade. Eles são especialistas em criar receitas saudáveis e deliciosas para te ajudar a alcançar seus objetivos.
                   </motion.p>
                   
                   <motion.div 
