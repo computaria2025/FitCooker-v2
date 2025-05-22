@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
-import { Send, MapPin, Mail, Phone } from 'lucide-react';
+import { Send, Mail, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -162,18 +162,6 @@ const Contato: React.FC = () => {
                   
                   <div className="space-y-6">
                     <div className="flex items-start">
-                      <MapPin className="h-6 w-6 text-fitcooker-orange mr-4 flex-shrink-0 mt-1" />
-                      <div>
-                        <h4 className="font-medium mb-1">Endereço</h4>
-                        <p className="text-gray-700">
-                          Av. Paulista, 1000<br />
-                          Bela Vista, São Paulo - SP<br />
-                          CEP: 01310-100
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start">
                       <Mail className="h-6 w-6 text-fitcooker-orange mr-4 flex-shrink-0 mt-1" />
                       <div>
                         <h4 className="font-medium mb-1">Email</h4>
@@ -198,17 +186,15 @@ const Contato: React.FC = () => {
                     <p className="text-gray-700">Sábado: 9h às 13h</p>
                   </div>
                   
-                  <div className="mt-8 rounded-lg overflow-hidden">
-                    <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.0976461953504!2d-46.65390548502212!3d-23.563200167620098!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce59c8da0aa315%3A0xd59f9431f2c9776a!2sAv.%20Paulista%2C%20S%C3%A3o%20Paulo%20-%20SP!5e0!3m2!1spt-BR!2sbr!4v1653067692543!5m2!1spt-BR!2sbr"
-                      width="100%"
-                      height="250"
-                      style={{ border: 0 }}
-                      allowFullScreen={true}
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title="FitCooker Localização"
-                    ></iframe>
+                  <div className="mt-8 p-6 bg-white rounded-lg border border-gray-200">
+                    <h4 className="font-medium mb-3 flex items-center">
+                      <Mail className="h-5 w-5 text-fitcooker-orange mr-2" />
+                      Resposta rápida
+                    </h4>
+                    <p className="text-gray-600 text-sm">
+                      Nossa equipe de suporte responde em até 24 horas úteis. Para assuntos urgentes, 
+                      recomendamos entrar em contato por telefone.
+                    </p>
                   </div>
                 </div>
               </motion.div>

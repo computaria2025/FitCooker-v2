@@ -6,13 +6,40 @@ import Footer from '@/components/layout/Footer';
 import RecipeCard from '@/components/ui/RecipeCard';
 import CategoryBadge from '@/components/ui/CategoryBadge';
 import { allRecipes, RecipeCategory } from '@/data/mockData';
-import { Search, Filter, ChevronDown, X, Utensils, PlusCircle, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Search, Filter, ChevronDown, X, Utensils, PlusCircle, SlidersHorizontal, Sparkles, Info, BookOpen, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { motion } from 'framer-motion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+// Tutorial steps for first-time users
+const tutorialSteps = [
+  {
+    title: "Pesquise Receitas",
+    description: "Use a barra de pesquisa para encontrar receitas por nome, ingredientes ou categoria."
+  },
+  {
+    title: "Filtre por Categorias",
+    description: "Selecione categorias para encontrar receitas que atendam às suas preferências e objetivos."
+  },
+  {
+    title: "Explore Detalhes",
+    description: "Clique nas receitas para ver ingredientes, macros, passos de preparo e avaliações."
+  },
+  {
+    title: "Salve suas Favoritas",
+    description: "Ao criar uma conta, você pode salvar receitas para acessar facilmente depois."
+  },
+];
 
 const Recipes: React.FC = () => {
   const location = useLocation();
@@ -22,6 +49,8 @@ const Recipes: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
   
   // Parse URL params for category filter and search
   useEffect(() => {
@@ -48,6 +77,13 @@ const Recipes: React.FC = () => {
     
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
+    
+    // Check local storage to see if it's first visit
+    const hasVisitedRecipes = localStorage.getItem('hasVisitedRecipes');
+    if (!hasVisitedRecipes) {
+      setShowTutorial(true);
+      localStorage.setItem('hasVisitedRecipes', 'true');
+    }
   }, [location]);
   
   const toggleFilter = (category: RecipeCategory) => {
@@ -79,6 +115,20 @@ const Recipes: React.FC = () => {
         variant: "destructive",
         duration: 3000,
       });
+    }
+  };
+  
+  const nextTutorialStep = () => {
+    if (currentTutorialStep < tutorialSteps.length - 1) {
+      setCurrentTutorialStep(currentTutorialStep + 1);
+    } else {
+      setShowTutorial(false);
+    }
+  };
+  
+  const prevTutorialStep = () => {
+    if (currentTutorialStep > 0) {
+      setCurrentTutorialStep(currentTutorialStep - 1);
     }
   };
   
@@ -127,8 +177,64 @@ const Recipes: React.FC = () => {
       <Navbar />
       
       <main className="flex-grow pt-24">
-        {/* Header with Beautiful Food Background - REDUCED HEIGHT */}
-        <section className="relative py-10 overflow-hidden bg-gradient-to-b from-fitcooker-orange/10 to-white">
+        {/* Tutorial Dialog */}
+        <Dialog open={showTutorial} onOpenChange={setShowTutorial}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="text-2xl flex items-center">
+                <BookOpen className="mr-2 h-5 w-5 text-fitcooker-orange" />
+                Como Explorar Receitas
+              </DialogTitle>
+              <DialogDescription>
+                Aprenda a encontrar e utilizar as receitas perfeitas para seus objetivos.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="py-6">
+              <div className="relative">
+                <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                
+                {tutorialSteps.map((step, index) => (
+                  <div 
+                    key={index} 
+                    className={`pl-10 pb-6 relative ${index === currentTutorialStep ? 'opacity-100' : 'opacity-40'}`}
+                  >
+                    <div className={`absolute left-2 top-1 w-6 h-6 rounded-full flex items-center justify-center 
+                      ${index === currentTutorialStep 
+                        ? 'bg-fitcooker-orange text-white' 
+                        : index < currentTutorialStep 
+                          ? 'bg-green-500 text-white' 
+                          : 'bg-gray-200 text-gray-500'}`}
+                    >
+                      {index < currentTutorialStep ? '✓' : index + 1}
+                    </div>
+                    <h3 className="font-bold text-lg mb-1">{step.title}</h3>
+                    <p className="text-gray-600">{step.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <DialogFooter className="flex justify-between items-center">
+              <Button 
+                variant="outline" 
+                onClick={prevTutorialStep}
+                disabled={currentTutorialStep === 0}
+              >
+                Anterior
+              </Button>
+              <span className="text-sm text-gray-500">
+                {currentTutorialStep + 1} de {tutorialSteps.length}
+              </span>
+              <Button onClick={nextTutorialStep}>
+                {currentTutorialStep < tutorialSteps.length - 1 ? 'Próximo' : 'Concluir'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Header with Beautiful Food Background */}
+        <section className="relative py-12 overflow-hidden bg-gradient-to-b from-fitcooker-orange/10 to-white">
           {/* Stylish background patterns */}
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1606787366850-de6330128bfc?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')] bg-cover bg-center opacity-10"></div>
           
@@ -137,54 +243,71 @@ const Recipes: React.FC = () => {
           <div className="absolute top-40 -right-20 w-60 h-60 bg-fitcooker-orange rounded-full opacity-10 blur-3xl"></div>
           
           <div className="container mx-auto px-4 md:px-6 relative z-10">
-            <div className="text-center">
-              <div className="relative inline-block">
-                <div className="absolute -top-3 -left-3 w-6 h-6 bg-fitcooker-yellow/80 rounded-full animate-pulse-light"></div>
-                <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-fitcooker-orange/80 rounded-full animate-pulse-light" style={{ animationDelay: "0.5s" }}></div>
-                <div className="inline-block p-2 bg-white/60 backdrop-blur-sm rounded-full shadow-md mb-4">
+            <div className="flex flex-col md:flex-row items-center justify-between">
+              <div className="text-center md:text-left mb-6 md:mb-0">
+                <div className="inline-flex items-center bg-white/60 backdrop-blur-sm rounded-full p-2 shadow-sm mb-4">
                   <Utensils className="h-8 w-8 text-fitcooker-orange" />
                 </div>
+                
+                <motion.h1 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-3xl md:text-4xl font-bold mb-2"
+                >
+                  Explore Nossas Receitas
+                </motion.h1>
+                <motion.p 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  className="text-gray-600 max-w-2xl mb-4"
+                >
+                  Descubra receitas fit para todos os objetivos - do bulking ao cutting, 
+                  com ingredientes nutritivos e deliciosos para seu dia a dia
+                </motion.p>
+                
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowTutorial(true)}
+                  className="mt-2"
+                >
+                  <Info className="mr-2 h-4 w-4" />
+                  Tutorial de Uso
+                </Button>
               </div>
-              
-              <motion.h1 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="heading-lg text-center mb-2"
-              >
-                Nossas Receitas
-              </motion.h1>
-              <motion.p 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="text-gray-600 text-center max-w-2xl mx-auto mb-4"
-              >
-                Descubra receitas fit para todos os objetivos - do bulking ao cutting, 
-                com ingredientes nutritivos e deliciosos para seu dia a dia
-              </motion.p>
               
               {/* Search Bar with Decorative Elements */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="max-w-2xl mx-auto relative mb-6"
+                className="w-full md:w-2/5 relative"
               >
-                <div className="absolute -top-3 -left-3 w-8 h-8 bg-fitcooker-yellow rounded-lg opacity-50 transform rotate-12"></div>
-                <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-fitcooker-orange rounded-lg opacity-50 transform -rotate-12"></div>
-                
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400" />
+                <div className="relative drop-shadow-md">
+                  <div className="absolute -top-3 -left-3 w-8 h-8 bg-fitcooker-yellow rounded-lg opacity-50 transform rotate-12"></div>
+                  <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-fitcooker-orange rounded-lg opacity-50 transform -rotate-12"></div>
+                  
+                  <div className="bg-white rounded-full overflow-hidden relative z-10 border border-gray-200 flex items-center">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Search className="h-5 w-5 text-fitcooker-orange" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Busque por receitas, ingredientes..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full py-3 pl-12 pr-4 bg-transparent border-none rounded-lg focus:outline-none focus:ring-0"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                      >
+                        <X className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      </button>
+                    )}
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Busque por receitas, ingredientes..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-fitcooker-orange focus:border-transparent transition-all shadow-md"
-                  />
                 </div>
               </motion.div>
             </div>
@@ -192,16 +315,16 @@ const Recipes: React.FC = () => {
         </section>
         
         {/* Filters Toggle Button (Mobile) */}
-        <div className="md:hidden px-4 mb-4">
+        <div className="md:hidden px-4 -mt-6 mb-4 relative z-20">
           <button
             onClick={() => setShowFilters(!showFilters)}
             className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm"
           >
             <div className="flex items-center">
-              <Filter size={18} className="mr-2" />
+              <Filter size={18} className="mr-2 text-fitcooker-orange" />
               <span>Filtrar receitas</span>
             </div>
-            <ChevronDown size={18} className={`transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+            <ChevronDown size={18} className={`transition-transform text-fitcooker-orange ${showFilters ? 'rotate-180' : ''}`} />
           </button>
         </div>
         
@@ -212,7 +335,7 @@ const Recipes: React.FC = () => {
               {/* Sidebar Filters - Left Column */}
               <div className={`md:w-1/4 lg:w-1/5 ${showFilters || 'hidden md:block'}`}>
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 sticky top-24">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-6">
                     <h2 className="font-bold text-lg flex items-center">
                       <SlidersHorizontal size={18} className="mr-2 text-fitcooker-orange" />
                       Filtros
@@ -228,30 +351,81 @@ const Recipes: React.FC = () => {
                     )}
                   </div>
                   
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-semibold mb-2">Categorias</h3>
-                    <div className="flex flex-col gap-2">
-                      {Object.values(RecipeCategory).map((category) => (
-                        <button
-                          key={category}
-                          onClick={() => toggleFilter(category)}
-                          className={`text-left px-3 py-2 rounded-md transition-all ${
-                            activeFilters.includes(category)
-                              ? 'bg-gradient-to-r from-fitcooker-orange/20 to-fitcooker-orange/5 text-fitcooker-orange font-medium'
-                              : 'hover:bg-gray-100'
-                          }`}
-                        >
-                          <div className="flex items-center">
-                            <div className={`w-3 h-3 rounded-full mr-2 ${
-                              activeFilters.includes(category) ? 'bg-fitcooker-orange' : 'bg-gray-300'
-                            }`}></div>
-                            {category}
-                            {activeFilters.includes(category) && (
-                              <Sparkles size={12} className="ml-2 text-fitcooker-orange animate-pulse-light" />
-                            )}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold mb-3 flex items-center">
+                      <Sparkles className="w-4 h-4 text-fitcooker-orange mr-2" />
+                      Categorias
+                    </h3>
+                    
+                    <div className="space-y-1.5">
+                      <Tabs defaultValue="all" className="w-full">
+                        <TabsList className="w-full grid grid-cols-2 mb-4">
+                          <TabsTrigger value="all">Todas</TabsTrigger>
+                          <TabsTrigger value="popular">Populares</TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="all" className="mt-0">
+                          <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin">
+                            {Object.values(RecipeCategory).map((category) => (
+                              <TooltipProvider key={category}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      onClick={() => toggleFilter(category)}
+                                      className={`text-left px-3 py-2 rounded-md transition-all ${
+                                        activeFilters.includes(category)
+                                          ? 'bg-gradient-to-r from-fitcooker-orange/20 to-fitcooker-orange/5 text-fitcooker-orange font-medium'
+                                          : 'hover:bg-gray-100'
+                                      }`}
+                                    >
+                                      <div className="flex items-center">
+                                        <div className={`w-3 h-3 rounded-full mr-2 ${
+                                          activeFilters.includes(category) ? 'bg-fitcooker-orange' : 'bg-gray-300'
+                                        }`}></div>
+                                        {category}
+                                        {activeFilters.includes(category) && (
+                                          <Sparkles size={12} className="ml-2 text-fitcooker-orange animate-pulse-light" />
+                                        )}
+                                      </div>
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Receitas com foco em {category}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            ))}
                           </div>
-                        </button>
-                      ))}
+                        </TabsContent>
+                        
+                        <TabsContent value="popular" className="mt-0">
+                          <div className="flex flex-col gap-2">
+                            {Object.values(RecipeCategory).slice(0, 5).map((category) => (
+                              <button
+                                key={category}
+                                onClick={() => toggleFilter(category)}
+                                className={`text-left px-3 py-2 rounded-md transition-all ${
+                                  activeFilters.includes(category)
+                                    ? 'bg-gradient-to-r from-fitcooker-orange/20 to-fitcooker-orange/5 text-fitcooker-orange font-medium'
+                                    : 'hover:bg-gray-100'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center">
+                                    <div className={`w-3 h-3 rounded-full mr-2 ${
+                                      activeFilters.includes(category) ? 'bg-fitcooker-orange' : 'bg-gray-300'
+                                    }`}></div>
+                                    {category}
+                                  </div>
+                                  <span className="text-xs bg-fitcooker-orange/10 text-fitcooker-orange px-2 py-0.5 rounded-full">
+                                    Popular
+                                  </span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </TabsContent>
+                      </Tabs>
                     </div>
                   </div>
                   
@@ -372,6 +546,21 @@ const Recipes: React.FC = () => {
                         </motion.div>
                       ))}
                     </motion.div>
+                    
+                    {/* Pagination */}
+                    <div className="mt-10 flex justify-center">
+                      <div className="flex items-center space-x-2">
+                        <Button variant="outline" size="sm" disabled>
+                          <ChevronRight className="h-4 w-4 rotate-180" />
+                        </Button>
+                        <Button variant="outline" size="sm" className="bg-fitcooker-orange text-white">1</Button>
+                        <Button variant="outline" size="sm">2</Button>
+                        <Button variant="outline" size="sm">3</Button>
+                        <Button variant="outline" size="sm">
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
                   </>
                 ) : (
                   <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
@@ -380,16 +569,16 @@ const Recipes: React.FC = () => {
                       alt="No recipes found" 
                       className="w-48 h-48 mx-auto mb-6"
                     />
-                    <h3 className="heading-md mb-2">Nenhuma receita encontrada</h3>
+                    <h3 className="text-2xl font-bold mb-2">Nenhuma receita encontrada</h3>
                     <p className="text-gray-600 mb-6">
                       Tente ajustar seus filtros ou buscar por outro termo.
                     </p>
-                    <button 
+                    <Button 
                       onClick={clearFilters}
-                      className="btn btn-primary"
+                      className="bg-fitcooker-orange hover:bg-fitcooker-orange/90"
                     >
                       Limpar filtros
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
