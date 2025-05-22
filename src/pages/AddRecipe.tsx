@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { RecipeCategory } from '@/data/mockData';
 
-// Import new components
+// Import components
 import BasicInformation from '@/components/add-recipe/BasicInformation';
 import MediaUpload from '@/components/add-recipe/MediaUpload';
 import Ingredients from '@/components/add-recipe/Ingredients';
@@ -43,6 +45,7 @@ interface MediaItem {
 
 const AddRecipe: React.FC = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulate auth state
   
@@ -58,7 +61,6 @@ const AddRecipe: React.FC = () => {
   
   // Images and media
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
-  const [videoUrl, setVideoUrl] = useState('');
   
   // Ingredients management
   const [ingredients, setIngredients] = useState<IngredientInput[]>([
@@ -93,6 +95,23 @@ const AddRecipe: React.FC = () => {
     { calories: 0, protein: 0, carbs: 0, fat: 0 }
   );
   
+  // Validation and progress tracking
+  const validationItems = [
+    { title: 'Título da receita', isValid: title.trim() !== '' },
+    { title: 'Descrição da receita', isValid: description.trim() !== '' },
+    { title: 'Tempo de preparo', isValid: preparationTime !== '' },
+    { title: 'Porções', isValid: servings !== '' },
+    { title: 'Pelo menos uma categoria', isValid: selectedCategories.length > 0 },
+    { title: 'Imagem principal', isValid: mediaItems.some(item => item.isMain) },
+    { title: 'Pelo menos um ingrediente', isValid: ingredients.some(ing => ing.name.trim() !== '' && ing.quantity > 0) },
+    { title: 'Pelo menos um passo', isValid: steps.some(step => step.description.trim() !== '') }
+  ];
+  
+  // Calculate validation progress
+  const validationProgress = Math.round(
+    (validationItems.filter(item => item.isValid).length / validationItems.length) * 100
+  );
+  
   // Mock ingredients database for search
   const ingredientsDatabase = [
     { name: 'Peito de Frango', protein: 31, carbs: 0, fat: 3.6, calories: 165, unit: 'g' },
@@ -117,18 +136,12 @@ const AddRecipe: React.FC = () => {
       const newMediaItems: MediaItem[] = files.map((file, index) => {
         // Create preview for each file
         const reader = new FileReader();
-        let preview = '';
-        
-        reader.onloadend = () => {
-          preview = reader.result as string;
-        };
-        reader.readAsDataURL(file);
         
         return {
           id: Date.now().toString() + index,
           type: 'image',
           file: file,
-          preview: preview,
+          preview: URL.createObjectURL(file),
           isMain: mediaItems.length === 0 && index === 0 // First image is main by default
         };
       });
@@ -138,17 +151,16 @@ const AddRecipe: React.FC = () => {
   };
   
   // Handler for adding video URL
-  const handleAddVideoUrl = () => {
-    if (videoUrl.trim()) {
+  const handleAddVideoUrl = (url: string) => {
+    if (url.trim()) {
       const newMediaItem: MediaItem = {
         id: Date.now().toString(),
         type: 'video',
-        url: videoUrl,
+        url: url,
         isMain: false
       };
       
       setMediaItems(prev => [...prev, newMediaItem]);
-      setVideoUrl('');
     }
   };
   
@@ -303,16 +315,7 @@ const AddRecipe: React.FC = () => {
   
   // Check if recipe is valid for submission
   const isRecipeValid = () => {
-    return (
-      title.trim() !== '' &&
-      selectedCategories.length > 0 &&
-      preparationTime !== '' &&
-      mediaItems.length > 0 &&
-      ingredients.length > 0 && 
-      !ingredients.some(ing => !ing.name || ing.quantity <= 0) &&
-      steps.length > 0 && 
-      !steps.some(step => !step.description)
-    );
+    return validationProgress === 100;
   };
   
   // Check if user is logged in before proceeding
@@ -354,7 +357,6 @@ const AddRecipe: React.FC = () => {
     setDifficulty('Médio');
     setSelectedCategories([]);
     setMediaItems([]);
-    setVideoUrl('');
     setIngredients([{ id: '1', name: '', quantity: 0, unit: 'g', protein: 0, carbs: 0, fat: 0, calories: 0 }]);
     setSteps([{ id: '1', order: 1, description: '' }]);
   };
@@ -398,8 +400,6 @@ const AddRecipe: React.FC = () => {
                 
                 <MediaUpload 
                   mediaItems={mediaItems}
-                  videoUrl={videoUrl}
-                  setVideoUrl={setVideoUrl}
                   handleImageChange={handleImageChange}
                   handleAddVideoUrl={handleAddVideoUrl}
                   handleRemoveMediaItem={handleRemoveMediaItem}
@@ -445,6 +445,8 @@ const AddRecipe: React.FC = () => {
                 checkLoginBeforeSubmit={checkLoginBeforeSubmit}
                 ingredientsCount={ingredients.filter(ing => ing.name.trim() !== '').length}
                 stepsCount={steps.filter(step => step.description.trim() !== '').length}
+                validationProgress={validationProgress}
+                validationItems={validationItems}
               />
             </div>
           </div>

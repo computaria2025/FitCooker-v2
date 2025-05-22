@@ -39,8 +39,8 @@ const HowItWorks = () => {
         </div>
         
         <div className="relative">
-          {/* Timeline line */}
-          <div className="absolute left-1/2 top-12 bottom-12 w-1.5 -translate-x-1/2 bg-fitcooker-orange/20 rounded-full"></div>
+          {/* Timeline line - now positioned in the center vertically */}
+          <div className="absolute left-1/2 top-0 bottom-0 w-1.5 -translate-x-1/2 bg-fitcooker-orange/20 rounded-full"></div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 relative z-10">
             {steps.map((step, index) => (
@@ -50,17 +50,16 @@ const HowItWorks = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.5 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className={`flex ${index % 2 === 0 ? 'lg:justify-end' : 'lg:justify-start'} ${index === 0 || index === 1 ? 'lg:mt-10' : 'lg:mb-10'}`}
+                className={`flex ${index % 2 === 0 ? 'lg:justify-end' : 'lg:justify-start'}`}
               >
                 <div className="bg-white rounded-xl shadow-lg p-6 max-w-md relative hover:shadow-xl transition-shadow duration-300 border border-gray-100">
-                  <div className="absolute -left-3 lg:left-auto lg:top-1/2 lg:-translate-y-1/2 
-                       lg:-translate-x-1/2 lg:-ml-5 lg:ml-0
-                       lg:inset-x-0 lg:top-auto lg:bottom-auto
+                  <div className="absolute -left-3 lg:left-auto 
+                       lg:inset-x-0 lg:top-1/2 lg:-translate-y-1/2
                        flex items-center justify-center w-12 h-12 bg-fitcooker-orange rounded-full shadow-md z-10
-                       lg:left-1/2 lg:right-auto lg:mx-auto"
+                       lg:mx-auto"
                        style={{
-                         [index % 2 === 0 ? 'left' : 'right']: '-24px',
-                         [index % 2 === 0 ? 'right' : 'left']: 'auto',
+                         [index % 2 === 0 ? 'right' : 'left']: '-24px',
+                         [index % 2 === 0 ? 'left' : 'right']: 'auto',
                        }}
                   >
                     {step.icon}

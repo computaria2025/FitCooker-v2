@@ -2,7 +2,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Flame, Check, AlertCircle } from 'lucide-react';
+import { Clock, Flame, Check, AlertCircle, Utensils } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 interface RecipePreviewProps {
   title: string;
@@ -22,6 +23,11 @@ interface RecipePreviewProps {
   checkLoginBeforeSubmit: (e: React.FormEvent) => void;
   ingredientsCount: number;
   stepsCount: number;
+  validationProgress: number;
+  validationItems: {
+    title: string;
+    isValid: boolean;
+  }[];
 }
 
 const RecipePreview: React.FC<RecipePreviewProps> = ({
@@ -36,14 +42,21 @@ const RecipePreview: React.FC<RecipePreviewProps> = ({
   isRecipeValid,
   checkLoginBeforeSubmit,
   ingredientsCount,
-  stepsCount
+  stepsCount,
+  validationProgress,
+  validationItems
 }) => {
   const previewTitle = title || 'Nome da sua receita';
   const previewDesc = description || 'Descrição da sua receita, conte uma pequena história ou dê dicas sobre o prato.';
 
+  // Macro percentage calculations based on standard daily values
+  const proteinPercentage = Math.min(Math.round((totalMacros.protein || 0) / 50 * 100), 100);
+  const carbsPercentage = Math.min(Math.round((totalMacros.carbs || 0) / 300 * 100), 100);
+  const fatPercentage = Math.min(Math.round((totalMacros.fat || 0) / 70 * 100), 100);
+
   return (
     <div className="bg-white rounded-xl shadow-lg sticky top-24 overflow-hidden">
-      <div className="aspect-video bg-gray-200 w-full overflow-hidden relative">
+      <div className="aspect-video sm:aspect-square bg-gray-200 w-full overflow-hidden relative">
         {getMainImagePreview() ? (
           <img 
             src={getMainImagePreview() || ''} 
@@ -81,9 +94,7 @@ const RecipePreview: React.FC<RecipePreviewProps> = ({
             <p className="font-medium text-sm">{preparationTime ? `${preparationTime} min` : '--'}</p>
           </div>
           <div className="text-center p-2 bg-gray-50 rounded-md">
-            <svg className="w-5 h-5 mx-auto text-fitcooker-orange" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 18V6M6 18V6M6 12H18M12 6V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <Utensils className="w-5 h-5 mx-auto text-fitcooker-orange" />
             <p className="text-xs mt-1">Porções</p>
             <p className="font-medium text-sm">{servings || '--'}</p>
           </div>
@@ -94,24 +105,52 @@ const RecipePreview: React.FC<RecipePreviewProps> = ({
           </div>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-md space-y-3">
+        <div className="bg-gray-50 p-4 rounded-md space-y-4">
           <h4 className="font-medium">Informação nutricional (por porção)</h4>
-          <div className="grid grid-cols-4 gap-2 text-center">
-            <div className="bg-white p-2 rounded">
-              <p className="font-medium text-sm">{Math.round(totalMacros.calories || 0)}</p>
-              <p className="text-xs text-gray-500">kcal</p>
+          
+          <div className="text-center mb-3">
+            <span className="text-2xl font-bold text-fitcooker-orange">{Math.round(totalMacros.calories || 0)}</span>
+            <span className="text-sm text-gray-500 ml-1">kcal</span>
+          </div>
+          
+          <div className="space-y-3">
+            <div>
+              <div className="flex justify-between mb-1">
+                <span className="text-sm font-medium">Proteínas</span>
+                <span className="text-sm font-medium">{Math.round(totalMacros.protein || 0)}g</span>
+              </div>
+              <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-blue-500 rounded-full" 
+                  style={{ width: `${proteinPercentage}%` }}
+                ></div>
+              </div>
             </div>
-            <div className="bg-white p-2 rounded">
-              <p className="font-medium text-sm">{Math.round(totalMacros.protein || 0)}g</p>
-              <p className="text-xs text-gray-500">Proteínas</p>
+            
+            <div>
+              <div className="flex justify-between mb-1">
+                <span className="text-sm font-medium">Carboidratos</span>
+                <span className="text-sm font-medium">{Math.round(totalMacros.carbs || 0)}g</span>
+              </div>
+              <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-green-500 rounded-full" 
+                  style={{ width: `${carbsPercentage}%` }}
+                ></div>
+              </div>
             </div>
-            <div className="bg-white p-2 rounded">
-              <p className="font-medium text-sm">{Math.round(totalMacros.carbs || 0)}g</p>
-              <p className="text-xs text-gray-500">Carbos</p>
-            </div>
-            <div className="bg-white p-2 rounded">
-              <p className="font-medium text-sm">{Math.round(totalMacros.fat || 0)}g</p>
-              <p className="text-xs text-gray-500">Gorduras</p>
+            
+            <div>
+              <div className="flex justify-between mb-1">
+                <span className="text-sm font-medium">Gorduras</span>
+                <span className="text-sm font-medium">{Math.round(totalMacros.fat || 0)}g</span>
+              </div>
+              <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-yellow-500 rounded-full" 
+                  style={{ width: `${fatPercentage}%` }}
+                ></div>
+              </div>
             </div>
           </div>
         </div>
@@ -124,6 +163,29 @@ const RecipePreview: React.FC<RecipePreviewProps> = ({
           <div className="flex justify-between">
             <p className="text-sm font-medium">Passos</p>
             <span className="text-sm font-medium">{stepsCount}</span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <h4 className="text-sm font-medium">Progresso</h4>
+            <span className="text-xs font-medium">{validationProgress}%</span>
+          </div>
+          <Progress value={validationProgress} className="h-2" />
+          
+          <div className="space-y-1 mt-2">
+            {validationItems.map((item, index) => (
+              <div key={index} className="flex items-center text-xs">
+                {item.isValid ? (
+                  <Check className="w-3 h-3 text-green-500 mr-1.5" />
+                ) : (
+                  <AlertCircle className="w-3 h-3 text-gray-400 mr-1.5" />
+                )}
+                <span className={item.isValid ? 'text-green-700' : 'text-gray-500'}>
+                  {item.title}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 

@@ -18,6 +18,7 @@ const badgeVariants = cva(
         outline: "text-foreground",
         category: "border-transparent bg-fitcooker-orange/20 text-fitcooker-orange hover:bg-fitcooker-orange/30",
         count: "border-transparent bg-fitcooker-orange/20 text-fitcooker-orange hover:bg-fitcooker-orange/30 rounded-full",
+        plus: "border-transparent bg-fitcooker-orange/20 text-fitcooker-orange hover:bg-fitcooker-orange/30 rounded-full px-2 py-0.5",
       },
     },
     defaultVariants: {

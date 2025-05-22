@@ -124,14 +124,14 @@ const BasicInformation: React.FC<BasicInformationProps> = ({
         
         <div>
           <label className="block font-medium mb-1">Categorias *</label>
-          <div className="flex flex-wrap gap-2 mb-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-2">
             {recipeCategories.map((category) => (
               <button
                 key={category}
                 type="button"
                 onClick={() => toggleCategory(category)}
                 className={`
-                  transition-all duration-200 rounded-full px-3 py-2 flex items-center justify-center
+                  transition-all duration-200 rounded-full px-4 py-2.5 flex items-center justify-center text-sm
                   ${selectedCategories.includes(category)
                     ? 'bg-fitcooker-orange text-white' 
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}
@@ -160,12 +160,12 @@ const BasicInformation: React.FC<BasicInformationProps> = ({
               <p className="text-sm font-medium mb-2">Categorias selecionadas:</p>
               <div className="flex flex-wrap gap-1">
                 {selectedCategories.map((category) => (
-                  <Badge key={category} variant="category" className="px-3 py-1">
+                  <Badge key={category} variant="category" className="px-3 py-1.5 text-sm">
                     {category}
                     <button 
                       type="button"
                       onClick={() => toggleCategory(category)}
-                      className="ml-1 hover:text-red-500 transition-colors"
+                      className="ml-1.5 hover:text-red-500 transition-colors"
                     >
                       ×
                     </button>

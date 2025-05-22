@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Star, Award, ChefHat, TrendingUp, Utensils, Clock, ChevronRight, Users } from 'lucide-react';
 import RecipeCard from '@/components/ui/RecipeCard';
@@ -44,6 +44,8 @@ const featuredCooks = [
 ];
 
 const FeaturedPage: React.FC = () => {
+  const navigate = useNavigate();
+  
   useEffect(() => {
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
@@ -55,7 +57,8 @@ const FeaturedPage: React.FC = () => {
     visible: {
       opacity: 1,
       transition: { 
-        staggerChildren: 0.15
+        staggerChildren: 0.15,
+        delayChildren: 0.2
       }
     }
   };
@@ -107,6 +110,7 @@ const FeaturedPage: React.FC = () => {
                   <Button 
                     size="lg" 
                     className="bg-fitcooker-orange hover:bg-fitcooker-orange/90 px-8 py-6 h-auto"
+                    onClick={() => navigate('/recipes')}
                   >
                     Ver Todas as Receitas
                   </Button>
@@ -114,6 +118,7 @@ const FeaturedPage: React.FC = () => {
                     variant="outline" 
                     size="lg" 
                     className="border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange/10 px-8 py-6 h-auto"
+                    onClick={() => navigate('/cooks')}
                   >
                     Conheça os Cozinheiros
                   </Button>
@@ -195,11 +200,9 @@ const FeaturedPage: React.FC = () => {
               <Button 
                 size="lg" 
                 className="bg-fitcooker-orange hover:bg-fitcooker-orange/90 px-8 py-6 h-auto"
-                asChild
+                onClick={() => navigate('/recipes')}
               >
-                <Link to="/recipes">
-                  Explorar Mais Receitas
-                </Link>
+                Explorar Mais Receitas
               </Button>
             </div>
           </div>
@@ -277,11 +280,9 @@ const FeaturedPage: React.FC = () => {
                     
                     <Button 
                       className="w-full bg-fitcooker-orange hover:bg-fitcooker-orange/90 px-6 py-4 h-auto"
-                      asChild
+                      onClick={() => navigate(`/cooks?id=${cook.id}`)}
                     >
-                      <Link to={`/cooks?id=${cook.id}`}>
-                        Ver Perfil
-                      </Link>
+                      Ver Perfil
                     </Button>
                   </div>
                 </motion.div>
@@ -408,8 +409,8 @@ const FeaturedPage: React.FC = () => {
           </div>
         </section>
         
-        {/* CTA Section */}
-        <section className="py-16 bg-gradient-to-r from-fitcooker-orange/30 to-fitcooker-yellow/30">
+        {/* CTA Section with gradient background */}
+        <section className="py-16 bg-gradient-to-b from-white to-fitcooker-orange/30">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center max-w-3xl mx-auto">
               <h2 className="text-3xl font-bold mb-4">
@@ -422,21 +423,17 @@ const FeaturedPage: React.FC = () => {
                 <Button 
                   size="lg" 
                   className="bg-fitcooker-orange hover:bg-fitcooker-orange/90 px-8 py-6 h-auto min-w-40"
-                  asChild
+                  onClick={() => navigate('/add-recipe')}
                 >
-                  <Link to="/add-recipe">
-                    Adicionar Receita
-                  </Link>
+                  Adicionar Receita
                 </Button>
                 <Button 
                   variant="outline" 
                   size="lg" 
                   className="border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange/10 px-8 py-6 h-auto min-w-40"
-                  asChild
+                  onClick={() => navigate('/signup')}
                 >
-                  <Link to="/signup">
-                    Criar Conta
-                  </Link>
+                  Criar Conta
                 </Button>
               </div>
             </div>
