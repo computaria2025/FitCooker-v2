@@ -6,7 +6,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { recipeCategories } from "@/data/mockData";
+import { RecipeCategory } from "@/data/mockData";
 
 interface BasicInformationProps {
   title: string;
@@ -45,6 +45,9 @@ const BasicInformation: React.FC<BasicInformationProps> = ({
   servingsOptions,
   difficultyOptions
 }) => {
+  // Create an array from the RecipeCategory enum values
+  const recipeCategories = Object.values(RecipeCategory);
+  
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Informações Básicas</h2>
