@@ -178,22 +178,25 @@ const Home: React.FC = () => {
                   transition={{ delay: 0.2, duration: 0.4 }}
                   className="flex items-center mb-6"
                 >
+                  {/*
                   <ChefHat className="h-8 w-8 text-fitcooker-orange mr-2" />
+                  */}
+
                   <span className="text-sm font-semibold bg-fitcooker-orange/10 text-fitcooker-orange px-3 py-1 rounded-full">
                     NUTRIÇÃO · SAÚDE · SABOR
                   </span>
                 </motion.div>
                 
                 <h2 className="text-xl md:text-2xl font-bold mb-2 text-fitcooker-orange">
-                  TRANSFORME SUA DIETA, CONQUISTE SEU CORPO
+                  Vem conhecer o FitCooker
                 </h2>
                 
                 <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-                  Alimente-se melhor com <span className="text-fitcooker-orange">sabor e simplicidade</span>
+                  Alimente-se melhor com <span className="text-fitcooker-orange">sabor e praticidade</span>
                 </h1>
                 
                 <p className="text-lg text-gray-700 mb-8">
-                  O FitCooker é uma plataforma onde você pode criar, descobrir e compartilhar receitas saudáveis, com informações nutricionais automáticas e interação social.
+                  O FitCooker é a plataforma ideal para criar, descobrir e compartilhar receitas de todos os tipos — embora a gente recomende as mais saudáveis! 🤣 <br /> Você pode visualizar informações nutricionais automaticamente, explorar receitas, interagir com a comunidade, seguir perfis que combinam com você e escolher se quer ser um <b>chef</b> ou apenas um <b>espectador</b>.
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-4 mb-8">
@@ -394,7 +397,7 @@ const Home: React.FC = () => {
         </section>
         
         {/* Final CTA Section - Updated with different background */}
-        <section className="py-16 md:py-24 bg-gradient-to-r from-fitcooker-orange/30 to-fitcooker-yellow/30">
+        <section className="py-16 md:py-24 bg-gradient-to-b from-white via-fitcooker-orange/30 to-fitcooker-yellow/30">
           <div className="container mx-auto px-4 md:px-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
