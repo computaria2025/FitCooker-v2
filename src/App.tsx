@@ -17,6 +17,10 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import About from "./pages/About";
+import QuemSomos from "./pages/QuemSomos";
+import Contato from "./pages/Contato";
+import Privacidade from "./pages/Privacidade";
+import TermosDeUso from "./pages/TermosDeUso";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -90,6 +94,10 @@ const AppContent = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/about" element={<About />} />
+        <Route path="/quem-somos" element={<QuemSomos />} />
+        <Route path="/contato" element={<Contato />} />
+        <Route path="/privacidade" element={<Privacidade />} />
+        <Route path="/termos-de-uso" element={<TermosDeUso />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

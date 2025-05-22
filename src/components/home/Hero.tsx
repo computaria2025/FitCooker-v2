@@ -84,12 +84,9 @@ const Hero: React.FC = () => {
       ref={heroRef}
       className="min-h-screen relative flex items-center justify-center bg-cover bg-center bg-fixed"
       style={{
-        backgroundImage: 'url(https://static.vecteezy.com/ti/fotos-gratis/p1/2754160-fitness-equipment-and-health-food-on-blue-wooden-background-gratis-foto.JPG)',
+        backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(https://static.vecteezy.com/ti/fotos-gratis/p1/2754160-fitness-equipment-and-health-food-on-blue-wooden-background-gratis-foto.JPG)',
       }}
     >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-60"></div>
-      
       {/* Content */}
       <div className="container mx-auto px-4 md:px-6 relative z-10 hero-content">
         <motion.div 
@@ -114,7 +111,7 @@ const Hero: React.FC = () => {
             <p className="text-white/80 text-lg md:text-xl mb-8 italic">
               Receitas de alto desempenho para quem busca resultados extraordinários
             </p>
-            <div className="flex justify-center gap-4 mt-4">
+            <div className="flex flex-wrap justify-center gap-4 mt-4">
               <motion.span 
                 variants={itemVariants}
                 className="bg-fitcooker-orange px-3 py-1 rounded-full text-white text-sm font-medium inline-flex items-center justify-center h-8"
@@ -168,7 +165,7 @@ const Hero: React.FC = () => {
             <motion.div variants={cardVariants} whileHover="hover">
               <Link 
                 to="/recipes?category=bulking"
-                className="bg-white/10 backdrop-blur-md rounded-lg p-4 text-center block h-full transition-all duration-300"
+                className="bg-fitcooker-orange/20 backdrop-blur-md rounded-lg p-4 text-center block h-full transition-all duration-300"
               >
                 <TrendingUp className="h-8 w-8 mx-auto mb-2 text-fitcooker-orange" />
                 <span className="text-white font-medium">Bulking</span>
@@ -217,7 +214,7 @@ const Hero: React.FC = () => {
             >
               <Link
                 to="/recipes"
-                className="btn btn-primary inline-flex items-center space-x-2"
+                className="btn bg-fitcooker-orange hover:bg-fitcooker-orange/90 text-white px-6 py-3 rounded-lg inline-flex items-center space-x-2 border-2 border-fitcooker-orange"
               >
                 <span>Explorar Todas as Receitas</span>
               </Link>
@@ -226,7 +223,7 @@ const Hero: React.FC = () => {
         </motion.div>
       </div>
       
-      {/* Scroll Down Indicator - With much slower animation */}
+      {/* Scroll Down Indicator */}
       <div 
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-opacity duration-300 mx-auto"
         style={{ 

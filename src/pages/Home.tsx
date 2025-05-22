@@ -49,27 +49,27 @@ const Home: React.FC = () => {
   // Features data
   const features = [
     {
-      icon: <Pencil className="h-6 w-6 text-green-600" />,
+      icon: <Pencil className="h-6 w-6 text-fitcooker-orange" />,
       title: "Criação de receitas personalizadas",
       description: "Crie e compartilhe suas próprias receitas com a comunidade."
     },
     {
-      icon: <Calculator className="h-6 w-6 text-green-600" />,
+      icon: <Calculator className="h-6 w-6 text-fitcooker-orange" />,
       title: "Cálculo automático de macronutrientes",
       description: "Veja automaticamente os valores nutricionais de cada receita."
     },
     {
-      icon: <MessageSquare className="h-6 w-6 text-green-600" />,
+      icon: <MessageSquare className="h-6 w-6 text-fitcooker-orange" />,
       title: "Comunidade ativa para troca de dicas",
       description: "Participe de discussões e compartilhe seu conhecimento."
     },
     {
-      icon: <Book className="h-6 w-6 text-green-600" />,
+      icon: <Book className="h-6 w-6 text-fitcooker-orange" />,
       title: "Acesso rápido a receitas saudáveis",
       description: "Encontre rapidamente receitas que se encaixam nos seus objetivos."
     },
     {
-      icon: <Bookmark className="h-6 w-6 text-green-600" />,
+      icon: <Bookmark className="h-6 w-6 text-fitcooker-orange" />,
       title: "Organização de favoritas em coleções",
       description: "Salve e organize suas receitas favoritas para acesso rápido."
     }
@@ -79,7 +79,7 @@ const Home: React.FC = () => {
   const userProfiles = [
     {
       icon: <Search className="h-10 w-10 text-white" />,
-      bgColor: "bg-blue-500",
+      bgColor: "bg-fitcooker-orange",
       title: "Para quem só quer explorar receitas",
       description: "Descubra receitas saudáveis, filtrando por proteína, carboidrato, tempo de preparo ou preferências alimentares.",
       features: [
@@ -105,7 +105,7 @@ const Home: React.FC = () => {
     },
     {
       icon: <Users className="h-10 w-10 text-white" />,
-      bgColor: "bg-orange-500",
+      bgColor: "bg-fitcooker-orange",
       title: "Para quem quer interagir",
       description: "Curta, comente, siga autores favoritos e participe de discussões.",
       features: [
@@ -121,34 +121,39 @@ const Home: React.FC = () => {
   // How it works steps
   const steps = [
     {
-      icon: <ClipboardList className="h-6 w-6 text-green-600" />,
+      icon: <ClipboardList className="h-6 w-6 text-fitcooker-orange" />,
       title: "Crie uma conta grátis",
       description: "Ou explore como visitante sem se cadastrar."
     },
     {
-      icon: <Search className="h-6 w-6 text-green-600" />,
+      icon: <Search className="h-6 w-6 text-fitcooker-orange" />,
       title: "Explore ou crie receitas",
       description: "Encontre ou compartilhe receitas conforme seus objetivos."
     },
     {
-      icon: <Calculator className="h-6 w-6 text-green-600" />,
+      icon: <Calculator className="h-6 w-6 text-fitcooker-orange" />,
       title: "Veja os macronutrientes",
       description: "Acompanhe automaticamente os valores nutricionais."
     },
     {
-      icon: <Heart className="h-6 w-6 text-green-600" />,
+      icon: <Heart className="h-6 w-6 text-fitcooker-orange" />,
       title: "Salve suas favoritas",
       description: "Organize suas receitas preferidas em coleções."
     },
     {
-      icon: <MessageSquare className="h-6 w-6 text-green-600" />,
+      icon: <MessageSquare className="h-6 w-6 text-fitcooker-orange" />,
       title: "Interaja com a comunidade",
       description: "Compartilhe conhecimento e dicas com outros usuários."
     },
     {
-      icon: <TrendingUp className="h-6 w-6 text-green-600" />,
+      icon: <TrendingUp className="h-6 w-6 text-fitcooker-orange" />,
       title: "Use filtros e categorias",
       description: "Mantenha o foco nos seus resultados e objetivos."
+    },
+    {
+      icon: <MessageSquare className="h-6 w-6 text-fitcooker-orange" />,
+      title: "Avalie e comente receitas",
+      description: "Contribua com feedback valioso para outros usuários."
     }
   ];
 
@@ -157,7 +162,7 @@ const Home: React.FC = () => {
       <Navbar />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="py-16 md:py-24 bg-gradient-to-b from-green-50 to-white">
+        <section className="py-16 md:py-24 bg-gradient-to-b from-fitcooker-orange/10 to-white">
           <div className="container mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <motion.div 
@@ -172,14 +177,18 @@ const Home: React.FC = () => {
                   transition={{ delay: 0.2, duration: 0.4 }}
                   className="flex items-center mb-6"
                 >
-                  <ChefHat className="h-8 w-8 text-green-600 mr-2" />
-                  <span className="text-sm font-semibold bg-green-100 text-green-800 px-3 py-1 rounded-full">
-                    Nova plataforma para entusiastas da alimentação saudável
+                  <ChefHat className="h-8 w-8 text-fitcooker-orange mr-2" />
+                  <span className="text-sm font-semibold bg-fitcooker-orange/10 text-fitcooker-orange px-3 py-1 rounded-full">
+                    NUTRIÇÃO · SAÚDE · SABOR
                   </span>
                 </motion.div>
                 
+                <h2 className="text-xl md:text-2xl font-bold mb-2 text-fitcooker-orange">
+                  TRANSFORME SUA DIETA, CONQUISTE SEU CORPO
+                </h2>
+                
                 <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-                  Alimente-se melhor com <span className="text-green-600">sabor e simplicidade</span>
+                  Alimente-se melhor com <span className="text-fitcooker-orange">sabor e simplicidade</span>
                 </h1>
                 
                 <p className="text-lg text-gray-700 mb-8">
@@ -187,10 +196,10 @@ const Home: React.FC = () => {
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                  <Link to="/signup" className="btn bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg">
+                  <Link to="/signup" className="btn bg-fitcooker-orange hover:bg-fitcooker-orange/90 text-white px-6 py-4 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg border-2 border-fitcooker-orange">
                     Criar minha conta grátis
                   </Link>
-                  <Link to="/recipes" className="btn-outline flex items-center justify-center text-green-700 border border-green-600 px-6 py-3 rounded-lg font-medium transition-all hover:bg-green-50">
+                  <Link to="/recipes" className="flex items-center justify-center text-fitcooker-orange border-2 border-fitcooker-orange px-6 py-4 rounded-lg font-medium transition-all hover:bg-fitcooker-orange/10">
                     Explorar receitas sem criar conta
                   </Link>
                 </div>
@@ -216,8 +225,8 @@ const Home: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="absolute -top-6 -right-6 bg-yellow-100 rounded-lg p-4 shadow-lg hidden md:block">
-                  <div className="text-yellow-800 flex items-center gap-2">
+                <div className="absolute -top-6 -right-6 bg-fitcooker-yellow p-4 rounded-lg shadow-lg hidden md:block">
+                  <div className="text-fitcooker-black flex items-center gap-2">
                     <Calculator className="h-5 w-5" />
                     <span className="font-medium">Cálculo automático de macros</span>
                   </div>
@@ -239,7 +248,7 @@ const Home: React.FC = () => {
                   variants={itemVariants}
                   className="bg-white p-4 md:p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100"
                 >
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 bg-fitcooker-orange/10 rounded-full flex items-center justify-center mb-4">
                     {feature.icon}
                   </div>
                   <h3 className="font-medium text-gray-900 mb-2">{feature.title}</h3>
@@ -288,7 +297,7 @@ const Home: React.FC = () => {
                     <ul className="space-y-3 mb-6">
                       {profile.features.map((feature, idx) => (
                         <li key={idx} className="flex items-start">
-                          <ChevronRight className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                          <ChevronRight className="h-5 w-5 text-fitcooker-orange mr-2 flex-shrink-0 mt-0.5" />
                           <span className="text-gray-700">{feature}</span>
                         </li>
                       ))}
@@ -307,7 +316,7 @@ const Home: React.FC = () => {
           </div>
         </section>
         
-        {/* How it Works Section */}
+        {/* How it Works Section - Enhanced visual appeal */}
         <section className="py-16 md:py-24 bg-white">
           <div className="container mx-auto px-4 md:px-6">
             <motion.div
@@ -323,11 +332,11 @@ const Home: React.FC = () => {
               </p>
             </motion.div>
             
-            {/* Desktop timeline */}
+            {/* Desktop timeline - Enhanced visual design */}
             <div className="hidden md:block relative">
-              <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-green-200" />
+              <div className="absolute left-0 right-0 top-1/2 h-1 bg-gradient-to-r from-fitcooker-orange/30 via-fitcooker-orange to-fitcooker-yellow rounded-full" />
               
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-7 gap-4">
                 {steps.map((step, index) => (
                   <motion.div
                     key={index}
@@ -338,13 +347,13 @@ const Home: React.FC = () => {
                     className="relative"
                   >
                     <div className="flex flex-col items-center">
-                      <div className="w-12 h-12 bg-white border-2 border-green-500 rounded-full flex items-center justify-center mb-4 z-10">
+                      <div className="w-14 h-14 bg-white border-2 border-fitcooker-orange rounded-full flex items-center justify-center mb-4 z-10 shadow-md">
                         {step.icon}
                       </div>
-                      <span className="absolute top-6 -ml-2 w-6 h-6 rounded-full bg-green-100 text-center text-green-700 font-bold">
+                      <span className="absolute top-7 -ml-2.5 w-6 h-6 rounded-full bg-fitcooker-orange text-center text-white font-bold text-sm flex items-center justify-center">
                         {index + 1}
                       </span>
-                      <h3 className="text-center font-medium mb-2">{step.title}</h3>
+                      <h3 className="text-center font-medium mb-2 text-fitcooker-black">{step.title}</h3>
                       <p className="text-sm text-gray-600 text-center">{step.description}</p>
                     </div>
                   </motion.div>
@@ -352,7 +361,7 @@ const Home: React.FC = () => {
               </div>
             </div>
             
-            {/* Mobile steps */}
+            {/* Mobile steps - Enhanced cards */}
             <div className="md:hidden space-y-6">
               {steps.map((step, index) => (
                 <motion.div
@@ -361,13 +370,13 @@ const Home: React.FC = () => {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="flex items-start gap-4 bg-white p-4 rounded-lg border border-gray-100 shadow-sm"
+                  className="flex items-start gap-4 bg-white p-4 rounded-lg border border-fitcooker-orange/20 shadow-sm"
                 >
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-green-700 font-bold">{index + 1}</span>
+                  <div className="w-12 h-12 bg-gradient-to-br from-fitcooker-orange to-fitcooker-yellow rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
+                    <span className="text-white font-bold">{index + 1}</span>
                   </div>
                   <div>
-                    <h3 className="font-medium mb-1">{step.title}</h3>
+                    <h3 className="font-medium mb-1 text-fitcooker-black">{step.title}</h3>
                     <p className="text-sm text-gray-600">{step.description}</p>
                   </div>
                 </motion.div>
@@ -377,7 +386,7 @@ const Home: React.FC = () => {
         </section>
         
         {/* Final CTA Section */}
-        <section className="py-16 md:py-24 bg-green-900 text-white">
+        <section className="py-16 md:py-24 bg-fitcooker-black text-white">
           <div className="container mx-auto px-4 md:px-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -393,7 +402,7 @@ const Home: React.FC = () => {
               <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
                 <Link
                   to="/signup"
-                  className="btn bg-yellow-500 hover:bg-yellow-600 text-gray-900 px-8 py-4 rounded-lg font-medium text-lg transition-colors shadow-lg hover:shadow-xl"
+                  className="btn bg-fitcooker-orange hover:bg-fitcooker-orange/90 text-white px-8 py-4 rounded-lg font-medium text-lg transition-colors shadow-lg hover:shadow-xl border-2 border-fitcooker-orange"
                 >
                   Criar minha conta grátis
                 </Link>
@@ -401,7 +410,7 @@ const Home: React.FC = () => {
               
               <Link
                 to="/recipes"
-                className="text-green-200 hover:text-white underline underline-offset-4"
+                className="text-fitcooker-orange hover:text-white underline underline-offset-4"
               >
                 Ou continue explorando receitas sem se cadastrar
               </Link>

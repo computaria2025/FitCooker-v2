@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChefHat, Instagram, Facebook, Twitter, Youtube } from 'lucide-react';
+import { ChefHat, Instagram, Facebook, Twitter, Youtube, HelpCircle } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -45,8 +45,8 @@ const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/categories" className="text-gray-400 hover:text-white transition-colors">
-                  Categorias
+                <Link to="/destaques" className="text-gray-400 hover:text-white transition-colors">
+                  Destaques
                 </Link>
               </li>
               <li>
@@ -63,51 +63,41 @@ const Footer: React.FC = () => {
           </div>
           
           <div className="col-span-1">
-            <h3 className="text-lg font-semibold mb-4">Categorias</h3>
+            <h3 className="text-lg font-semibold mb-4">Ajuda</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/recipes?category=bulking" className="text-gray-400 hover:text-white transition-colors">
-                  Bulking
+                <Link to="/about#faq" className="text-gray-400 hover:text-white transition-colors flex items-center">
+                  <HelpCircle size={16} className="mr-2" /> Dúvidas?
                 </Link>
               </li>
               <li>
-                <Link to="/recipes?category=cutting" className="text-gray-400 hover:text-white transition-colors">
-                  Cutting
+                <Link to="/contato" className="text-gray-400 hover:text-white transition-colors">
+                  Contato
                 </Link>
               </li>
               <li>
-                <Link to="/recipes?category=highprotein" className="text-gray-400 hover:text-white transition-colors">
-                  Alto Proteína
+                <Link to="/about" className="text-gray-400 hover:text-white transition-colors">
+                  Sobre Nós
                 </Link>
               </li>
               <li>
-                <Link to="/recipes?category=lowcarb" className="text-gray-400 hover:text-white transition-colors">
-                  Low Carb
+                <Link to="/quem-somos" className="text-gray-400 hover:text-white transition-colors">
+                  Quem Somos
                 </Link>
               </li>
             </ul>
           </div>
           
           <div className="col-span-1">
-            <h3 className="text-lg font-semibold mb-4">Sobre</h3>
+            <h3 className="text-lg font-semibold mb-4">Legal</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/about" className="text-gray-400 hover:text-white transition-colors">
-                  Quem Somos
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-gray-400 hover:text-white transition-colors">
-                  Contato
-                </Link>
-              </li>
-              <li>
-                <Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/privacidade" className="text-gray-400 hover:text-white transition-colors">
                   Privacidade
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/termos-de-uso" className="text-gray-400 hover:text-white transition-colors">
                   Termos de Uso
                 </Link>
               </li>
