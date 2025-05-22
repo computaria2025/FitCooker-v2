@@ -18,6 +18,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger, // Added DialogTrigger import here
 } from "@/components/ui/dialog";
 import { Star, Search, Award, ChefHat, Book, Users, Heart, MessageSquare, Filter, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

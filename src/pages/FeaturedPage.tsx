@@ -1,11 +1,10 @@
-
 import React, { useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Star, Award, ChefHat, TrendingUp, Utensils, Clock } from 'lucide-react';
+import { Star, Award, ChefHat, TrendingUp, Utensils, Clock, ChevronRight, Users } from 'lucide-react';
 import RecipeCard from '@/components/ui/RecipeCard';
 import { allRecipes } from '@/data/mockData';
 
@@ -346,7 +345,7 @@ const FeaturedPage: React.FC = () => {
                   {allRecipes.slice(0, 3).map((recipe) => (
                     <li key={recipe.id} className="flex items-center gap-3">
                       <img 
-                        src={recipe.imageSrc} 
+                        src={recipe.image} 
                         alt={recipe.title}
                         className="w-12 h-12 rounded-md object-cover"
                       />
