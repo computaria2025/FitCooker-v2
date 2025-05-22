@@ -1,15 +1,13 @@
 
 import React from 'react';
-import { FileCheck, Clock, Users, ChefHat } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import MacroDisplay from '@/components/ui/MacroDisplay';
-import CategoryBadge from '@/components/ui/CategoryBadge';
-import { RecipeCategory } from '@/data/mockData';
+import { Badge } from '@/components/ui/badge';
+import { Clock, Flame, Check, AlertCircle } from 'lucide-react';
 
 interface RecipePreviewProps {
   title: string;
   description: string;
-  selectedCategories: RecipeCategory[];
+  selectedCategories: string[];
   preparationTime: string;
   servings: string;
   difficulty: string;
@@ -40,112 +38,115 @@ const RecipePreview: React.FC<RecipePreviewProps> = ({
   ingredientsCount,
   stepsCount
 }) => {
+  const previewTitle = title || 'Nome da sua receita';
+  const previewDesc = description || 'Descrição da sua receita, conte uma pequena história ou dê dicas sobre o prato.';
+
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
-      <h2 className="text-xl font-bold mb-4 flex items-center">
-        <FileCheck className="mr-2 text-green-500" />
-        Pré-visualização da Receita
-      </h2>
-      
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="bg-white rounded-xl shadow-lg sticky top-24 overflow-hidden">
+      <div className="aspect-video bg-gray-200 w-full overflow-hidden relative">
         {getMainImagePreview() ? (
           <img 
             src={getMainImagePreview() || ''} 
-            alt="Preview" 
-            className="w-full h-48 object-cover"
+            alt="Prévia da receita" 
+            className="w-full h-full object-cover"
           />
         ) : (
-          <div className="bg-gray-100 h-40 flex items-center justify-center">
-            <p className="text-gray-500 text-center">Adicione uma imagem principal</p>
+          <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <span className="text-sm">Prévia da imagem aparecerá aqui</span>
+            <span className="text-xs mt-1">Adicione uma imagem para visualizar</span>
           </div>
         )}
-        
-        <div className="p-4">
-          <h3 className="font-bold text-lg">{title || "Título da Receita"}</h3>
-          
-          <p className="text-gray-600 text-sm mt-2 line-clamp-2">
-            {description || "Descrição da receita aparecerá aqui..."}
-          </p>
-          
-          <div className="flex flex-wrap gap-1 mt-3">
-            {selectedCategories.map(category => (
-              <CategoryBadge key={category} category={category} />
-            ))}
-            {selectedCategories.length === 0 && (
-              <span className="text-sm text-gray-400">Selecione categorias</span>
-            )}
+      </div>
+
+      <div className="p-6 space-y-4">
+        <div className="space-y-2">
+          <h3 className="text-xl font-bold">{previewTitle}</h3>
+          <p className="text-gray-600 text-sm line-clamp-3">{previewDesc}</p>
+        </div>
+
+        <div className="flex flex-wrap gap-1">
+          {selectedCategories.length > 0 ? (
+            selectedCategories.map((category) => (
+              <Badge key={category} variant="category">{category}</Badge>
+            ))
+          ) : (
+            <Badge variant="outline">Selecione categorias</Badge>
+          )}
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 py-2">
+          <div className="text-center p-2 bg-gray-50 rounded-md">
+            <Clock className="w-5 h-5 mx-auto text-fitcooker-orange" />
+            <p className="text-xs mt-1">Tempo</p>
+            <p className="font-medium text-sm">{preparationTime ? `${preparationTime} min` : '--'}</p>
           </div>
-          
-          <div className="flex flex-wrap mt-4 text-sm text-gray-500 gap-4">
-            <div className="flex items-center">
-              <Clock size={16} className="mr-1" />
-              {preparationTime ? `${preparationTime} min` : "Tempo"}
-            </div>
-            <div className="flex items-center">
-              <Users size={16} className="mr-1" />
-              {servings ? `${servings} porções` : "Porções"}
-            </div>
-            <div className="flex items-center">
-              <ChefHat size={16} className="mr-1" />
-              {difficulty}
-            </div>
+          <div className="text-center p-2 bg-gray-50 rounded-md">
+            <svg className="w-5 h-5 mx-auto text-fitcooker-orange" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 18V6M6 18V6M6 12H18M12 6V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <p className="text-xs mt-1">Porções</p>
+            <p className="font-medium text-sm">{servings || '--'}</p>
           </div>
-          
-          <div className="mt-4">
-            <h4 className="font-semibold text-sm">Informações Nutricionais</h4>
-            <MacroDisplay
-              calories={Math.round(totalMacros.calories)}
-              protein={Math.round(totalMacros.protein)}
-              carbs={Math.round(totalMacros.carbs)}
-              fat={Math.round(totalMacros.fat)}
-              className="mt-1"
-            />
+          <div className="text-center p-2 bg-gray-50 rounded-md">
+            <Flame className="w-5 h-5 mx-auto text-fitcooker-orange" />
+            <p className="text-xs mt-1">Dificuldade</p>
+            <p className="font-medium text-sm">{difficulty || '--'}</p>
           </div>
         </div>
+
+        <div className="bg-gray-50 p-4 rounded-md space-y-3">
+          <h4 className="font-medium">Informação nutricional (por porção)</h4>
+          <div className="grid grid-cols-4 gap-2 text-center">
+            <div className="bg-white p-2 rounded">
+              <p className="font-medium text-sm">{Math.round(totalMacros.calories || 0)}</p>
+              <p className="text-xs text-gray-500">kcal</p>
+            </div>
+            <div className="bg-white p-2 rounded">
+              <p className="font-medium text-sm">{Math.round(totalMacros.protein || 0)}g</p>
+              <p className="text-xs text-gray-500">Proteínas</p>
+            </div>
+            <div className="bg-white p-2 rounded">
+              <p className="font-medium text-sm">{Math.round(totalMacros.carbs || 0)}g</p>
+              <p className="text-xs text-gray-500">Carbos</p>
+            </div>
+            <div className="bg-white p-2 rounded">
+              <p className="font-medium text-sm">{Math.round(totalMacros.fat || 0)}g</p>
+              <p className="text-xs text-gray-500">Gorduras</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <p className="text-sm font-medium">Ingredientes</p>
+            <span className="text-sm font-medium">{ingredientsCount}</span>
+          </div>
+          <div className="flex justify-between">
+            <p className="text-sm font-medium">Passos</p>
+            <span className="text-sm font-medium">{stepsCount}</span>
+          </div>
+        </div>
+
+        {isRecipeValid ? (
+          <Button 
+            type="button" 
+            className="w-full bg-fitcooker-orange hover:bg-fitcooker-orange/90 px-6 py-4 h-auto"
+            onClick={checkLoginBeforeSubmit}
+          >
+            <Check className="mr-2 h-5 w-5" />
+            Publicar Receita
+          </Button>
+        ) : (
+          <Button 
+            type="button" 
+            className="w-full bg-gray-300 hover:bg-gray-400 cursor-not-allowed px-6 py-4 h-auto"
+            disabled
+          >
+            <AlertCircle className="mr-2 h-5 w-5" />
+            Complete Todos os Campos
+          </Button>
+        )}
       </div>
-      
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
-        <h3 className="font-semibold text-blue-800 mb-2">Checklist de Publicação</h3>
-        <ul className="space-y-2">
-          <li className="flex items-start">
-            <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${title ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
-            <span className={title ? 'text-gray-800' : 'text-gray-500'}>Título da receita</span>
-          </li>
-          <li className="flex items-start">
-            <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${description ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
-            <span className={description ? 'text-gray-800' : 'text-gray-500'}>Descrição da receita</span>
-          </li>
-          <li className="flex items-start">
-            <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${selectedCategories.length > 0 ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
-            <span className={selectedCategories.length > 0 ? 'text-gray-800' : 'text-gray-500'}>Pelo menos uma categoria selecionada</span>
-          </li>
-          <li className="flex items-start">
-            <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${preparationTime ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
-            <span className={preparationTime ? 'text-gray-800' : 'text-gray-500'}>Tempo de preparo</span>
-          </li>
-          <li className="flex items-start">
-            <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${servings ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
-            <span className={servings ? 'text-gray-800' : 'text-gray-500'}>Porções</span>
-          </li>
-          <li className="flex items-start">
-            <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${ingredientsCount > 0 ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
-            <span className={ingredientsCount > 0 ? 'text-gray-800' : 'text-gray-500'}>Pelo menos um ingrediente selecionado</span>
-          </li>
-          <li className="flex items-start">
-            <div className={`mt-0.5 flex-shrink-0 h-4 w-4 rounded-full ${stepsCount > 0 ? 'bg-green-500' : 'bg-gray-200'} mr-2`}></div>
-            <span className={stepsCount > 0 ? 'text-gray-800' : 'text-gray-500'}>Pelo menos um passo adicionado</span>
-          </li>
-        </ul>
-        
-        <p className="text-xs text-gray-600 mt-4">
-          Verifique se você preencheu todos os campos obrigatórios e se as informações estão corretas. 
-          Após a publicação, sua receita passará por uma revisão rápida antes de ser disponibilizada para todos.
-        </p>
-      </div>
-      
-      <Button type="submit" className="w-full mt-6" size="lg" onClick={checkLoginBeforeSubmit}>
-        Publicar Receita
-      </Button>
     </div>
   );
 };

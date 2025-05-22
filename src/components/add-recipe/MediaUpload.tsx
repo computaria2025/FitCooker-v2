@@ -1,10 +1,8 @@
 
-import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { ImagePlus, Video, Check, X, Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { Camera, Video, X, Star } from 'lucide-react';
 
 interface MediaItem {
   id: string;
@@ -34,123 +32,146 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
   handleRemoveMediaItem,
   handleSetMainImage
 }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const triggerFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  
+  const renderPreview = (item: MediaItem) => {
+    if (item.type === 'image') {
+      if (item.preview) {
+        return (
+          <img 
+            src={item.preview} 
+            alt="Preview" 
+            className="w-full h-full object-cover"
+          />
+        );
+      } else if (item.file) {
+        const url = URL.createObjectURL(item.file);
+        return (
+          <img 
+            src={url}
+            alt="Preview"
+            className="w-full h-full object-cover"
+            onLoad={() => URL.revokeObjectURL(url)}
+          />
+        );
+      }
+    } else if (item.type === 'video' && item.url) {
+      return (
+        <div className="flex items-center justify-center h-full bg-gray-800 text-white">
+          <Video className="w-8 h-8" />
+        </div>
+      );
+    }
+    
+    return (
+      <div className="flex items-center justify-center h-full">
+        <span className="text-gray-400">Sem prévia</span>
+      </div>
+    );
+  };
+  
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <h2 className="text-xl font-bold mb-4">Mídia (Opcional)</h2>
+    <div>
+      <h2 className="text-xl font-semibold mb-4">Mídia</h2>
       
       <div className="space-y-6">
-        {/* Media gallery */}
-        <div>
-          <div className="flex justify-between items-center mb-2">
-            <Label className="block">Imagens da Receita</Label>
-            <p className="text-xs text-gray-500">* Marque uma das imagens como principal para preview</p>
-          </div>
+        <div className="bg-gray-50 p-6 rounded-lg border border-dashed border-gray-300">
+          <Input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={handleImageChange}
+          />
           
-          {mediaItems.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-4">
-              {mediaItems.filter(item => item.type === 'image').map((item) => (
-                <div key={item.id} className="relative group">
-                  <div className={cn(
-                    "h-24 w-full rounded-lg overflow-hidden border-2",
-                    item.isMain ? "border-fitcooker-orange" : "border-transparent"
-                  )}>
-                    <img 
-                      src={item.preview} 
-                      alt="Imagem da receita" 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="absolute top-2 right-2 flex space-x-1">
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveMediaItem(item.id)}
-                      className="bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
-                      title="Remover imagem"
-                    >
-                      <X size={14} />
-                    </button>
-                    {!item.isMain && (
-                      <button
+          <div className="text-center">
+            <Camera className="w-10 h-10 mx-auto text-gray-400" />
+            <h3 className="text-lg font-medium mt-2">Adicione fotos da sua receita</h3>
+            <p className="text-gray-500 mt-1 mb-4">
+              Arraste e solte ou clique para fazer upload (máx. 5MB cada)
+            </p>
+            <Button 
+              type="button"
+              variant="outline"
+              onClick={triggerFileInput}
+              className="mx-auto"
+            >
+              Escolher Imagens
+            </Button>
+          </div>
+        </div>
+        
+        {mediaItems.length > 0 && (
+          <div>
+            <h3 className="font-medium mb-2">Imagens Adicionadas</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {mediaItems.map((item) => (
+                <div 
+                  key={item.id} 
+                  className={`relative aspect-square rounded-lg overflow-hidden border ${item.isMain ? 'border-2 border-fitcooker-orange' : 'border-gray-200'}`}
+                >
+                  {renderPreview(item)}
+                  
+                  <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-50 flex flex-col items-center justify-center opacity-0 hover:opacity-100 transition-all duration-200">
+                    <div className="flex gap-2">
+                      <Button 
                         type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="bg-white text-gray-800 hover:bg-gray-100"
                         onClick={() => handleSetMainImage(item.id)}
-                        className="bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
-                        title="Definir como principal"
+                        disabled={item.isMain}
                       >
-                        <Check size={14} />
-                      </button>
-                    )}
+                        <Star className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="bg-white text-red-600 hover:bg-red-50 hover:text-red-700"
+                        onClick={() => handleRemoveMediaItem(item.id)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
+                  
                   {item.isMain && (
-                    <div className="absolute bottom-0 left-0 w-full bg-fitcooker-orange text-white text-xs py-1 text-center">
-                      Principal
+                    <div className="absolute top-2 right-2">
+                      <span className="bg-fitcooker-orange text-white text-xs px-2 py-1 rounded-full">Principal</span>
                     </div>
                   )}
                 </div>
               ))}
             </div>
-          )}
-          
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-            <label className="cursor-pointer block">
-              <div className="flex flex-col items-center justify-center py-6">
-                <ImagePlus className="w-12 h-12 text-gray-400 mb-2" />
-                <span className="text-sm text-gray-500">Clique para fazer upload</span>
-                <span className="text-xs text-gray-400 mt-1">JPG, PNG (Max 5MB por imagem)</span>
-              </div>
-              <input 
-                type="file" 
-                className="hidden"
-                accept="image/*"
-                onChange={handleImageChange}
-                multiple
-              />
-            </label>
           </div>
-        </div>
+        )}
         
-        {/* Video section */}
         <div>
-          <Label className="block mb-2">Vídeos (opcional)</Label>
-          
-          {mediaItems.filter(item => item.type === 'video').length > 0 && (
-            <div className="space-y-2 mb-4">
-              {mediaItems.filter(item => item.type === 'video').map((item) => (
-                <div key={item.id} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
-                  <div className="flex items-center">
-                    <Video className="text-gray-400 mr-2" size={20} />
-                    <span className="text-sm truncate max-w-xs">{item.url}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveMediaItem(item.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          <div className="flex items-center space-x-2">
-            <div className="flex-grow">
-              <Input
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="Ex: https://youtube.com/watch?v=..."
-              />
-            </div>
+          <h3 className="font-medium mb-2">Adicionar Vídeo (opcional)</h3>
+          <div className="flex gap-2">
+            <Input 
+              type="url"
+              placeholder="Cole o link do YouTube ou Vimeo"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+            />
             <Button 
-              type="button" 
+              type="button"
               variant="outline"
               onClick={handleAddVideoUrl}
               disabled={!videoUrl.trim()}
             >
-              <Plus size={16} className="mr-2" />
               Adicionar
             </Button>
           </div>
-          <p className="text-xs text-gray-500 mt-1">YouTube, Vimeo e outros links de vídeo</p>
         </div>
       </div>
     </div>

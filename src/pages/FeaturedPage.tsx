@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -105,14 +106,14 @@ const FeaturedPage: React.FC = () => {
                 <div className="flex flex-wrap gap-4">
                   <Button 
                     size="lg" 
-                    className="bg-fitcooker-orange hover:bg-fitcooker-orange/90"
+                    className="bg-fitcooker-orange hover:bg-fitcooker-orange/90 px-8 py-6 h-auto"
                   >
                     Ver Todas as Receitas
                   </Button>
                   <Button 
                     variant="outline" 
                     size="lg" 
-                    className="border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange/10"
+                    className="border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange/10 px-8 py-6 h-auto"
                   >
                     Conheça os Cozinheiros
                   </Button>
@@ -193,7 +194,7 @@ const FeaturedPage: React.FC = () => {
             <div className="mt-10 text-center">
               <Button 
                 size="lg" 
-                className="bg-fitcooker-orange hover:bg-fitcooker-orange/90"
+                className="bg-fitcooker-orange hover:bg-fitcooker-orange/90 px-8 py-6 h-auto"
                 asChild
               >
                 <Link to="/recipes">
@@ -275,7 +276,7 @@ const FeaturedPage: React.FC = () => {
                     </div>
                     
                     <Button 
-                      className="w-full bg-fitcooker-orange hover:bg-fitcooker-orange/90"
+                      className="w-full bg-fitcooker-orange hover:bg-fitcooker-orange/90 px-6 py-4 h-auto"
                       asChild
                     >
                       <Link to={`/cooks?id=${cook.id}`}>
@@ -345,7 +346,7 @@ const FeaturedPage: React.FC = () => {
                   {allRecipes.slice(0, 3).map((recipe) => (
                     <li key={recipe.id} className="flex items-center gap-3">
                       <img 
-                        src={recipe.image} 
+                        src={recipe.imageUrl} 
                         alt={recipe.title}
                         className="w-12 h-12 rounded-md object-cover"
                       />
@@ -420,7 +421,7 @@ const FeaturedPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Button 
                   size="lg" 
-                  className="bg-fitcooker-orange hover:bg-fitcooker-orange/90 min-w-40"
+                  className="bg-fitcooker-orange hover:bg-fitcooker-orange/90 px-8 py-6 h-auto min-w-40"
                   asChild
                 >
                   <Link to="/add-recipe">
@@ -430,7 +431,7 @@ const FeaturedPage: React.FC = () => {
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange/10 min-w-40"
+                  className="border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange/10 px-8 py-6 h-auto min-w-40"
                   asChild
                 >
                   <Link to="/signup">
