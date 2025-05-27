@@ -29,20 +29,39 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
   handleRemoveMediaItem,
   handleSetMainImage
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [videoUrl, setVideoUrl] = useState('');
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const [uploadType, setUploadType] = useState<'image' | 'video'>('image');
   
-  const triggerFileInput = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
+  const triggerImageInput = () => {
+    if (imageInputRef.current) {
+      imageInputRef.current.click();
     }
   };
   
-  const handleVideoUrlSubmit = () => {
-    if (videoUrl.trim()) {
-      handleAddVideoUrl(videoUrl);
-      setVideoUrl('');
+  const triggerVideoInput = () => {
+    if (videoInputRef.current) {
+      videoInputRef.current.click();
+    }
+  };
+  
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      
+      files.forEach((file, index) => {
+        const newMediaItem: MediaItem = {
+          id: Date.now().toString() + index,
+          type: 'video',
+          file: file,
+          preview: URL.createObjectURL(file),
+          isMain: false
+        };
+        
+        // Simular o mesmo comportamento do handleAddVideoUrl mas com arquivo
+        const fakeUrl = URL.createObjectURL(file);
+        handleAddVideoUrl(fakeUrl);
+      });
     }
   };
   
@@ -66,13 +85,24 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
           />
         );
       }
-    } else if (item.type === 'video' && item.url) {
-      return (
-        <div className="flex items-center justify-center h-full bg-gray-800 text-white">
-          <Video className="w-8 h-8" />
-          <span className="ml-2 text-sm">Vídeo</span>
-        </div>
-      );
+    } else if (item.type === 'video') {
+      if (item.file) {
+        return (
+          <video 
+            src={URL.createObjectURL(item.file)}
+            className="w-full h-full object-cover"
+            controls={false}
+            muted
+          />
+        );
+      } else if (item.url) {
+        return (
+          <div className="flex items-center justify-center h-full bg-gray-800 text-white">
+            <Video className="w-8 h-8" />
+            <span className="ml-2 text-sm">Vídeo</span>
+          </div>
+        );
+      }
     }
     
     return (
@@ -112,7 +142,7 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
           {uploadType === 'image' ? (
             <>
               <Input
-                ref={fileInputRef}
+                ref={imageInputRef}
                 type="file"
                 accept="image/*"
                 multiple
@@ -129,7 +159,7 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                 <Button 
                   type="button"
                   variant="outline"
-                  onClick={triggerFileInput}
+                  onClick={triggerImageInput}
                   className="mx-auto"
                 >
                   Escolher Imagens
@@ -137,29 +167,32 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
               </div>
             </>
           ) : (
-            <div className="text-center">
-              <Video className="w-10 h-10 mx-auto text-gray-400" />
-              <h3 className="text-lg font-medium mt-2">Adicione um vídeo da sua receita</h3>
-              <p className="text-gray-500 mt-1 mb-4">
-                Cole o link do YouTube ou Vimeo
-              </p>
-              <div className="flex gap-2 max-w-md mx-auto">
-                <Input 
-                  type="url"
-                  placeholder="Cole o link do YouTube ou Vimeo"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                />
+            <>
+              <Input
+                ref={videoInputRef}
+                type="file"
+                accept="video/*"
+                multiple
+                className="hidden"
+                onChange={handleVideoChange}
+              />
+              
+              <div className="text-center">
+                <Video className="w-10 h-10 mx-auto text-gray-400" />
+                <h3 className="text-lg font-medium mt-2">Adicione vídeos da sua receita</h3>
+                <p className="text-gray-500 mt-1 mb-4">
+                  Selecione vídeos do seu dispositivo (máx. 50MB cada)
+                </p>
                 <Button 
                   type="button"
                   variant="outline"
-                  onClick={handleVideoUrlSubmit}
-                  disabled={!videoUrl.trim()}
+                  onClick={triggerVideoInput}
+                  className="mx-auto"
                 >
-                  Adicionar
+                  Escolher Vídeos
                 </Button>
               </div>
-            </div>
+            </>
           )}
         </div>
         

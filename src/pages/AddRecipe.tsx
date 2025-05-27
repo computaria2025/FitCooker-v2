@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
@@ -150,17 +149,34 @@ const AddRecipe: React.FC = () => {
     }
   };
   
-  // Handler for adding video URL
-  const handleAddVideoUrl = (url: string) => {
-    if (url.trim()) {
+  // Handler for adding video file instead of URL
+  const handleAddVideoFile = (file: File) => {
+    const newMediaItem: MediaItem = {
+      id: Date.now().toString(),
+      type: 'video',
+      file: file,
+      preview: URL.createObjectURL(file),
+      isMain: false
+    };
+    
+    setMediaItems(prev => [...prev, newMediaItem]);
+  };
+  
+  // Update the handleAddVideoUrl to work with both URLs and files
+  const handleAddVideoUrl = (urlOrFile: string | File) => {
+    if (typeof urlOrFile === 'string') {
+      // Handle URL (legacy support)
       const newMediaItem: MediaItem = {
         id: Date.now().toString(),
         type: 'video',
-        url: url,
+        url: urlOrFile,
         isMain: false
       };
       
       setMediaItems(prev => [...prev, newMediaItem]);
+    } else {
+      // Handle File
+      handleAddVideoFile(urlOrFile);
     }
   };
   

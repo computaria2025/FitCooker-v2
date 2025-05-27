@@ -56,7 +56,7 @@ const RecipePreview: React.FC<RecipePreviewProps> = ({
 
   return (
     <div className="bg-white rounded-xl shadow-lg sticky top-24 overflow-hidden">
-      <div className="aspect-video sm:aspect-square bg-gray-200 w-full overflow-hidden relative">
+      <div className="aspect-[4/3] bg-gray-200 w-full overflow-hidden relative">
         {getMainImagePreview() ? (
           <img 
             src={getMainImagePreview() || ''} 
