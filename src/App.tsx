@@ -21,6 +21,7 @@ import QuemSomos from "./pages/QuemSomos";
 import Contato from "./pages/Contato";
 import Privacidade from "./pages/Privacidade";
 import TermosDeUso from "./pages/TermosDeUso";
+import AlimentacaoSaudavel from "./pages/AlimentacaoSaudavel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -98,6 +99,7 @@ const AppContent = () => {
         <Route path="/contato" element={<Contato />} />
         <Route path="/privacidade" element={<Privacidade />} />
         <Route path="/termos-de-uso" element={<TermosDeUso />} />
+        <Route path="/alimentacao-saudavel" element={<AlimentacaoSaudavel />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

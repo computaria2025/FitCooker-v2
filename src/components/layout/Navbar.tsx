@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChefHat, Search, User, Menu, X, Bell } from 'lucide-react';
@@ -94,6 +93,7 @@ const Navbar: React.FC = () => {
             <Link to="/recipes" className="nav-link">Receitas</Link>
             <Link to="/cooks" className="nav-link">Cozinheiros</Link>
             <Link to="/about" className="nav-link">Sobre</Link>
+            <Link to="/alimentacao-saudavel" className="nav-link">Alimentação</Link>
           </div>
           
           {/* Right Side Actions */}
@@ -231,6 +231,9 @@ const Navbar: React.FC = () => {
           </Link>
           <Link to="/about" className="flex items-center py-3 border-b border-gray-100">
             <span className="text-xl font-medium">Sobre</span>
+          </Link>
+          <Link to="/alimentacao-saudavel" className="flex items-center py-3 border-b border-gray-100">
+            <span className="text-xl font-medium">Alimentação</span>
           </Link>
           
           <div className="pt-6 flex flex-col space-y-4">
