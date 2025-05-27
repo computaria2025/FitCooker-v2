@@ -1,40 +1,89 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Star, Users, Award, ChefHat } from 'lucide-react';
+import { Star, Users, Award, ChefHat, Search, Heart, Filter } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { topCooks } from '@/data/mockData';
+import { Button } from '@/components/ui/button';
 
-const cooks = [
+// Extended cook data based on existing mockData
+const extendedCooks = topCooks.map(cook => ({
+  ...cook,
+  specialty: cook.id === 1 ? "Receitas High Protein" : 
+            cook.id === 2 ? "Bulking Saudável" : 
+            cook.id === 3 ? "Receitas Vegetarianas" : "Sobremesas Fitness",
+  followers: cook.followers,
+  recipes: cook.recipes,
+  verified: true,
+  avatar: cook.avatarUrl,
+  description: cook.bio,
+  achievements: cook.id === 1 ? ["Top Chef 2023", "Mais de 12K seguidores", "Certificação Nutricional"] :
+               cook.id === 2 ? ["Nutricionista Esportivo", "Top Recipes 2023", "Certificação Internacional"] :
+               cook.id === 3 ? ["Chef Vegana do Ano", "Receitas Inovadoras", "Certificação Plant-Based"] :
+               ["Especialista em Fitness", "Baixa Caloria Expert", "Certificação Culinary"]
+}));
+
+const additionalCooks = [
   {
-    id: 1,
-    name: "Chef Ana Silva",
-    specialty: "Receitas Low Carb",
-    rating: 4.9,
-    followers: 15000,
-    recipes: 89,
+    id: 5,
+    name: "Chef Julia Santos",
+    specialty: "Cutting e Definição",
+    rating: 4.7,
+    followers: 8900,
+    recipes: 52,
     verified: true,
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
-    description: "Especialista em alimentação low carb com mais de 10 anos de experiência.",
-    achievements: ["Top Chef 2023", "Mais de 1M de seguidores", "Certificação Nutricional"]
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+    description: "Especialista em receitas para cutting e definição muscular.",
+    achievements: ["Nutricionista Fitness", "Especialista em Cutting", "Receitas de Baixa Caloria"]
   },
   {
-    id: 2,
-    name: "Chef Carlos Mendes",
-    specialty: "Bulking Saudável",
-    rating: 4.8,
-    followers: 12500,
-    recipes: 76,
+    id: 6,
+    name: "Chef Roberto Lima",
+    specialty: "Pratos Funcionais",
+    rating: 4.6,
+    followers: 7200,
+    recipes: 41,
     verified: true,
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
-    description: "Expert em receitas para ganho de massa muscular de forma saudável.",
-    achievements: ["Nutricionista Esportivo", "Top Recipes 2023", "Certificação Internacional"]
-  },
-  // ... outros cooks
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+    description: "Criador de pratos funcionais para performance atlética.",
+    achievements: ["Chef Funcional", "Performance Expert", "Certificação Esportiva"]
+  }
 ];
 
+const allCooks = [...extendedCooks, ...additionalCooks];
+
 const Cooks: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState('');
+  const [visibleCooks, setVisibleCooks] = useState(6);
+  const [followedCooks, setFollowedCooks] = useState<number[]>([]);
+
+  const specialties = ['Todos', ...Array.from(new Set(allCooks.map(cook => cook.specialty)))];
+
+  const filteredCooks = allCooks.filter(cook => {
+    const matchesSearch = cook.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         cook.specialty.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSpecialty = selectedSpecialty === '' || selectedSpecialty === 'Todos' || cook.specialty === selectedSpecialty;
+    return matchesSearch && matchesSpecialty;
+  });
+
+  const displayedCooks = filteredCooks.slice(0, visibleCooks);
+
+  const handleFollow = (cookId: number) => {
+    // In a real app, this would require authentication
+    if (followedCooks.includes(cookId)) {
+      setFollowedCooks(followedCooks.filter(id => id !== cookId));
+    } else {
+      setFollowedCooks([...followedCooks, cookId]);
+    }
+  };
+
+  const loadMoreCooks = () => {
+    setVisibleCooks(prev => Math.min(prev + 6, filteredCooks.length));
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -89,7 +138,7 @@ const Cooks: React.FC = () => {
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-fitcooker-orange via-fitcooker-yellow to-fitcooker-orange bg-clip-text text-transparent">
-            Mestres da Culinária <span className="text-gray-900">Fit</span>
+            Mestres da Culinária Fit
           </h1>
           
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -110,7 +159,7 @@ const Cooks: React.FC = () => {
             <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
               <Users className="h-6 w-6 text-white" />
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">150+</div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">{allCooks.length}+</div>
             <div className="text-sm text-gray-600">Chefs Ativos</div>
           </div>
           
@@ -134,8 +183,54 @@ const Cooks: React.FC = () => {
             <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
               <ChefHat className="h-6 w-6 text-white" />
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">2K+</div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">
+              {allCooks.reduce((sum, cook) => sum + cook.recipes, 0)}+
+            </div>
             <div className="text-sm text-gray-600">Receitas Criadas</div>
+          </div>
+        </motion.div>
+
+        {/* Search and Filter Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-12"
+        >
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Search Bar */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <input
+                type="text"
+                placeholder="Pesquisar chefs por nome ou especialidade..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-fitcooker-orange focus:border-transparent outline-none transition-all"
+              />
+            </div>
+
+            {/* Specialty Filter */}
+            <div className="flex items-center space-x-2">
+              <Filter className="h-5 w-5 text-gray-500" />
+              <select
+                value={selectedSpecialty}
+                onChange={(e) => setSelectedSpecialty(e.target.value)}
+                className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-fitcooker-orange focus:border-transparent outline-none bg-white min-w-[180px]"
+              >
+                {specialties.map(specialty => (
+                  <option key={specialty} value={specialty === 'Todos' ? '' : specialty}>
+                    {specialty}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Results Count */}
+          <div className="mt-4 text-sm text-gray-600">
+            {filteredCooks.length} chef{filteredCooks.length !== 1 ? 's' : ''} encontrado{filteredCooks.length !== 1 ? 's' : ''}
           </div>
         </motion.div>
 
@@ -147,7 +242,7 @@ const Cooks: React.FC = () => {
           viewport={{ once: true, amount: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {cooks.map((cook) => (
+          {displayedCooks.map((cook) => (
             <motion.div
               key={cook.id}
               variants={itemVariants}
@@ -210,29 +305,64 @@ const Cooks: React.FC = () => {
                   ))}
                 </div>
 
-                <Link
-                  to={`/cook/${cook.id}`}
-                  className="block w-full text-center bg-gradient-to-r from-fitcooker-orange to-fitcooker-yellow text-white py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-                >
-                  Ver Perfil
-                </Link>
+                <div className="space-y-3">
+                  <Link
+                    to={`/cook/${cook.id}`}
+                    className="block w-full text-center bg-gradient-to-r from-fitcooker-orange to-fitcooker-yellow text-white py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                  >
+                    Ver Perfil
+                  </Link>
+
+                  <Button
+                    onClick={() => handleFollow(cook.id)}
+                    variant={followedCooks.includes(cook.id) ? "default" : "outline"}
+                    className={`w-full ${
+                      followedCooks.includes(cook.id)
+                        ? "bg-red-500 hover:bg-red-600 text-white"
+                        : "border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange hover:text-white"
+                    }`}
+                  >
+                    <Heart className={`w-4 h-4 mr-2 ${followedCooks.includes(cook.id) ? "fill-current" : ""}`} />
+                    {followedCooks.includes(cook.id) ? "Seguindo" : "Seguir"}
+                  </Button>
+                </div>
               </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Additional cooks data would be loaded here */}
-        <div className="text-center mt-12">
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5 }}
-            className="bg-white border-2 border-fitcooker-orange text-fitcooker-orange px-8 py-3 rounded-xl font-medium hover:bg-fitcooker-orange hover:text-white transition-all duration-300"
+        {/* Load More Button */}
+        {displayedCooks.length < filteredCooks.length && (
+          <div className="text-center mt-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+            >
+              <Button
+                onClick={loadMoreCooks}
+                variant="outline"
+                className="border-2 border-fitcooker-orange text-fitcooker-orange px-8 py-3 rounded-xl font-medium hover:bg-fitcooker-orange hover:text-white transition-all duration-300"
+              >
+                Carregar Mais Chefs ({filteredCooks.length - displayedCooks.length} restantes)
+              </Button>
+            </motion.div>
+          </div>
+        )}
+
+        {/* No Results Message */}
+        {filteredCooks.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-12"
           >
-            Carregar Mais Chefs
-          </motion.button>
-        </div>
+            <ChefHat className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">Nenhum chef encontrado</h3>
+            <p className="text-gray-500">Tente ajustar seus filtros ou termo de pesquisa.</p>
+          </motion.div>
+        )}
       </div>
 
       <Footer />
