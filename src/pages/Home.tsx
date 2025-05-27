@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -119,42 +118,49 @@ const Home: React.FC = () => {
     }
   ];
 
-  // How it works steps
+  // How it works steps - updated without numbers
   const steps = [
     {
-      icon: <ClipboardList className="h-6 w-6 text-fitcooker-orange" />,
+      icon: <ClipboardList className="h-8 w-8 text-fitcooker-orange" />,
       title: "Crie uma conta grátis",
-      description: "Ou explore como visitante sem se cadastrar."
+      description: "Ou explore como visitante sem se cadastrar.",
+      link: "/signup"
     },
     {
-      icon: <Search className="h-6 w-6 text-fitcooker-orange" />,
+      icon: <Search className="h-8 w-8 text-fitcooker-orange" />,
       title: "Explore ou crie receitas",
-      description: "Encontre ou compartilhe receitas conforme seus objetivos."
+      description: "Encontre ou compartilhe receitas conforme seus objetivos.",
+      link: "/recipes"
     },
     {
-      icon: <Calculator className="h-6 w-6 text-fitcooker-orange" />,
+      icon: <Calculator className="h-8 w-8 text-fitcooker-orange" />,
       title: "Veja os macronutrientes",
-      description: "Acompanhe automaticamente os valores nutricionais."
+      description: "Acompanhe automaticamente os valores nutricionais.",
+      link: "/recipes"
     },
     {
-      icon: <Heart className="h-6 w-6 text-fitcooker-orange" />,
+      icon: <Heart className="h-8 w-8 text-fitcooker-orange" />,
       title: "Salve suas favoritas",
-      description: "Organize suas receitas preferidas em coleções."
+      description: "Organize suas receitas preferidas em coleções.",
+      link: "/recipes"
     },
     {
-      icon: <MessageSquare className="h-6 w-6 text-fitcooker-orange" />,
+      icon: <MessageSquare className="h-8 w-8 text-fitcooker-orange" />,
       title: "Interaja com a comunidade",
-      description: "Compartilhe conhecimento e dicas com outros usuários."
+      description: "Compartilhe conhecimento e dicas com outros usuários.",
+      link: "/cooks"
     },
     {
-      icon: <TrendingUp className="h-6 w-6 text-fitcooker-orange" />,
+      icon: <TrendingUp className="h-8 w-8 text-fitcooker-orange" />,
       title: "Use filtros e categorias",
-      description: "Mantenha o foco nos seus resultados e objetivos."
+      description: "Mantenha o foco nos seus resultados e objetivos.",
+      link: "/recipes"
     },
     {
-      icon: <Comment className="h-6 w-6 text-fitcooker-orange" />,
+      icon: <Comment className="h-8 w-8 text-fitcooker-orange" />,
       title: "Avalie e comente receitas",
-      description: "Contribua com feedback valioso para outros usuários."
+      description: "Contribua com feedback valioso para outros usuários.",
+      link: "/recipes"
     }
   ];
 
@@ -320,7 +326,7 @@ const Home: React.FC = () => {
           </div>
         </section>
         
-        {/* How it Works Section - Enhanced visual appeal */}
+        {/* How it Works Section - Updated design */}
         <section className="py-16 md:py-24 bg-white">
           <div className="container mx-auto px-4 md:px-6">
             <motion.div
@@ -332,71 +338,52 @@ const Home: React.FC = () => {
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Como funciona o FitCooker</h2>
               <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-                Um processo simples e intuitivo para você começar sua jornada de alimentação saudável
+                Descubra todas as funcionalidades e possibilidades para transformar sua alimentação
               </p>
             </motion.div>
             
-            {/* Desktop timeline - Enhanced visual design */}
-            <div className="hidden md:block relative pb-8">
-              {/* Timeline bar with gradient */}
-              <div className="absolute left-[60px] right-[60px] top-1/2 h-2 bg-gradient-to-r from-fitcooker-orange/50 via-fitcooker-orange to-fitcooker-yellow rounded-full transform -translate-y-1/2 shadow-md"></div>
-              
-              {/* Timeline nodes */}
-              <div className="grid grid-cols-7 gap-4 relative z-10">
-                {steps.map((step, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: index % 2 === 0 ? -20 : 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    className={`relative ${index % 2 === 0 ? 'pt-14' : 'pt-0 pb-14'}`}
-                  >
-                    <div className="flex flex-col items-center">
-                      <div className={`${index % 2 === 0 ? 'order-2 mt-4' : 'order-1 mb-4'}`}>
-                        <div className="w-16 h-16 bg-white border-2 border-fitcooker-orange rounded-full flex items-center justify-center shadow-lg">
-                          {step.icon}
-                        </div>
-                        <span className="absolute top-1/2 transform -translate-y-1/2 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-fitcooker-orange text-white font-bold text-sm flex items-center justify-center">
-                          {index + 1}
-                        </span>
-                      </div>
-                      
-                      <div className={`bg-white p-4 rounded-xl shadow-md border border-gray-100 w-full max-w-[180px] ${index % 2 === 0 ? 'order-1' : 'order-2'}`}>
-                        <h3 className="font-medium mb-2 text-fitcooker-black">{step.title}</h3>
-                        <p className="text-sm text-gray-600">{step.description}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-            
-            {/* Mobile steps - Enhanced cards */}
-            <div className="md:hidden space-y-6">
+            {/* Steps Grid */}
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            >
               {steps.map((step, index) => (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="flex items-start gap-4 bg-white p-4 rounded-lg border-l-4 border-fitcooker-orange shadow-md"
+                  variants={itemVariants}
+                  className="group"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-fitcooker-orange to-fitcooker-yellow rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
-                    <span className="text-white font-bold">{index + 1}</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium mb-1 text-fitcooker-black">{step.title}</h3>
-                    <p className="text-sm text-gray-600">{step.description}</p>
-                  </div>
+                  <Link 
+                    to={step.link}
+                    className="block bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-fitcooker-orange/30 transform hover:-translate-y-2"
+                  >
+                    <div className="w-16 h-16 bg-gradient-to-br from-fitcooker-orange/10 to-fitcooker-yellow/10 rounded-full flex items-center justify-center mb-4 group-hover:from-fitcooker-orange/20 group-hover:to-fitcooker-yellow/20 transition-all duration-300">
+                      {step.icon}
+                    </div>
+                    
+                    <h3 className="font-bold text-lg mb-3 text-fitcooker-black group-hover:text-fitcooker-orange transition-colors duration-300">
+                      {step.title}
+                    </h3>
+                    
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {step.description}
+                    </p>
+                    
+                    <div className="mt-4 flex items-center text-fitcooker-orange opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <span className="text-sm font-medium mr-2">Saiba mais</span>
+                      <ChevronRight className="h-4 w-4" />
+                    </div>
+                  </Link>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </section>
         
-        {/* Final CTA Section - Updated with different background */}
+        {/* Final CTA Section - Updated with gradient background */}
         <section className="py-16 md:py-24 bg-gradient-to-b from-white via-fitcooker-orange/30 to-fitcooker-yellow/30">
           <div className="container mx-auto px-4 md:px-6">
             <motion.div
