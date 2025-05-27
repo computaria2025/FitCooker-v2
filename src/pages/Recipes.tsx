@@ -663,7 +663,7 @@ const Recipes: React.FC = () => {
       
       <Footer />
       
-      <style jsx>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;
         }
