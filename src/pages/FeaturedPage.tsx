@@ -1,35 +1,55 @@
-
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Apple, Heart, TrendingUp, Users, Star, Award, ChefHat, Clock, Flame, Target, Trophy, BookOpen, Sparkles } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import RecipeCard from '@/components/ui/RecipeCard';
+import RecipeCardSkeleton from '@/components/ui/RecipeCardSkeleton';
 import { featuredRecipes } from '@/data/mockData';
 
 const FeaturedPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadedRecipes, setLoadedRecipes] = useState<number[]>([]);
+
+  // Simulate loading with staggered effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 600);
+
+    // Stagger the appearance of recipes
+    featuredRecipes.forEach((_, index) => {
+      setTimeout(() => {
+        setLoadedRecipes(prev => [...prev, index]);
+      }, 100 + index * 80);
+    });
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.15,
+        staggerChildren: 0.1,
         delayChildren: 0.1
       }
     }
   };
 
   const itemVariants = {
-    hidden: { y: 50, opacity: 0 },
+    hidden: { y: 30, opacity: 0, scale: 0.95 },
     visible: {
       y: 0,
       opacity: 1,
+      scale: 1,
       transition: {
         type: "spring",
-        stiffness: 50,
-        damping: 20,
-        mass: 1
+        stiffness: 100,
+        damping: 25,
+        mass: 0.8
       }
     }
   };
@@ -73,18 +93,27 @@ const FeaturedPage: React.FC = () => {
           viewport={{ once: true, amount: 0.2, margin: "-100px" }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-20"
         >
-          {featuredRecipes.map((recipe) => (
-            <motion.div
-              key={recipe.id}
-              variants={itemVariants}
-              whileHover={{
-                y: -8,
-                transition: { duration: 0.3 }
-              }}
-            >
-              <RecipeCard recipe={recipe} />
-            </motion.div>
-          ))}
+          <AnimatePresence>
+            {featuredRecipes.map((recipe, index) => (
+              <motion.div
+                key={recipe.id}
+                variants={itemVariants}
+                initial="hidden"
+                animate={loadedRecipes.includes(index) ? "visible" : "hidden"}
+                whileHover={{
+                  y: -4,
+                  transition: { duration: 0.2, ease: "easeOut" }
+                }}
+                className="will-change-transform"
+              >
+                {isLoading && !loadedRecipes.includes(index) ? (
+                  <RecipeCardSkeleton />
+                ) : (
+                  <RecipeCard recipe={recipe} />
+                )}
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </motion.div>
       </div>
       
