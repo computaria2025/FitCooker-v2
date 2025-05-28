@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -7,6 +6,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { topCooks } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
+import LoginPrompt from '@/components/add-recipe/LoginPrompt';
 
 // Extended cook data based on existing mockData
 const extendedCooks = topCooks.map(cook => ({
@@ -59,6 +59,10 @@ const Cooks: React.FC = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [visibleCooks, setVisibleCooks] = useState(6);
   const [followedCooks, setFollowedCooks] = useState<number[]>([]);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  // Mock auth state - in a real app, this would come from context
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const specialties = ['Todos', ...Array.from(new Set(allCooks.map(cook => cook.specialty)))];
 
@@ -72,7 +76,11 @@ const Cooks: React.FC = () => {
   const displayedCooks = filteredCooks.slice(0, visibleCooks);
 
   const handleFollow = (cookId: number) => {
-    // In a real app, this would require authentication
+    if (!isLoggedIn) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    
     if (followedCooks.includes(cookId)) {
       setFollowedCooks(followedCooks.filter(id => id !== cookId));
     } else {
@@ -364,6 +372,12 @@ const Cooks: React.FC = () => {
           </motion.div>
         )}
       </div>
+
+      {/* Login Prompt Dialog */}
+      <LoginPrompt 
+        showLoginPrompt={showLoginPrompt}
+        setShowLoginPrompt={setShowLoginPrompt}
+      />
 
       <Footer />
     </div>

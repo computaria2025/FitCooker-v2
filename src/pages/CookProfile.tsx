@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -8,10 +7,15 @@ import Footer from '@/components/layout/Footer';
 import { topCooks, featuredRecipes } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import RecipeCard from '@/components/ui/RecipeCard';
+import LoginPrompt from '@/components/add-recipe/LoginPrompt';
 
 const CookProfile: React.FC = () => {
   const { id } = useParams();
   const [isFollowing, setIsFollowing] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  
+  // Mock auth state - in a real app, this would come from context
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   // Extended cook data (same as in Cooks.tsx)
   const extendedCooks = topCooks.map(cook => ({
@@ -52,6 +56,10 @@ const CookProfile: React.FC = () => {
   }
 
   const handleFollow = () => {
+    if (!isLoggedIn) {
+      setShowLoginPrompt(true);
+      return;
+    }
     setIsFollowing(!isFollowing);
   };
 
@@ -205,6 +213,12 @@ const CookProfile: React.FC = () => {
           )}
         </motion.div>
       </div>
+
+      {/* Login Prompt Dialog */}
+      <LoginPrompt 
+        showLoginPrompt={showLoginPrompt}
+        setShowLoginPrompt={setShowLoginPrompt}
+      />
 
       <Footer />
     </div>
