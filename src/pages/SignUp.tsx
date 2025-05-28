@@ -1,3 +1,6 @@
+// Dentro do componente SignUp
+import { useToast } from '@/components/ui/use-toast'; // Certifique-se que está importado
+import { useNavigate } from 'react-router-dom'; // Para redirecionar
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -6,6 +9,9 @@ import Footer from '@/components/layout/Footer';
 import { ChefHat, Mail, Lock, User, Eye, EyeOff, Check, X } from 'lucide-react';
 
 const SignUp: React.FC = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,22 +26,66 @@ const SignUp: React.FC = () => {
   
   const isPasswordStrong = hasMinLength && hasUpperCase && hasNumber && hasSpecialChar;
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!isPasswordStrong) {
-      // Handle weak password validation
+      toast({ // Seu toast para senha fraca já está aqui, o que é ótimo!
+        title: "Senha fraca",
+        description: "Por favor, certifique-se de que sua senha atende a todos os critérios.",
+        variant: "destructive",
+      });
       return;
     }
     
-    setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Handle signup logic here
-      console.log('Signup attempted with:', { name, email, password });
-    }, 1500);
+    setIsLoading(true); // Inicia o estado de carregamento
+
+    try {
+      // 🎯 ETAPA 1: Fazer a requisição POST para o backend
+      const response = await fetch('http://127.0.0.1:5000/register', { // URL do seu backend Flask
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json', // Informa ao backend que estamos enviando JSON
+        },
+        body: JSON.stringify({
+          nome: name,       // O backend espera 'nome', 'email', 'senha'
+          email: email,
+          senha: password,
+        }),
+      });
+
+      // 🎯 ETAPA 2: Processar a resposta do backend
+      const data = await response.json(); // Tenta converter a resposta para JSON
+
+      if (response.ok) { // Código de status HTTP 2xx indica sucesso
+        toast({
+          title: "Cadastro realizado com sucesso! (Mock)",
+          description: data.msg || "Seu usuário foi 'mockado' com sucesso.", // Usa a msg do backend ou uma padrão
+          className: "bg-green-500 text-white", // Um estilo para sucesso
+        });
+        // Opcional: Redirecionar para a página de login após um tempo
+        setTimeout(() => {
+          navigate('/login'); // Use o hook useNavigate importado
+        }, 2000); // Redireciona após 2 segundos
+      } else {
+        // Se o backend retornar um erro (ex: email já existe, dados faltando)
+        toast({
+          title: "Erro no cadastro",
+          description: data.msg || `Erro ${response.status}: Ocorreu um problema.`, // Usa a msg do backend ou uma genérica
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      // 🎯 ETAPA 3: Lidar com erros de rede ou conexão
+      console.error("Falha ao conectar com o backend:", error);
+      toast({
+        title: "Erro de Conexão",
+        description: "Não foi possível conectar ao servidor. Verifique se o backend está rodando.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false); // Finaliza o estado de carregamento, independente do resultado
+    }
   };
   
   return (
