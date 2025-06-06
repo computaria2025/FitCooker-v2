@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Recipe } from '@/data/mockData';
+import { Recipe } from '@/types/recipe';
 import CategoryBadge from './CategoryBadge';
 import MacroDisplay from './MacroDisplay';
 import { Clock, Flame, ChefHat } from 'lucide-react';
@@ -15,7 +15,7 @@ interface RecipeCardProps {
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, className, featured = false, similar = false }) => {
-  const { id, title, description, imageUrl, preparationTime, difficulty, macros, author, categories } = recipe;
+  const { id, title, description, imageUrl, preparationTime, difficulty, macros, author, categories, rating } = recipe;
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   
@@ -140,7 +140,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, className, featured = f
             </div>
             <div className="flex items-center text-sm text-gray-600">
               <ChefHat size={16} className="mr-1 text-fitcooker-orange" />
-              <span>{recipe.rating.toFixed(1)}</span>
+              <span>{rating.toFixed(1)}</span>
             </div>
           </div>
         </div>

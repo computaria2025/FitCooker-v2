@@ -1,14 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
-interface Category {
-  id: number;
-  nome: string;
-  descricao: string;
-  ativa: boolean;
-  created_at: string;
-}
+import { Category } from '@/types/recipe';
 
 export const useCategories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -33,6 +26,7 @@ export const useCategories = () => {
       setCategories(data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar categorias');
+      console.error('Erro ao buscar categorias:', err);
     } finally {
       setLoading(false);
     }
