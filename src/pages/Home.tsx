@@ -118,6 +118,7 @@ const Home: React.FC = () => {
     }
   ];
 
+  
   // How it works steps - updated without numbers
   const steps = [
     {
