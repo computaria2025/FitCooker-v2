@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { useRecipes } from '@/hooks/useRecipes';
-import { RecipeCard } from '@/components/ui/RecipeCard';
-import { RecipeCardSkeleton } from '@/components/ui/RecipeCardSkeleton';
+import RecipeCard from '@/components/ui/RecipeCard';
+import RecipeCardSkeleton from '@/components/ui/RecipeCardSkeleton';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const FeaturedRecipes: React.FC = () => {
-  const { recipes, isLoading } = useRecipes();
+  const { recipes, loading } = useRecipes();
   
   const featuredRecipes = recipes.slice(0, 6);
 
@@ -19,7 +19,7 @@ const FeaturedRecipes: React.FC = () => {
           <p className="text-gray-600">Descubra as receitas mais populares da nossa comunidade</p>
         </div>
         
-        {isLoading ? (
+        {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <RecipeCardSkeleton key={i} />
