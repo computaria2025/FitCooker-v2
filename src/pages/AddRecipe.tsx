@@ -1,10 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { RecipeCategory } from '@/data/mockData';
+import { useAuth } from '@/hooks/useAuth';
+import { useCategories } from '@/hooks/useCategories';
+import { supabase } from '@/integrations/supabase/client';
 
 // Import components
 import BasicInformation from '@/components/add-recipe/BasicInformation';
@@ -45,8 +48,10 @@ interface MediaItem {
 const AddRecipe: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { categories } = useCategories();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulate auth state
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Recipe basic information
   const [title, setTitle] = useState('');
@@ -54,7 +59,7 @@ const AddRecipe: React.FC = () => {
   const [preparationTime, setPreparationTime] = useState('');
   const [servings, setServings] = useState('');
   const [difficulty, setDifficulty] = useState('Médio');
-  const [selectedCategories, setSelectedCategories] = useState<RecipeCategory[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showNewCategoryDialog, setShowNewCategoryDialog] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   
@@ -106,77 +111,46 @@ const AddRecipe: React.FC = () => {
     { title: 'Pelo menos um passo', isValid: steps.some(step => step.description.trim() !== '') }
   ];
   
-  // Calculate validation progress
   const validationProgress = Math.round(
     (validationItems.filter(item => item.isValid).length / validationItems.length) * 100
   );
-  
-  // Mock ingredients database for search
-  const ingredientsDatabase = [
-    { name: 'Peito de Frango', protein: 31, carbs: 0, fat: 3.6, calories: 165, unit: 'g' },
-    { name: 'Arroz Branco', protein: 2.7, carbs: 28, fat: 0.3, calories: 130, unit: 'g' },
-    { name: 'Batata Doce', protein: 1.6, carbs: 20, fat: 0.1, calories: 86, unit: 'g' },
-    { name: 'Whey Protein', protein: 24, carbs: 3, fat: 1.5, calories: 120, unit: 'g' },
-    { name: 'Ovo', protein: 6, carbs: 0.6, fat: 5, calories: 70, unit: 'unidade' },
-    { name: 'Azeite de Oliva', protein: 0, carbs: 0, fat: 14, calories: 126, unit: 'ml' },
-    { name: 'Aveia', protein: 16.9, carbs: 66.3, fat: 6.9, calories: 389, unit: 'g' },
-    { name: 'Brócolis', protein: 2.8, carbs: 6.6, fat: 0.4, calories: 34, unit: 'g' },
-  ];
-  
-  const filteredIngredients = ingredientsDatabase.filter(
-    ing => ing.name.toLowerCase().includes(ingredientSearchTerm.toLowerCase())
-  );
-  
+
   // Handler for multiple image uploads
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
       
-      const newMediaItems: MediaItem[] = files.map((file, index) => {
-        // Create preview for each file
-        const reader = new FileReader();
-        
-        return {
-          id: Date.now().toString() + index,
-          type: 'image',
-          file: file,
-          preview: URL.createObjectURL(file),
-          isMain: mediaItems.length === 0 && index === 0 // First image is main by default
-        };
-      });
+      const newMediaItems: MediaItem[] = files.map((file, index) => ({
+        id: Date.now().toString() + index,
+        type: 'image',
+        file: file,
+        preview: URL.createObjectURL(file),
+        isMain: mediaItems.length === 0 && index === 0
+      }));
       
       setMediaItems(prev => [...prev, ...newMediaItems]);
     }
   };
   
-  // Handler for adding video file instead of URL
-  const handleAddVideoFile = (file: File) => {
-    const newMediaItem: MediaItem = {
-      id: Date.now().toString(),
-      type: 'video',
-      file: file,
-      preview: URL.createObjectURL(file),
-      isMain: false
-    };
-    
-    setMediaItems(prev => [...prev, newMediaItem]);
-  };
-  
-  // Update the handleAddVideoUrl to work with both URLs and files
+  // Handler for adding video file
   const handleAddVideoUrl = (urlOrFile: string | File) => {
     if (typeof urlOrFile === 'string') {
-      // Handle URL (legacy support)
       const newMediaItem: MediaItem = {
         id: Date.now().toString(),
         type: 'video',
         url: urlOrFile,
         isMain: false
       };
-      
       setMediaItems(prev => [...prev, newMediaItem]);
     } else {
-      // Handle File
-      handleAddVideoFile(urlOrFile);
+      const newMediaItem: MediaItem = {
+        id: Date.now().toString(),
+        type: 'video',
+        file: urlOrFile,
+        preview: URL.createObjectURL(urlOrFile),
+        isMain: false
+      };
+      setMediaItems(prev => [...prev, newMediaItem]);
     }
   };
   
@@ -184,7 +158,6 @@ const AddRecipe: React.FC = () => {
   const handleRemoveMediaItem = (id: string) => {
     const updatedMediaItems = mediaItems.filter(item => item.id !== id);
     
-    // If removing the main image, set first available image as main
     if (mediaItems.find(item => item.id === id)?.isMain && updatedMediaItems.length > 0) {
       const itemsWithMain = updatedMediaItems.map((item, index) => ({
         ...item,
@@ -202,12 +175,11 @@ const AddRecipe: React.FC = () => {
       ...item,
       isMain: item.id === id
     }));
-    
     setMediaItems(updatedMediaItems);
   };
   
   // Handler for selecting an ingredient from search
-  const handleSelectIngredient = (index: number, ingredient: typeof ingredientsDatabase[0]) => {
+  const handleSelectIngredient = (index: number, ingredient: any) => {
     const newIngredients = [...ingredients];
     newIngredients[index] = {
       ...newIngredients[index],
@@ -225,28 +197,10 @@ const AddRecipe: React.FC = () => {
   
   // Handler for adding a custom ingredient
   const handleAddCustomIngredient = () => {
-    const customIngredient = {
-      name: newIngredientName,
-      protein: 0,
-      carbs: 0,
-      fat: 0,
-      calories: 0,
-      unit: 'g'
-    };
-    
-    // Add to current recipe
-    handleSelectIngredient(currentIngredientIndex, customIngredient);
-    
-    // Reset form
+    // This is handled in the IngredientSelector component now
     setNewIngredientName('');
     setShowAddIngredientForm(false);
     setShowIngredientSelector(false);
-    
-    toast({
-      title: "Ingrediente adicionado",
-      description: "Por favor, atualize os valores nutricionais.",
-      duration: 3000,
-    });
   };
   
   // Open ingredient selector
@@ -290,11 +244,11 @@ const AddRecipe: React.FC = () => {
   };
   
   // Toggle category selection
-  const toggleCategory = (category: RecipeCategory) => {
-    if (selectedCategories.includes(category)) {
-      setSelectedCategories(selectedCategories.filter(c => c !== category));
+  const toggleCategory = (categoryId: string) => {
+    if (selectedCategories.includes(categoryId)) {
+      setSelectedCategories(selectedCategories.filter(c => c !== categoryId));
     } else {
-      setSelectedCategories([...selectedCategories, category]);
+      setSelectedCategories([...selectedCategories, categoryId]);
     }
   };
   
@@ -319,6 +273,15 @@ const AddRecipe: React.FC = () => {
       )
     );
   };
+
+  // Update ingredient unit
+  const updateIngredientUnit = (id: string, unit: string) => {
+    setIngredients(
+      ingredients.map(ing => 
+        ing.id === id ? { ...ing, unit } : ing
+      )
+    );
+  };
   
   // Update step description
   const updateStepDescription = (id: string, description: string) => {
@@ -332,6 +295,42 @@ const AddRecipe: React.FC = () => {
   // Check if recipe is valid for submission
   const isRecipeValid = () => {
     return validationProgress === 100;
+  };
+
+  // Upload media files to Supabase Storage
+  const uploadMediaFiles = async (): Promise<{ mainImageUrl?: string; videoUrl?: string }> => {
+    const results: { mainImageUrl?: string; videoUrl?: string } = {};
+    
+    for (const mediaItem of mediaItems) {
+      if (mediaItem.file) {
+        const fileExt = mediaItem.file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+        const filePath = `recipes/${fileName}`;
+        
+        const { data, error } = await supabase.storage
+          .from('recipe-media')
+          .upload(filePath, mediaItem.file);
+        
+        if (error) {
+          console.error('Erro no upload:', error);
+          continue;
+        }
+        
+        const { data: urlData } = supabase.storage
+          .from('recipe-media')
+          .getPublicUrl(filePath);
+        
+        if (mediaItem.isMain) {
+          results.mainImageUrl = urlData.publicUrl;
+        } else if (mediaItem.type === 'video') {
+          results.videoUrl = urlData.publicUrl;
+        }
+      } else if (mediaItem.url && mediaItem.type === 'video') {
+        results.videoUrl = mediaItem.url;
+      }
+    }
+    
+    return results;
   };
   
   // Check if user is logged in before proceeding
@@ -348,7 +347,7 @@ const AddRecipe: React.FC = () => {
       return;
     }
     
-    if (!isLoggedIn) {
+    if (!user) {
       setShowLoginPrompt(true);
       return;
     }
@@ -357,24 +356,134 @@ const AddRecipe: React.FC = () => {
   };
   
   // Submit form
-  const handleSubmit = () => {
-    // Form validation complete, proceed with submission
-    toast({
-      title: "Receita enviada com sucesso!",
-      description: "Sua receita será analisada e publicada em breve.",
-      duration: 3000,
-    });
+  const handleSubmit = async () => {
+    if (!user) return;
     
-    // Reset form
-    setTitle('');
-    setDescription('');
-    setPreparationTime('');
-    setServings('');
-    setDifficulty('Médio');
-    setSelectedCategories([]);
-    setMediaItems([]);
-    setIngredients([{ id: '1', name: '', quantity: 0, unit: 'g', protein: 0, carbs: 0, fat: 0, calories: 0 }]);
-    setSteps([{ id: '1', order: 1, description: '' }]);
+    setIsSubmitting(true);
+    
+    try {
+      // 1. Upload media files
+      const { mainImageUrl, videoUrl } = await uploadMediaFiles();
+      
+      // 2. Create recipe
+      const { data: recipeData, error: recipeError } = await supabase
+        .from('receitas')
+        .insert({
+          titulo: title,
+          descricao: description,
+          tempo_preparo: parseInt(preparationTime),
+          porcoes: parseInt(servings),
+          dificuldade: difficulty,
+          imagem_url: mainImageUrl,
+          video_url: videoUrl,
+          usuario_id: user.id
+        })
+        .select()
+        .single();
+      
+      if (recipeError) throw recipeError;
+      
+      const recipeId = recipeData.id;
+      
+      // 3. Add ingredients
+      const validIngredients = ingredients.filter(ing => ing.name.trim() && ing.quantity > 0);
+      for (let i = 0; i < validIngredients.length; i++) {
+        const ingredient = validIngredients[i];
+        
+        // Find or create ingredient in database
+        let { data: existingIngredient } = await supabase
+          .from('ingredientes')
+          .select('id')
+          .eq('nome', ingredient.name)
+          .single();
+        
+        let ingredientId = existingIngredient?.id;
+        
+        if (!ingredientId) {
+          const { data: newIngredient, error: ingredientError } = await supabase
+            .from('ingredientes')
+            .insert({
+              nome: ingredient.name,
+              proteina: ingredient.protein,
+              carboidratos: ingredient.carbs,
+              gorduras: ingredient.fat,
+              calorias: ingredient.calories,
+              unidade_padrao: ingredient.unit
+            })
+            .select()
+            .single();
+          
+          if (ingredientError) throw ingredientError;
+          ingredientId = newIngredient.id;
+        }
+        
+        // Link ingredient to recipe
+        const { error: linkError } = await supabase
+          .from('receita_ingredientes')
+          .insert({
+            receita_id: recipeId,
+            ingrediente_id: ingredientId,
+            quantidade: ingredient.quantity,
+            unidade: ingredient.unit,
+            ordem: i + 1
+          });
+        
+        if (linkError) throw linkError;
+      }
+      
+      // 4. Add steps
+      const validSteps = steps.filter(step => step.description.trim());
+      for (const step of validSteps) {
+        const { error: stepError } = await supabase
+          .from('receita_passos')
+          .insert({
+            receita_id: recipeId,
+            ordem: step.order,
+            descricao: step.description
+          });
+        
+        if (stepError) throw stepError;
+      }
+      
+      // 5. Add categories
+      for (const categoryId of selectedCategories) {
+        const { error: categoryError } = await supabase
+          .from('receita_categorias')
+          .insert({
+            receita_id: recipeId,
+            categoria_id: parseInt(categoryId)
+          });
+        
+        if (categoryError) throw categoryError;
+      }
+      
+      // 6. Calculate nutritional information
+      const { error: macroError } = await supabase.rpc('calcular_macros_receita', {
+        receita_id_param: recipeId
+      });
+      
+      if (macroError) console.error('Erro ao calcular macros:', macroError);
+      
+      toast({
+        title: "Receita criada com sucesso!",
+        description: "Sua receita foi publicada e está disponível para a comunidade.",
+        duration: 3000,
+      });
+      
+      // Reset form and redirect
+      navigate(`/recipe/${recipeId}`);
+      
+    } catch (error) {
+      console.error('Erro ao criar receita:', error);
+      toast({
+        title: "Erro ao criar receita",
+        description: "Ocorreu um erro inesperado. Tente novamente.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   // Get main image preview
@@ -412,6 +521,7 @@ const AddRecipe: React.FC = () => {
                   setShowNewCategoryDialog={setShowNewCategoryDialog}
                   servingsOptions={servingsOptions}
                   difficultyOptions={difficultyOptions}
+                  categories={categories}
                 />
                 
                 <MediaUpload 
@@ -425,6 +535,7 @@ const AddRecipe: React.FC = () => {
                 <Ingredients 
                   ingredients={ingredients}
                   updateIngredientQuantity={updateIngredientQuantity}
+                  updateIngredientUnit={updateIngredientUnit}
                   removeIngredient={removeIngredient}
                   addIngredient={addIngredient}
                   openIngredientSelector={openIngredientSelector}
@@ -439,8 +550,13 @@ const AddRecipe: React.FC = () => {
                 />
                 
                 <div className="lg:hidden">
-                  <Button type="submit" className="w-full" size="lg">
-                    Publicar Receita
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    size="lg"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Publicando..." : "Publicar Receita"}
                   </Button>
                 </div>
               </form>
@@ -463,6 +579,8 @@ const AddRecipe: React.FC = () => {
                 stepsCount={steps.filter(step => step.description.trim() !== '').length}
                 validationProgress={validationProgress}
                 validationItems={validationItems}
+                isSubmitting={isSubmitting}
+                categories={categories}
               />
             </div>
           </div>
@@ -474,7 +592,6 @@ const AddRecipe: React.FC = () => {
         setShowIngredientSelector={setShowIngredientSelector}
         ingredientSearchTerm={ingredientSearchTerm}
         setIngredientSearchTerm={setIngredientSearchTerm}
-        filteredIngredients={filteredIngredients}
         handleSelectIngredient={handleSelectIngredient}
         currentIngredientIndex={currentIngredientIndex}
         showAddIngredientForm={showAddIngredientForm}
