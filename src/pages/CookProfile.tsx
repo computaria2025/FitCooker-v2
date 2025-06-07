@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Star, Users, Award, ChefHat, Heart, ArrowLeft, Calendar, MapPin } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { topCooks, featuredRecipes } from '@/data/mockData';
+import { useRecipes } from '@/hooks/useRecipes';
 import { Button } from '@/components/ui/button';
 import RecipeCard from '@/components/ui/RecipeCard';
 import LoginPrompt from '@/components/add-recipe/LoginPrompt';
@@ -13,34 +14,29 @@ const CookProfile: React.FC = () => {
   const { id } = useParams();
   const [isFollowing, setIsFollowing] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const { recipes, loading } = useRecipes();
   
   // Mock auth state - in a real app, this would come from context
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
-  // Extended cook data (same as in Cooks.tsx)
-  const extendedCooks = topCooks.map(cook => ({
-    ...cook,
-    specialty: cook.id === 1 ? "Receitas High Protein" : 
-              cook.id === 2 ? "Bulking Saudável" : 
-              cook.id === 3 ? "Receitas Vegetarianas" : "Sobremesas Fitness",
-    followers: cook.followers,
-    recipes: cook.recipes,
+  // Mock cook data - this would come from Supabase profiles table
+  const cook = {
+    id: parseInt(id || '1'),
+    name: "Chef Ana Silva",
+    specialty: "Receitas High Protein",
+    followers: 12500,
+    recipes: 45,
     verified: true,
-    avatar: cook.avatarUrl,
-    description: cook.bio,
-    achievements: cook.id === 1 ? ["Top Chef 2023", "Mais de 12K seguidores", "Certificação Nutricional"] :
-                 cook.id === 2 ? ["Nutricionista Esportivo", "Top Recipes 2023", "Certificação Internacional"] :
-                 cook.id === 3 ? ["Chef Vegana do Ano", "Receitas Inovadoras", "Certificação Plant-Based"] :
-                 ["Especialista em Fitness", "Baixa Caloria Expert", "Certificação Culinary"],
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
+    rating: 4.8,
+    achievements: ["Top Chef 2023", "Mais de 12K seguidores", "Certificação Nutricional"],
     joinDate: "Janeiro 2023",
     location: "São Paulo, Brasil",
     about: "Apaixonado pela arte culinária e pela vida saudável, dedico minha carreira a criar receitas que unem sabor e nutrição. Acredito que comer bem é um ato de amor próprio e quero inspirar outras pessoas nessa jornada."
-  }));
-
-  const cook = extendedCooks.find(c => c.id === parseInt(id || ''));
+  };
   
-  // Filter recipes by author (for demo purposes, showing all featured recipes)
-  const cookRecipes = featuredRecipes.filter(recipe => recipe.author.id === parseInt(id || ''));
+  // Filter recipes by author (for demo purposes, showing first 6 recipes)
+  const cookRecipes = recipes.slice(0, 6);
 
   if (!cook) {
     return (
@@ -191,7 +187,11 @@ const CookProfile: React.FC = () => {
             <span className="text-gray-500">{cookRecipes.length} receita{cookRecipes.length !== 1 ? 's' : ''}</span>
           </div>
 
-          {cookRecipes.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">Carregando receitas...</p>
+            </div>
+          ) : cookRecipes.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {cookRecipes.map((recipe) => (
                 <motion.div

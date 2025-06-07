@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import RecipeCard from '@/components/ui/RecipeCard';
 import CategoryBadge from '@/components/ui/CategoryBadge';
-import { allRecipes, RecipeCategory } from '@/data/mockData';
+import { useRecipes } from '@/hooks/useRecipes';
+import { RecipeCategory } from '@/data/mockData';
 import { Search, Filter, ChevronDown, X, Utensils, PlusCircle, SlidersHorizontal, Sparkles, Info, BookOpen, ChevronRight, Star, TrendingUp, Award, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -43,6 +45,7 @@ const tutorialSteps = [
 const Recipes: React.FC = () => {
   const location = useLocation();
   const { toast } = useToast();
+  const { recipes, loading } = useRecipes();
   const [activeFilters, setActiveFilters] = useState<RecipeCategory[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -132,10 +135,10 @@ const Recipes: React.FC = () => {
   };
   
   // Filter recipes based on active filters and search term
-  const filteredRecipes = allRecipes.filter(recipe => {
+  const filteredRecipes = recipes.filter(recipe => {
     // Filter by category if there are active filters
     const matchesCategory = activeFilters.length === 0 || 
-      recipe.categories.some(category => activeFilters.includes(category));
+      recipe.categories.some(category => activeFilters.includes(category as RecipeCategory));
     
     // Filter by search term
     const matchesSearch = searchTerm === '' || 
@@ -248,7 +251,6 @@ const Recipes: React.FC = () => {
         
         {/* Enhanced Header Section */}
         <section className="relative py-16 overflow-hidden">
-          {/* Animated Background */}
           <div className="absolute inset-0 bg-gradient-to-br from-fitcooker-orange/5 via-transparent to-fitcooker-yellow/5"></div>
           <div className="absolute inset-0">
             <div className="absolute top-10 left-10 w-32 h-32 bg-fitcooker-orange/10 rounded-full blur-3xl animate-pulse"></div>
@@ -298,7 +300,7 @@ const Recipes: React.FC = () => {
                 >
                   <div className="flex items-center justify-center mb-2">
                     <TrendingUp className="h-5 w-5 text-green-500 mr-1" />
-                    <span className="text-2xl font-bold text-gray-900">2K+</span>
+                    <span className="text-2xl font-bold text-gray-900">{recipes.length}+</span>
                   </div>
                   <p className="text-sm text-gray-600">Receitas Ativas</p>
                 </motion.div>
@@ -545,7 +547,11 @@ const Recipes: React.FC = () => {
               
               {/* Enhanced Recipe Content */}
               <div className="lg:w-3/4 xl:w-4/5">
-                {filteredRecipes.length > 0 ? (
+                {loading ? (
+                  <div className="text-center py-12">
+                    <p className="text-gray-500">Carregando receitas...</p>
+                  </div>
+                ) : filteredRecipes.length > 0 ? (
                   <>
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                       <div>
