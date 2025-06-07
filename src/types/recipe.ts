@@ -12,14 +12,14 @@ export interface Recipe {
   created_at: string;
   usuario_id: string;
   
-  // Campos calculados/relacionados
-  title: string; // alias para titulo
-  description: string; // alias para descricao
-  imageUrl: string; // alias para imagem_url
-  preparationTime: number; // alias para tempo_preparo
-  servings: number; // alias para porcoes
-  difficulty: string; // alias para dificuldade
-  rating: number; // alias para nota_media
+  // Campos calculados/relacionados para compatibilidade com componentes existentes
+  title: string;
+  description: string;
+  imageUrl: string;
+  preparationTime: number;
+  servings: number;
+  difficulty: string;
+  rating: number;
   
   author: {
     id: string;

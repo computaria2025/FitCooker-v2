@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
@@ -12,33 +12,54 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      console.log('User already logged in, redirecting to home');
+      navigate('/');
+    }
+  }, [user, navigate]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
+      console.log('Attempting login with email:', email);
       const { error } = await signIn(email, password);
       
       if (error) {
+        console.error('Login error:', error);
+        let errorMessage = error.message;
+        
+        // Melhor tratamento de erros
+        if (error.message === 'Invalid login credentials') {
+          errorMessage = 'Email ou senha incorretos';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'Por favor, confirme seu email antes de fazer login';
+        } else if (error.message.includes('too many requests')) {
+          errorMessage = 'Muitas tentativas de login. Tente novamente em alguns minutos';
+        }
+        
         toast({
           title: "Erro no login",
-          description: error.message === 'Invalid login credentials' 
-            ? 'Email ou senha incorretos' 
-            : error.message,
+          description: errorMessage,
           variant: "destructive",
         });
       } else {
+        console.log('Login successful');
         toast({
           title: "Login realizado com sucesso!",
           description: "Bem-vindo de volta ao FitCooker!",
         });
-        navigate('/');
+        // Navigation will happen automatically via useEffect when user state changes
       }
     } catch (error) {
+      console.error('Unexpected login error:', error);
       toast({
         title: "Erro de conexão",
         description: "Não foi possível conectar ao servidor.",

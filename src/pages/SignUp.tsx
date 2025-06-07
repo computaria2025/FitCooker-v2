@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
@@ -13,9 +13,17 @@ const SignUp: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      console.log('User already logged in, redirecting to home');
+      navigate('/');
+    }
+  }, [user, navigate]);
   
   // Password strength indicators
   const hasMinLength = password.length >= 8;
@@ -40,24 +48,37 @@ const SignUp: React.FC = () => {
     setIsLoading(true);
 
     try {
+      console.log('Attempting sign up with email:', email, 'and name:', name);
       const { error } = await signUp(email, password, { nome: name });
       
       if (error) {
+        console.error('Sign up error:', error);
+        let errorMessage = error.message;
+        
+        if (error.message === 'User already registered') {
+          errorMessage = 'Este email já está cadastrado';
+        } else if (error.message.includes('Password should be at least')) {
+          errorMessage = 'A senha deve ter pelo menos 6 caracteres';
+        } else if (error.message.includes('already been registered')) {
+          errorMessage = 'Este email já está cadastrado';
+        }
+        
         toast({
           title: "Erro no cadastro",
-          description: error.message === 'User already registered' 
-            ? 'Este email já está cadastrado' 
-            : error.message,
+          description: errorMessage,
           variant: "destructive",
         });
       } else {
+        console.log('Sign up successful');
         toast({
           title: "Cadastro realizado com sucesso!",
-          description: "Bem-vindo ao FitCooker! Verifique seu email para confirmar a conta.",
+          description: "Bem-vindo ao FitCooker! Você já pode fazer login.",
         });
+        // Redirect to login page after successful signup
         setTimeout(() => navigate('/login'), 2000);
       }
     } catch (error) {
+      console.error('Unexpected sign up error:', error);
       toast({
         title: "Erro de Conexão",
         description: "Não foi possível conectar ao servidor. Tente novamente.",

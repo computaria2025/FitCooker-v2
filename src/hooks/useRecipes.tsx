@@ -15,6 +15,8 @@ export const useRecipes = () => {
   const fetchRecipes = async () => {
     try {
       setLoading(true);
+      console.log('Fetching recipes from Supabase...');
+      
       const { data, error } = await supabase
         .from('receitas')
         .select(`
@@ -26,7 +28,12 @@ export const useRecipes = () => {
         .eq('status', 'ativa')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching recipes:', error);
+        throw error;
+      }
+
+      console.log('Raw recipes data:', data);
 
       const formattedRecipes: Recipe[] = (data || []).map((recipe: any) => ({
         // Campos originais do banco
@@ -65,9 +72,11 @@ export const useRecipes = () => {
         }
       }));
 
+      console.log('Formatted recipes:', formattedRecipes);
       setRecipes(formattedRecipes);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar receitas');
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar receitas';
+      setError(errorMessage);
       console.error('Erro ao buscar receitas:', err);
     } finally {
       setLoading(false);

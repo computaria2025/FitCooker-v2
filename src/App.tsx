@@ -11,6 +11,7 @@ import NotFound from './pages/NotFound';
 import CookProfile from './pages/CookProfile';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
+import Profile from './pages/Profile';
 import AddRecipe from './pages/AddRecipe';
 import ForgotPassword from './pages/ForgotPassword';
 import AlimentacaoSaudavel from './pages/AlimentacaoSaudavel';
@@ -34,6 +35,7 @@ function App() {
           <Route path="/contato" element={<Contato />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/add-recipe" element={<AddRecipe />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/alimentacao-saudavel" element={<AlimentacaoSaudavel />} />
