@@ -1,55 +1,81 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Star, Users, Award, ChefHat, Heart, ArrowLeft, Calendar, MapPin } from 'lucide-react';
+import { Star, Users, Award, ChefHat, Heart, ArrowLeft, Calendar, MapPin, Loader } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { useRecipes } from '@/hooks/useRecipes';
 import { Button } from '@/components/ui/button';
 import RecipeCard from '@/components/ui/RecipeCard';
 import LoginPrompt from '@/components/add-recipe/LoginPrompt';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/components/ui/use-toast';
+
+interface CookProfile {
+  id: string;
+  nome: string;
+  bio: string | null;
+  avatar_url: string | null;
+  receitas_count: number;
+  seguidores_count: number;
+  seguindo_count: number;
+  is_chef: boolean;
+  data_cadastro: string;
+}
 
 const CookProfile: React.FC = () => {
   const { id } = useParams();
   const [isFollowing, setIsFollowing] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  const { recipes, loading } = useRecipes();
+  const [cookProfile, setCookProfile] = useState<CookProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { recipes, loading: recipesLoading } = useRecipes();
+  const { toast } = useToast();
   
   // Mock auth state - in a real app, this would come from context
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
-  // Mock cook data - this would come from Supabase profiles table
-  const cook = {
-    id: parseInt(id || '1'),
-    name: "Chef Ana Silva",
-    specialty: "Receitas High Protein",
-    followers: 12500,
-    recipes: 45,
-    verified: true,
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
-    rating: 4.8,
-    achievements: ["Top Chef 2023", "Mais de 12K seguidores", "Certificação Nutricional"],
-    joinDate: "Janeiro 2023",
-    location: "São Paulo, Brasil",
-    about: "Apaixonado pela arte culinária e pela vida saudável, dedico minha carreira a criar receitas que unem sabor e nutrição. Acredito que comer bem é um ato de amor próprio e quero inspirar outras pessoas nessa jornada."
-  };
-  
-  // Filter recipes by author (for demo purposes, showing first 6 recipes)
-  const cookRecipes = recipes.slice(0, 6);
 
-  if (!cook) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Chef não encontrado</h2>
-          <Link to="/cooks" className="text-fitcooker-orange hover:underline">
-            Voltar para lista de chefs
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (id) {
+      fetchCookProfile();
+    }
+  }, [id]);
+
+  const fetchCookProfile = async () => {
+    if (!id) return;
+
+    try {
+      setIsLoading(true);
+      console.log('Fetching cook profile for ID:', id);
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching cook profile:', error);
+        setError('Chef não encontrado');
+        return;
+      }
+
+      console.log('Cook profile data:', data);
+      setCookProfile(data);
+    } catch (error) {
+      console.error('Unexpected error fetching cook profile:', error);
+      setError('Erro ao carregar perfil do chef');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Filter recipes by the cook's user ID
+  const cookRecipes = recipes.filter(recipe => recipe.usuario_id === id).slice(0, 6);
 
   const handleFollow = () => {
     if (!isLoggedIn) {
@@ -57,7 +83,59 @@ const CookProfile: React.FC = () => {
       return;
     }
     setIsFollowing(!isFollowing);
+    toast({
+      title: isFollowing ? "Deixou de seguir" : "Seguindo chef",
+      description: isFollowing 
+        ? `Você deixou de seguir ${cookProfile?.nome}` 
+        : `Agora você está seguindo ${cookProfile?.nome}`,
+    });
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center">
+        <Navbar />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
+          <div className="relative">
+            <div className="animate-spin rounded-full h-20 w-20 border-4 border-fitcooker-orange/20 border-t-fitcooker-orange mx-auto mb-6"></div>
+            <ChefHat className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-8 w-8 text-fitcooker-orange" />
+          </div>
+          <p className="text-gray-600 font-medium">Carregando perfil do chef...</p>
+        </motion.div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !cookProfile) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Navbar />
+        <div className="flex-grow flex items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center"
+          >
+            <ChefHat className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Chef não encontrado</h2>
+            <p className="text-gray-600 mb-6">
+              O perfil que você está procurando não existe ou foi removido.
+            </p>
+            <Link to="/cooks" className="text-fitcooker-orange hover:underline font-medium">
+              ← Voltar para lista de chefs
+            </Link>
+          </motion.div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
@@ -72,107 +150,145 @@ const CookProfile: React.FC = () => {
         >
           <Link
             to="/cooks"
-            className="inline-flex items-center text-fitcooker-orange hover:text-fitcooker-orange/80 transition-colors"
+            className="inline-flex items-center text-fitcooker-orange hover:text-fitcooker-orange/80 transition-colors font-medium"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
             Voltar para chefs
           </Link>
         </motion.div>
 
-        {/* Profile Header */}
+        {/* Enhanced Profile Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8"
+          className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden mb-8"
         >
-          <div className="bg-gradient-to-r from-fitcooker-orange to-fitcooker-yellow h-32"></div>
+          {/* Header Background */}
+          <div className="relative h-40 bg-gradient-to-r from-fitcooker-orange via-orange-500 to-orange-600 overflow-hidden">
+            <motion.div
+              className="absolute inset-0 opacity-30"
+              animate={{
+                background: [
+                  "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.3) 0%, transparent 50%)",
+                  "radial-gradient(circle at 80% 20%, rgba(255,255,255,0.3) 0%, transparent 50%)",
+                  "radial-gradient(circle at 40% 40%, rgba(255,255,255,0.3) 0%, transparent 50%)"
+                ]
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </div>
           
           <div className="px-8 pb-8">
-            <div className="relative -mt-16 mb-6">
-              <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                <img
-                  src={cook.avatar}
-                  alt={cook.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              {cook.verified && (
-                <div className="absolute bottom-2 right-2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                  <Award className="w-5 h-5 text-white" />
-                </div>
-              )}
+            {/* Avatar Section */}
+            <div className="relative -mt-20 mb-6 flex flex-col items-center">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+                className="relative"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-fitcooker-orange to-orange-500 rounded-full blur-xl opacity-40"></div>
+                <Avatar className="relative w-40 h-40 border-6 border-white shadow-2xl">
+                  <AvatarImage src={cookProfile.avatar_url || ''} className="object-cover" />
+                  <AvatarFallback className="text-4xl bg-gradient-to-r from-fitcooker-orange to-orange-500 text-white">
+                    <ChefHat className="w-16 h-16" />
+                  </AvatarFallback>
+                </Avatar>
+                {cookProfile.is_chef && (
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute bottom-3 right-3 w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg"
+                  >
+                    <Award className="w-6 h-6 text-white" />
+                  </motion.div>
+                )}
+              </motion.div>
             </div>
 
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{cook.name}</h1>
-                <p className="text-xl text-fitcooker-orange font-medium mb-4">{cook.specialty}</p>
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
+              <div className="flex-1 text-center lg:text-left">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <h1 className="text-4xl font-bold text-gray-900 mb-3">{cookProfile.nome}</h1>
+                  {cookProfile.is_chef && (
+                    <Badge className="bg-gradient-to-r from-fitcooker-orange to-orange-500 text-white border-0 mb-4 text-sm px-4 py-1">
+                      <ChefHat className="w-4 h-4 mr-2" />
+                      Chef Verificado
+                    </Badge>
+                  )}
+                </motion.div>
                 
-                <div className="flex flex-wrap items-center gap-6 mb-6">
-                  <div className="flex items-center">
-                    <Star className="w-5 h-5 text-yellow-500 mr-2" />
-                    <span className="font-semibold">{cook.rating}</span>
-                    <span className="text-gray-500 ml-1">avaliação</span>
-                  </div>
-                  <div className="flex items-center">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="flex flex-wrap justify-center lg:justify-start items-center gap-6 mb-6"
+                >
+                  <div className="flex items-center bg-gray-50 px-4 py-2 rounded-xl">
                     <Users className="w-5 h-5 text-gray-500 mr-2" />
-                    <span className="font-semibold">{cook.followers.toLocaleString()}</span>
+                    <span className="font-semibold text-gray-900">{cookProfile.seguidores_count.toLocaleString()}</span>
                     <span className="text-gray-500 ml-1">seguidores</span>
                   </div>
-                  <div className="flex items-center">
+                  <div className="flex items-center bg-gray-50 px-4 py-2 rounded-xl">
                     <ChefHat className="w-5 h-5 text-gray-500 mr-2" />
-                    <span className="font-semibold">{cook.recipes}</span>
+                    <span className="font-semibold text-gray-900">{cookProfile.receitas_count}</span>
                     <span className="text-gray-500 ml-1">receitas</span>
                   </div>
-                </div>
+                  <div className="flex items-center bg-gray-50 px-4 py-2 rounded-xl">
+                    <Heart className="w-5 h-5 text-gray-500 mr-2" />
+                    <span className="font-semibold text-gray-900">{cookProfile.seguindo_count}</span>
+                    <span className="text-gray-500 ml-1">seguindo</span>
+                  </div>
+                </motion.div>
 
-                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex flex-wrap justify-center lg:justify-start items-center gap-4 text-sm text-gray-600 mb-6"
+                >
                   <div className="flex items-center">
                     <Calendar className="w-4 h-4 mr-2" />
-                    <span>Membro desde {cook.joinDate}</span>
+                    <span>Membro desde {new Date(cookProfile.data_cadastro).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</span>
                   </div>
-                  <div className="flex items-center">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    <span>{cook.location}</span>
-                  </div>
-                </div>
+                </motion.div>
 
-                <p className="text-gray-600 leading-relaxed">{cook.about}</p>
+                {cookProfile.bio && (
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="text-gray-600 leading-relaxed text-lg"
+                  >
+                    {cookProfile.bio}
+                  </motion.p>
+                )}
               </div>
 
-              <div className="lg:w-auto">
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.7 }}
+                className="lg:w-auto flex justify-center"
+              >
                 <Button
                   onClick={handleFollow}
                   size="lg"
-                  className={`w-full lg:w-auto px-8 ${
+                  className={`px-8 py-3 font-medium transition-all duration-300 ${
                     isFollowing
-                      ? "bg-red-500 hover:bg-red-600 text-white"
-                      : "bg-gradient-to-r from-fitcooker-orange to-fitcooker-yellow text-white hover:shadow-lg"
+                      ? "bg-red-500 hover:bg-red-600 text-white shadow-lg hover:shadow-xl"
+                      : "bg-gradient-to-r from-fitcooker-orange to-orange-500 hover:from-fitcooker-orange hover:to-orange-600 text-white shadow-lg hover:shadow-xl"
                   }`}
                 >
                   <Heart className={`w-5 h-5 mr-2 ${isFollowing ? "fill-current" : ""}`} />
                   {isFollowing ? "Seguindo" : "Seguir Chef"}
                 </Button>
-              </div>
+              </motion.div>
             </div>
-          </div>
-        </motion.div>
-
-        {/* Achievements */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8"
-        >
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Conquistas & Certificações</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {cook.achievements.map((achievement, index) => (
-              <div key={index} className="flex items-center p-4 bg-gray-50 rounded-xl">
-                <Award className="w-6 h-6 text-fitcooker-orange mr-3" />
-                <span className="font-medium text-gray-900">{achievement}</span>
-              </div>
-            ))}
           </div>
         </motion.div>
 
@@ -180,36 +296,42 @@ const CookProfile: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.8 }}
         >
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Receitas do Chef</h2>
-            <span className="text-gray-500">{cookRecipes.length} receita{cookRecipes.length !== 1 ? 's' : ''}</span>
+            <h2 className="text-3xl font-bold text-gray-900">Receitas do Chef</h2>
+            <span className="text-gray-500 text-lg">{cookRecipes.length} receita{cookRecipes.length !== 1 ? 's' : ''}</span>
           </div>
 
-          {loading ? (
+          {recipesLoading ? (
             <div className="text-center py-12">
+              <Loader className="w-8 h-8 animate-spin text-fitcooker-orange mx-auto mb-4" />
               <p className="text-gray-500">Carregando receitas...</p>
             </div>
           ) : cookRecipes.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {cookRecipes.map((recipe) => (
+              {cookRecipes.map((recipe, index) => (
                 <motion.div
                   key={recipe.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * recipe.id }}
+                  transition={{ delay: 0.9 + (index * 0.1) }}
                 >
                   <RecipeCard recipe={recipe} />
                 </motion.div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 bg-white rounded-2xl shadow-lg border border-gray-100">
-              <ChefHat className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">Nenhuma receita encontrada</h3>
-              <p className="text-gray-500">Este chef ainda não publicou receitas em nossa plataforma.</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+              className="text-center py-16 bg-white rounded-3xl shadow-lg border border-gray-100"
+            >
+              <ChefHat className="w-20 h-20 text-gray-300 mx-auto mb-6" />
+              <h3 className="text-2xl font-semibold text-gray-600 mb-3">Nenhuma receita encontrada</h3>
+              <p className="text-gray-500 text-lg">Este chef ainda não publicou receitas em nossa plataforma.</p>
+            </motion.div>
           )}
         </motion.div>
       </div>

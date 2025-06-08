@@ -17,10 +17,10 @@ const Navbar: React.FC = () => {
   const { toast } = useToast();
   const location = useLocation();
 
-  // Handle scroll for responsive navbar
+  // Handle scroll for sophisticated navbar
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 50);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -68,204 +68,242 @@ const Navbar: React.FC = () => {
   return (
     <>
       <motion.nav 
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+        className={`fixed top-0 w-full z-50 transition-all duration-500 ease-in-out ${
           isScrolled 
-            ? 'bg-white/90 backdrop-blur-md shadow-lg' 
+            ? 'bg-white/80 backdrop-blur-xl shadow-2xl border-b border-gray-100/50' 
             : 'bg-transparent'
         }`}
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <div className="container mx-auto px-4 md:px-6">
-          <div className={`flex justify-between items-center transition-all duration-300 ${
-            isScrolled ? 'h-14' : 'h-20'
+          <div className={`flex justify-between items-center transition-all duration-500 ease-in-out ${
+            isScrolled ? 'h-16' : 'h-24'
           }`}>
-            {/* Logo */}
+            {/* Enhanced Logo with Premium Animation */}
             <motion.div
               layout
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-3"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              <Link to="/" className="flex items-center space-x-2 group">
+              <Link to="/" className="flex items-center space-x-3 group">
                 <motion.div
                   animate={{ 
-                    scale: isScrolled ? 0.9 : 1,
-                    rotate: [0, 5, -5, 0]
+                    scale: isScrolled ? 0.85 : 1,
+                    rotate: [0, 10, -10, 0]
                   }}
                   transition={{ 
-                    scale: { duration: 0.3 },
-                    rotate: { duration: 2, repeat: Infinity, repeatDelay: 3 }
+                    scale: { duration: 0.5, ease: "easeInOut" },
+                    rotate: { duration: 3, repeat: Infinity, repeatDelay: 4, ease: "easeInOut" }
                   }}
+                  className="relative"
                 >
-                  <ChefHat className={`text-fitcooker-orange transition-all duration-300 ${
-                    isScrolled ? 'h-6 w-6' : 'h-8 w-8'
+                  <div className="absolute inset-0 bg-gradient-to-r from-fitcooker-orange to-orange-400 rounded-full blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                  <ChefHat className={`relative text-fitcooker-orange transition-all duration-500 ${
+                    isScrolled ? 'h-7 w-7' : 'h-10 w-10'
                   }`} />
                 </motion.div>
-                <motion.span 
-                  className={`font-bold transition-all duration-300 ${
-                    isScrolled ? 'text-lg' : 'text-xl'
-                  }`}
+                <motion.div
                   layout
+                  className="relative"
                 >
-                  Fit<span className="text-fitcooker-orange">Cooker</span>
-                </motion.span>
+                  <span className={`font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent transition-all duration-500 ${
+                    isScrolled ? 'text-xl' : 'text-2xl'
+                  }`}>
+                    Fit<span className="bg-gradient-to-r from-fitcooker-orange to-orange-500 bg-clip-text text-transparent">Cooker</span>
+                  </span>
+                  <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fitcooker-orange to-orange-500 group-hover:w-full transition-all duration-300"></div>
+                </motion.div>
               </Link>
             </motion.div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
+            {/* Enhanced Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-1">
               {navigation.map((item, index) => (
                 <motion.div
                   key={item.name}
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: index * 0.1, duration: 0.6, ease: "easeOut" }}
                 >
                   <Link
                     to={item.href}
-                    className="relative text-gray-700 hover:text-fitcooker-orange transition-colors duration-300 group"
+                    className="relative px-4 py-2 text-gray-700 hover:text-fitcooker-orange transition-all duration-300 group font-medium"
                   >
-                    {item.name}
-                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-fitcooker-orange transition-all duration-300 group-hover:w-full"></span>
+                    <span className="relative z-10">{item.name}</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-fitcooker-orange/10 to-orange-400/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 ease-out"></div>
+                    <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-fitcooker-orange to-orange-500 transition-all duration-300 group-hover:w-3/4 transform -translate-x-1/2"></div>
                   </Link>
                 </motion.div>
               ))}
             </div>
 
-            {/* Right Side Actions */}
-            <div className="flex items-center space-x-4">
-              {/* Search Button */}
+            {/* Enhanced Right Side Actions */}
+            <div className="flex items-center space-x-3">
+              {/* Premium Search Button */}
               <motion.button
                 onClick={() => setShowSearchDialog(true)}
-                className="p-2 text-gray-600 hover:text-fitcooker-orange transition-colors"
+                className="relative p-3 text-gray-600 hover:text-fitcooker-orange transition-all duration-300 group"
                 aria-label="Buscar receitas"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Search className="h-5 w-5" />
+                <div className="absolute inset-0 bg-gradient-to-r from-fitcooker-orange/20 to-orange-400/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                <Search className="relative h-5 w-5" />
               </motion.button>
 
               {user ? (
                 <>
-                  {/* Add Recipe Button - Only for authenticated users */}
-                  <Link
-                    to="/add-recipe"
-                    className="hidden sm:flex items-center space-x-2 bg-fitcooker-orange text-white px-4 py-2 rounded-lg hover:bg-fitcooker-orange/90 transition-colors"
+                  {/* Enhanced Add Recipe Button */}
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <PlusCircle className="h-4 w-4" />
-                    <span>Nova Receita</span>
-                  </Link>
+                    <Link
+                      to="/add-recipe"
+                      className="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-fitcooker-orange to-orange-500 text-white px-6 py-2.5 rounded-xl hover:shadow-lg hover:shadow-fitcooker-orange/25 transition-all duration-300 font-medium"
+                    >
+                      <PlusCircle className="h-4 w-4" />
+                      <span>Nova Receita</span>
+                    </Link>
+                  </motion.div>
 
-                  {/* User Menu with Avatar */}
+                  {/* Enhanced User Menu with Avatar */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <motion.button
-                        className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+                        className="flex items-center space-x-3 hover:opacity-80 transition-all duration-300 group"
                         whileHover={{ scale: 1.05 }}
                       >
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={user.user_metadata?.avatar_url} />
-                          <AvatarFallback>
-                            <User className="h-4 w-4" />
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="hidden sm:inline text-gray-700 hover:text-fitcooker-orange">
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-gradient-to-r from-fitcooker-orange to-orange-400 rounded-full blur opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                          <Avatar className="relative h-9 w-9 border-2 border-white shadow-lg">
+                            <AvatarImage src={user.user_metadata?.avatar_url} />
+                            <AvatarFallback className="bg-gradient-to-r from-fitcooker-orange to-orange-500 text-white">
+                              <User className="h-4 w-4" />
+                            </AvatarFallback>
+                          </Avatar>
+                        </div>
+                        <span className="hidden sm:inline text-gray-700 hover:text-fitcooker-orange font-medium transition-colors duration-300">
                           {user.user_metadata?.nome || user.email?.split('@')[0] || 'Usuário'}
                         </span>
                       </motion.button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuContent align="end" className="w-56 p-2">
                       <DropdownMenuItem asChild>
-                        <Link to="/profile" className="flex items-center">
-                          <User className="h-4 w-4 mr-2" />
-                          Meu Perfil
+                        <Link to="/profile" className="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                          <User className="h-4 w-4 mr-3 text-gray-500" />
+                          <span className="font-medium">Meu Perfil</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild className="sm:hidden">
-                        <Link to="/add-recipe" className="flex items-center">
-                          <PlusCircle className="h-4 w-4 mr-2" />
-                          Nova Receita
+                        <Link to="/add-recipe" className="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                          <PlusCircle className="h-4 w-4 mr-3 text-gray-500" />
+                          <span className="font-medium">Nova Receita</span>
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Sair
+                      <DropdownMenuSeparator className="my-2" />
+                      <DropdownMenuItem onClick={handleSignOut} className="flex items-center p-3 rounded-lg hover:bg-red-50 text-red-600 transition-colors">
+                        <LogOut className="h-4 w-4 mr-3" />
+                        <span className="font-medium">Sair</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </>
               ) : (
                 <>
-                  {/* Login/Signup for non-authenticated users */}
+                  {/* Enhanced Login/Signup for non-authenticated users */}
                   <Link
                     to="/login"
-                    className="hidden sm:block text-gray-700 hover:text-fitcooker-orange transition-colors"
+                    className="hidden sm:block text-gray-700 hover:text-fitcooker-orange transition-colors duration-300 font-medium px-4 py-2"
                   >
                     Entrar
                   </Link>
-                  <Link
-                    to="/signup"
-                    className="bg-fitcooker-orange text-white px-4 py-2 rounded-lg hover:bg-fitcooker-orange/90 transition-colors"
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    Cadastrar
-                  </Link>
+                    <Link
+                      to="/signup"
+                      className="bg-gradient-to-r from-fitcooker-orange to-orange-500 text-white px-6 py-2.5 rounded-xl hover:shadow-lg hover:shadow-fitcooker-orange/25 transition-all duration-300 font-medium"
+                    >
+                      Cadastrar
+                    </Link>
+                  </motion.div>
                 </>
               )}
 
-              {/* Mobile Menu Button */}
-              <button
+              {/* Enhanced Mobile Menu Button */}
+              <motion.button
                 onClick={() => setIsOpen(!isOpen)}
-                className="md:hidden p-2 text-gray-600 hover:text-fitcooker-orange"
+                className="md:hidden p-2 text-gray-600 hover:text-fitcooker-orange transition-colors duration-300"
                 aria-label="Toggle menu"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
               >
-                {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </button>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={isOpen ? 'close' : 'open'}
+                    initial={{ rotate: 0, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                  </motion.div>
+                </AnimatePresence>
+              </motion.button>
             </div>
           </div>
 
-          {/* Mobile Navigation */}
+          {/* Enhanced Mobile Navigation */}
           <AnimatePresence>
             {isOpen && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="md:hidden py-4 border-t border-gray-200 bg-white/90 backdrop-blur-md"
+                initial={{ opacity: 0, height: 0, y: -20 }}
+                animate={{ opacity: 1, height: 'auto', y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="md:hidden overflow-hidden"
               >
-                <div className="flex flex-col space-y-4">
-                  {navigation.map((item, index) => (
-                    <motion.div
-                      key={item.name}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Link
-                        to={item.href}
-                        className="text-gray-700 hover:text-fitcooker-orange transition-colors block"
-                        onClick={() => setIsOpen(false)}
+                <div className="py-6 bg-white/90 backdrop-blur-xl rounded-2xl mx-4 mb-4 shadow-xl border border-gray-100/50">
+                  <div className="flex flex-col space-y-2 px-6">
+                    {navigation.map((item, index) => (
+                      <motion.div
+                        key={item.name}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1, duration: 0.3 }}
                       >
-                        {item.name}
-                      </Link>
-                    </motion.div>
-                  ))}
-                  
-                  {!user && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: navigation.length * 0.1 }}
-                    >
-                      <Link
-                        to="/login"
-                        className="text-gray-700 hover:text-fitcooker-orange transition-colors block"
-                        onClick={() => setIsOpen(false)}
+                        <Link
+                          to={item.href}
+                          className="text-gray-700 hover:text-fitcooker-orange transition-colors duration-300 block py-3 px-4 rounded-lg hover:bg-gray-50 font-medium"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          {item.name}
+                        </Link>
+                      </motion.div>
+                    ))}
+                    
+                    {!user && (
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: navigation.length * 0.1, duration: 0.3 }}
+                        className="pt-4 border-t border-gray-200"
                       >
-                        Entrar
-                      </Link>
-                    </motion.div>
-                  )}
+                        <Link
+                          to="/login"
+                          className="text-gray-700 hover:text-fitcooker-orange transition-colors duration-300 block py-3 px-4 rounded-lg hover:bg-gray-50 font-medium"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Entrar
+                        </Link>
+                      </motion.div>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -273,8 +311,8 @@ const Navbar: React.FC = () => {
         </div>
       </motion.nav>
 
-      {/* Spacer for fixed navbar */}
-      <div className="h-20"></div>
+      {/* Enhanced Spacer for fixed navbar */}
+      <div className={`transition-all duration-500 ${isScrolled ? 'h-16' : 'h-24'}`}></div>
 
       {/* Search Dialog */}
       <SearchDialog open={showSearchDialog} onOpenChange={setShowSearchDialog} />
