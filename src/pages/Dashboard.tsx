@@ -1,14 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Star, TrendingUp, Users, Heart, Clock, ChefHat, Bookmark } from 'lucide-react';
+import { Star, TrendingUp, Users, Heart, Clock, ChefHat, Bookmark, Award, Trophy, Zap, Target } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import RecipeCard from '@/components/ui/RecipeCard';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Recipe } from '@/types/recipe';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface DashboardStats {
   totalRecipes: number;
@@ -31,6 +33,7 @@ const Dashboard: React.FC = () => {
   const [featuredRecipes, setFeaturedRecipes] = useState<Recipe[]>([]);
   const [featuredChefs, setFeaturedChefs] = useState<FeaturedChef[]>([]);
   const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
+  const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     totalRecipes: 0,
     totalChefs: 0,
@@ -79,6 +82,20 @@ const Dashboard: React.FC = () => {
           )
         `)
         .eq('usuario_id', user?.id)
+        .limit(4);
+
+      // Fetch user's own recipes
+      const { data: userRecipesData } = await supabase
+        .from('receitas')
+        .select(`
+          *,
+          profiles(nome, avatar_url),
+          receita_categorias(categorias(nome)),
+          informacao_nutricional(*)
+        `)
+        .eq('usuario_id', user?.id)
+        .eq('status', 'ativa')
+        .order('created_at', { ascending: false })
         .limit(4);
 
       // Fetch statistics
@@ -159,6 +176,7 @@ const Dashboard: React.FC = () => {
         };
       });
 
+      setUserRecipes(formattedUserRecipes);
       setFeaturedRecipes(formattedRecipes);
       setFeaturedChefs(chefs || []);
       setSavedRecipes(formattedSaved);
@@ -181,10 +199,17 @@ const Dashboard: React.FC = () => {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-fitcooker-orange mx-auto mb-4"></div>
-            <p className="text-gray-600">Carregando dashboard...</p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center"
+          >
+            <div className="relative">
+              <div className="animate-spin rounded-full h-20 w-20 border-4 border-fitcooker-orange/20 border-t-fitcooker-orange mx-auto mb-6"></div>
+              <ChefHat className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-8 w-8 text-fitcooker-orange" />
+            </div>
+            <p className="text-gray-600 font-medium">Carregando seu dashboard personalizado...</p>
+          </motion.div>
         </main>
         <Footer />
       </div>
@@ -192,90 +217,199 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
       <Navbar />
       
-      <main className="flex-grow py-8">
-        <div className="container mx-auto px-4 md:px-6">
-          {/* Welcome Section */}
+      <main className="flex-grow">
+        {/* Hero Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden bg-gradient-to-r from-fitcooker-orange via-orange-500 to-orange-600 text-white"
+        >
+          <div className="absolute inset-0 bg-black/10"></div>
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-              Bem-vindo de volta! 👋
-            </h1>
-            <p className="text-gray-600">
-              Descubra novas receitas e acompanhe suas favoritas
-            </p>
-          </motion.div>
+            className="absolute inset-0 opacity-20"
+            animate={{
+              background: [
+                "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.3) 0%, transparent 50%)",
+                "radial-gradient(circle at 80% 20%, rgba(255,255,255,0.3) 0%, transparent 50%)",
+                "radial-gradient(circle at 40% 40%, rgba(255,255,255,0.3) 0%, transparent 50%)"
+              ]
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          
+          <div className="relative container mx-auto px-4 md:px-6 py-16">
+            <div className="max-w-4xl">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                className="flex items-center space-x-4 mb-6"
+              >
+                <Avatar className="w-16 h-16 border-4 border-white/20">
+                  <AvatarImage src={user?.user_metadata?.avatar_url} />
+                  <AvatarFallback className="text-2xl bg-white/20">
+                    {user?.user_metadata?.nome?.[0] || user?.email?.[0] || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h1 className="text-4xl md:text-5xl font-bold mb-2">
+                    Olá, {user?.user_metadata?.nome || user?.email?.split('@')[0] || 'Chef'}! 👋
+                  </h1>
+                  <p className="text-xl text-orange-100">
+                    Pronto para criar algo delicioso hoje?
+                  </p>
+                </div>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="flex flex-wrap gap-4"
+              >
+                <Link to="/add-recipe">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="bg-white/20 backdrop-blur-sm px-6 py-3 rounded-xl border border-white/30 hover:bg-white/30 transition-all duration-300"
+                  >
+                    <span className="font-medium">Criar Nova Receita</span>
+                  </motion.div>
+                </Link>
+                <Link to="/recipes">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="bg-white/20 backdrop-blur-sm px-6 py-3 rounded-xl border border-white/30 hover:bg-white/30 transition-all duration-300"
+                  >
+                    <span className="font-medium">Explorar Receitas</span>
+                  </motion.div>
+                </Link>
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
 
-          {/* Stats Cards */}
+        <div className="container mx-auto px-4 md:px-6 py-12">
+          {/* Enhanced Stats Cards */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8"
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12"
           >
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="flex items-center">
-                <ChefHat className="w-8 h-8 text-fitcooker-orange mr-3" />
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalRecipes}</p>
-                  <p className="text-sm text-gray-600">Receitas</p>
-                </div>
-              </div>
-            </div>
+            <motion.div whileHover={{ scale: 1.05, y: -5 }}>
+              <Card className="border-0 bg-gradient-to-br from-white to-blue-50/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-6 text-center">
+                  <div className="flex items-center justify-center w-12 h-12 bg-blue-500 rounded-2xl mx-auto mb-4">
+                    <ChefHat className="w-6 h-6 text-white" />
+                  </div>
+                  <p className="text-3xl font-bold text-blue-600 mb-1">{userRecipes.length}</p>
+                  <p className="text-sm text-gray-600">Minhas Receitas</p>
+                </CardContent>
+              </Card>
+            </motion.div>
             
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="flex items-center">
-                <Users className="w-8 h-8 text-fitcooker-orange mr-3" />
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalChefs}</p>
-                  <p className="text-sm text-gray-600">Chefs</p>
-                </div>
-              </div>
-            </div>
+            <motion.div whileHover={{ scale: 1.05, y: -5 }}>
+              <Card className="border-0 bg-gradient-to-br from-white to-green-50/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-6 text-center">
+                  <div className="flex items-center justify-center w-12 h-12 bg-green-500 rounded-2xl mx-auto mb-4">
+                    <Bookmark className="w-6 h-6 text-white" />
+                  </div>
+                  <p className="text-3xl font-bold text-green-600 mb-1">{stats.savedRecipes}</p>
+                  <p className="text-sm text-gray-600">Receitas Salvas</p>
+                </CardContent>
+              </Card>
+            </motion.div>
             
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="flex items-center">
-                <TrendingUp className="w-8 h-8 text-fitcooker-orange mr-3" />
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.totalCategories}</p>
-                  <p className="text-sm text-gray-600">Categorias</p>
-                </div>
-              </div>
-            </div>
+            <motion.div whileHover={{ scale: 1.05, y: -5 }}>
+              <Card className="border-0 bg-gradient-to-br from-white to-orange-50/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-6 text-center">
+                  <div className="flex items-center justify-center w-12 h-12 bg-orange-500 rounded-2xl mx-auto mb-4">
+                    <Trophy className="w-6 h-6 text-white" />
+                  </div>
+                  <p className="text-3xl font-bold text-orange-600 mb-1">{stats.totalRecipes}</p>
+                  <p className="text-sm text-gray-600">Total Receitas</p>
+                </CardContent>
+              </Card>
+            </motion.div>
             
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="flex items-center">
-                <Bookmark className="w-8 h-8 text-fitcooker-orange mr-3" />
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.savedRecipes}</p>
-                  <p className="text-sm text-gray-600">Salvos</p>
-                </div>
-              </div>
-            </div>
+            <motion.div whileHover={{ scale: 1.05, y: -5 }}>
+              <Card className="border-0 bg-gradient-to-br from-white to-purple-50/50 shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardContent className="p-6 text-center">
+                  <div className="flex items-center justify-center w-12 h-12 bg-purple-500 rounded-2xl mx-auto mb-4">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <p className="text-3xl font-bold text-purple-600 mb-1">{stats.totalChefs}</p>
+                  <p className="text-sm text-gray-600">Chefs Ativos</p>
+                </CardContent>
+              </Card>
+            </motion.div>
           </motion.div>
+
+          {/* User's Recipes */}
+          {userRecipes.length > 0 && (
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mb-12"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Minhas Receitas</h2>
+                  <p className="text-gray-600">Suas criações culinárias mais recentes</p>
+                </div>
+                <Link to="/profile" className="text-fitcooker-orange hover:underline font-medium">
+                  Gerenciar todas →
+                </Link>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {userRecipes.map((recipe, index) => (
+                  <motion.div
+                    key={recipe.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 + (index * 0.1) }}
+                  >
+                    <RecipeCard recipe={recipe} />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.section>
+          )}
 
           {/* Featured Recipes */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.3 }}
             className="mb-12"
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Receitas em Destaque</h2>
-              <Link to="/recipes" className="text-fitcooker-orange hover:underline">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Receitas Recomendadas</h2>
+                <p className="text-gray-600">Descobertas especiais baseadas no seu gosto</p>
+              </div>
+              <Link to="/recipes" className="text-fitcooker-orange hover:underline font-medium">
                 Ver todas →
               </Link>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredRecipes.map((recipe) => (
-                <RecipeCard key={recipe.id} recipe={recipe} />
+              {featuredRecipes.map((recipe, index) => (
+                <motion.div
+                  key={recipe.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 + (index * 0.1) }}
+                >
+                  <RecipeCard recipe={recipe} />
+                </motion.div>
               ))}
             </div>
           </motion.section>
@@ -284,37 +418,57 @@ const Dashboard: React.FC = () => {
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.4 }}
             className="mb-12"
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Chefs em Destaque</h2>
-              <Link to="/cooks" className="text-fitcooker-orange hover:underline">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Chefs em Destaque</h2>
+                <p className="text-gray-600">Conheça os talentos da nossa comunidade</p>
+              </div>
+              <Link to="/cooks" className="text-fitcooker-orange hover:underline font-medium">
                 Ver todos →
               </Link>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredChefs.map((chef) => (
-                <Link
+              {featuredChefs.map((chef, index) => (
+                <motion.div
                   key={chef.id}
-                  to={`/cook/${chef.id}`}
-                  className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 + (index * 0.1) }}
+                  whileHover={{ y: -5 }}
                 >
-                  <div className="text-center">
-                    <img
-                      src={chef.avatar_url || '/placeholder.svg'}
-                      alt={chef.nome}
-                      className="w-16 h-16 rounded-full mx-auto mb-4 object-cover"
-                    />
-                    <h3 className="font-semibold text-gray-900 mb-1">{chef.nome}</h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{chef.bio}</p>
-                    <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
-                      <span>{chef.seguidores_count} seguidores</span>
-                      <span>{chef.receitas_count} receitas</span>
-                    </div>
-                  </div>
-                </Link>
+                  <Link to={`/cook/${chef.id}`}>
+                    <Card className="border-0 bg-white shadow-lg hover:shadow-xl transition-all duration-300">
+                      <CardContent className="p-6 text-center">
+                        <Avatar className="w-16 h-16 mx-auto mb-4 border-4 border-fitcooker-orange/20">
+                          <AvatarImage src={chef.avatar_url || ''} />
+                          <AvatarFallback className="bg-gradient-to-r from-fitcooker-orange to-orange-500 text-white">
+                            <ChefHat className="w-8 h-8" />
+                          </AvatarFallback>
+                        </Avatar>
+                        
+                        <h3 className="font-bold text-gray-900 mb-2">{chef.nome}</h3>
+                        {chef.bio && (
+                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{chef.bio}</p>
+                        )}
+                        
+                        <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
+                          <div className="flex items-center">
+                            <Users className="w-4 h-4 mr-1" />
+                            <span>{chef.seguidores_count}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <ChefHat className="w-4 h-4 mr-1" />
+                            <span>{chef.receitas_count}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
               ))}
             </div>
           </motion.section>
@@ -324,18 +478,28 @@ const Dashboard: React.FC = () => {
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.5 }}
             >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Minhas Receitas Salvas</h2>
-                <Link to="/saved" className="text-fitcooker-orange hover:underline">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Receitas Salvas</h2>
+                  <p className="text-gray-600">Suas receitas favoritas para cozinhar depois</p>
+                </div>
+                <Link to="/saved" className="text-fitcooker-orange hover:underline font-medium">
                   Ver todas →
                 </Link>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {savedRecipes.map((recipe) => (
-                  <RecipeCard key={recipe.id} recipe={recipe} />
+                {savedRecipes.map((recipe, index) => (
+                  <motion.div
+                    key={recipe.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 + (index * 0.1) }}
+                  >
+                    <RecipeCard recipe={recipe} />
+                  </motion.div>
                 ))}
               </div>
             </motion.section>

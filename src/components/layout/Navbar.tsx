@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
   // Handle scroll for sophisticated navbar
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > 0);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -70,7 +70,7 @@ const Navbar: React.FC = () => {
       <motion.nav 
         className={`fixed top-0 w-full z-50 transition-all duration-500 ease-in-out ${
           isScrolled 
-            ? 'bg-white/80 backdrop-blur-xl shadow-2xl border-b border-gray-100/50' 
+            ? 'bg-white/95 backdrop-blur-xl shadow-2xl border-b border-gray-100/50' 
             : 'bg-transparent'
         }`}
         initial={{ y: -100, opacity: 0 }}

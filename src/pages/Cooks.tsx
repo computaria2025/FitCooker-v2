@@ -2,11 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { User, ChefHat, Users, Award, Star, MapPin, Calendar, Heart } from 'lucide-react';
+import { User, ChefHat, Users, Award, Star, MapPin, Calendar, Heart, Utensils, Coffee } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -103,6 +102,18 @@ const Cooks: React.FC = () => {
     }
   };
 
+  // Mock categories and preferences for each chef
+  const getChefDetails = (index: number) => {
+    const categories = ['Italiana', 'Brasileira', 'Asiática', 'Vegana', 'Fitness', 'Doces'];
+    const preferences = ['Low Carb', 'Vegetariana', 'Sem Glúten', 'Proteica', 'Detox'];
+    
+    return {
+      categories: categories.slice(index % 3, (index % 3) + 2),
+      preferences: preferences.slice(index % 2, (index % 2) + 2),
+      specialties: ['Pratos Rápidos', 'Sobremesas', 'Almoços Fit'][index % 3]
+    };
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <Navbar />
@@ -149,64 +160,55 @@ const Cooks: React.FC = () => {
             <motion.div
               whileHover={{ scale: 1.05, y: -5 }}
               transition={{ type: "spring", stiffness: 300 }}
+              className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Card className="text-center hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-orange-50/50 backdrop-blur-sm">
-                <CardContent className="pt-8 pb-6">
-                  <motion.div
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                    className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-fitcooker-orange to-orange-500 rounded-2xl mx-auto mb-4 shadow-lg"
-                  >
-                    <ChefHat className="w-8 h-8 text-white" />
-                  </motion.div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-fitcooker-orange to-orange-600 bg-clip-text text-transparent mb-2">
-                    {chefs.length}
-                  </div>
-                  <div className="text-gray-600 font-medium">Chefs Talentosos</div>
-                </CardContent>
-              </Card>
+              <motion.div
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+                className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-fitcooker-orange to-orange-500 rounded-2xl mx-auto mb-4 shadow-lg"
+              >
+                <ChefHat className="w-8 h-8 text-white" />
+              </motion.div>
+              <div className="text-3xl font-bold bg-gradient-to-r from-fitcooker-orange to-orange-600 bg-clip-text text-transparent mb-2">
+                {chefs.length}
+              </div>
+              <div className="text-gray-600 font-medium">Chefs Talentosos</div>
             </motion.div>
 
             <motion.div
               whileHover={{ scale: 1.05, y: -5 }}
               transition={{ type: "spring", stiffness: 300 }}
+              className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Card className="text-center hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-blue-50/50 backdrop-blur-sm">
-                <CardContent className="pt-8 pb-6">
-                  <motion.div
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                    className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl mx-auto mb-4 shadow-lg"
-                  >
-                    <Award className="w-8 h-8 text-white" />
-                  </motion.div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent mb-2">
-                    {chefs.reduce((total, chef) => total + chef.receitas_count, 0)}
-                  </div>
-                  <div className="text-gray-600 font-medium">Receitas Criadas</div>
-                </CardContent>
-              </Card>
+              <motion.div
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+                className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl mx-auto mb-4 shadow-lg"
+              >
+                <Award className="w-8 h-8 text-white" />
+              </motion.div>
+              <div className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent mb-2">
+                {chefs.reduce((total, chef) => total + chef.receitas_count, 0)}
+              </div>
+              <div className="text-gray-600 font-medium">Receitas Criadas</div>
             </motion.div>
 
             <motion.div
               whileHover={{ scale: 1.05, y: -5 }}
               transition={{ type: "spring", stiffness: 300 }}
+              className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Card className="text-center hover:shadow-2xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-green-50/50 backdrop-blur-sm">
-                <CardContent className="pt-8 pb-6">
-                  <motion.div
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                    className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl mx-auto mb-4 shadow-lg"
-                  >
-                    <Users className="w-8 h-8 text-white" />
-                  </motion.div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-green-500 to-green-600 bg-clip-text text-transparent mb-2">
-                    {chefs.reduce((total, chef) => total + chef.seguidores_count, 0)}
-                  </div>
-                  <div className="text-gray-600 font-medium">Seguidores Totais</div>
-                </CardContent>
-              </Card>
+              <motion.div
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.6 }}
+                className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl mx-auto mb-4 shadow-lg"
+              >
+                <Users className="w-8 h-8 text-white" />
+              </motion.div>
+              <div className="text-3xl font-bold bg-gradient-to-r from-green-500 to-green-600 bg-clip-text text-transparent mb-2">
+                {chefs.reduce((total, chef) => total + chef.seguidores_count, 0)}
+              </div>
+              <div className="text-gray-600 font-medium">Seguidores Totais</div>
             </motion.div>
           </motion.div>
 
@@ -217,64 +219,49 @@ const Cooks: React.FC = () => {
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            {chefs.map((chef, index) => (
-              <motion.div
-                key={chef.id}
-                variants={cardVariants}
-                whileHover={{ 
-                  y: -10,
-                  scale: 1.02,
-                  rotateY: 5
-                }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 300,
-                  damping: 20
-                }}
-                className="group"
-              >
-                <Card className="overflow-hidden border-0 bg-white/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-500 hover:shadow-fitcooker-orange/10">
-                  {/* Card Header with Gradient Background */}
-                  <div className="relative h-32 bg-gradient-to-br from-fitcooker-orange via-orange-500 to-orange-600 overflow-hidden">
-                    <div className="absolute inset-0 bg-black/20"></div>
-                    <motion.div
-                      className="absolute inset-0 opacity-30"
-                      animate={{
-                        background: [
-                          "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.3) 0%, transparent 50%)",
-                          "radial-gradient(circle at 80% 20%, rgba(255,255,255,0.3) 0%, transparent 50%)",
-                          "radial-gradient(circle at 40% 40%, rgba(255,255,255,0.3) 0%, transparent 50%)"
-                        ]
-                      }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    />
-                    
-                    {/* Chef Badge */}
-                    {chef.is_chef && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: index * 0.1 + 0.5 }}
-                        className="absolute top-4 right-4"
-                      >
-                        <Badge className="bg-white/90 text-fitcooker-orange border-0 font-semibold shadow-lg">
-                          <Award className="w-3 h-3 mr-1" />
-                          Chef Verificado
-                        </Badge>
-                      </motion.div>
-                    )}
-                  </div>
+            {chefs.map((chef, index) => {
+              const details = getChefDetails(index);
+              return (
+                <motion.div
+                  key={chef.id}
+                  variants={cardVariants}
+                  whileHover={{ 
+                    y: -10,
+                    scale: 1.02
+                  }}
+                  transition={{ 
+                    type: "spring", 
+                    stiffness: 300,
+                    damping: 20
+                  }}
+                  className="group"
+                >
+                  <div className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100/50">
+                    {/* Chef Header */}
+                    <div className="relative p-8 text-center">
+                      {/* Chef Badge */}
+                      {chef.is_chef && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: index * 0.1 + 0.5 }}
+                          className="absolute top-4 right-4"
+                        >
+                          <Badge className="bg-gradient-to-r from-fitcooker-orange to-orange-500 text-white border-0 font-semibold shadow-lg">
+                            <Award className="w-3 h-3 mr-1" />
+                            Verificado
+                          </Badge>
+                        </motion.div>
+                      )}
 
-                  <CardContent className="relative -mt-12 pt-0 pb-6">
-                    {/* Enhanced Avatar */}
-                    <div className="flex flex-col items-center mb-6">
+                      {/* Enhanced Avatar */}
                       <motion.div
                         whileHover={{ scale: 1.1 }}
                         transition={{ type: "spring", stiffness: 300 }}
-                        className="relative"
+                        className="relative mb-4"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-fitcooker-orange to-orange-500 rounded-full blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-300"></div>
-                        <Avatar className="relative w-24 h-24 border-4 border-white shadow-2xl">
+                        <div className="absolute inset-0 bg-gradient-to-r from-fitcooker-orange to-orange-500 rounded-full blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                        <Avatar className="relative w-24 h-24 mx-auto border-4 border-white shadow-xl">
                           <AvatarImage src={chef.avatar_url || ''} className="object-cover" />
                           <AvatarFallback className="text-2xl bg-gradient-to-r from-fitcooker-orange to-orange-500 text-white">
                             <User className="w-10 h-10" />
@@ -292,70 +279,106 @@ const Cooks: React.FC = () => {
                         )}
                       </motion.div>
                       
-                      <h3 className="text-xl font-bold text-gray-900 mt-4 mb-2 text-center group-hover:text-fitcooker-orange transition-colors duration-300">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-fitcooker-orange transition-colors duration-300">
                         {chef.nome}
                       </h3>
                       
                       {chef.bio && (
-                        <p className="text-gray-600 text-sm text-center line-clamp-2 leading-relaxed">
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
                           {chef.bio}
                         </p>
                       )}
-                    </div>
 
-                    {/* Enhanced Stats Grid */}
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="text-center p-3 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl"
-                      >
-                        <div className="flex items-center justify-center mb-1">
-                          <ChefHat className="w-4 h-4 text-fitcooker-orange mr-1" />
-                          <span className="font-bold text-fitcooker-orange text-lg">{chef.receitas_count}</span>
+                      {/* Categories & Preferences */}
+                      <div className="space-y-3 mb-6">
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Especialidades</p>
+                          <div className="flex flex-wrap gap-1 justify-center">
+                            {details.categories.map((category, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+                                {category}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                        <span className="text-xs text-gray-600 font-medium">Receitas</span>
-                      </motion.div>
-                      
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl"
-                      >
-                        <div className="flex items-center justify-center mb-1">
-                          <Heart className="w-4 h-4 text-blue-600 mr-1" />
-                          <span className="font-bold text-blue-600 text-lg">{chef.seguidores_count}</span>
+                        
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Preferências</p>
+                          <div className="flex flex-wrap gap-1 justify-center">
+                            {details.preferences.map((pref, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                {pref}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                        <span className="text-xs text-gray-600 font-medium">Seguidores</span>
+                      </div>
+
+                      {/* Enhanced Stats Grid */}
+                      <div className="grid grid-cols-3 gap-4 mb-6">
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          className="text-center p-3 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl"
+                        >
+                          <div className="flex items-center justify-center mb-1">
+                            <ChefHat className="w-4 h-4 text-fitcooker-orange mr-1" />
+                            <span className="font-bold text-fitcooker-orange text-lg">{chef.receitas_count}</span>
+                          </div>
+                          <span className="text-xs text-gray-600 font-medium">Receitas</span>
+                        </motion.div>
+                        
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl"
+                        >
+                          <div className="flex items-center justify-center mb-1">
+                            <Heart className="w-4 h-4 text-blue-600 mr-1" />
+                            <span className="font-bold text-blue-600 text-lg">{chef.seguidores_count}</span>
+                          </div>
+                          <span className="text-xs text-gray-600 font-medium">Seguidores</span>
+                        </motion.div>
+
+                        <motion.div
+                          whileHover={{ scale: 1.05 }}
+                          className="text-center p-3 bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl"
+                        >
+                          <div className="flex items-center justify-center mb-1">
+                            <Star className="w-4 h-4 text-green-600 mr-1" />
+                            <span className="font-bold text-green-600 text-lg">{details.specialties === 'Pratos Rápidos' ? '4.8' : details.specialties === 'Sobremesas' ? '4.9' : '4.7'}</span>
+                          </div>
+                          <span className="text-xs text-gray-600 font-medium">Avaliação</span>
+                        </motion.div>
+                      </div>
+
+                      {/* Enhanced Action Button */}
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Link to={`/cook/${chef.id}`}>
+                          <Button className="w-full bg-gradient-to-r from-fitcooker-orange to-orange-500 hover:from-fitcooker-orange hover:to-orange-600 text-white font-medium py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                            Ver Perfil Completo
+                            <motion.span
+                              animate={{ x: [0, 5, 0] }}
+                              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                              className="ml-2"
+                            >
+                              →
+                            </motion.span>
+                          </Button>
+                        </Link>
                       </motion.div>
-                    </div>
 
-                    {/* Enhanced Action Button */}
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Link to={`/cook/${chef.id}`}>
-                        <Button className="w-full bg-gradient-to-r from-fitcooker-orange to-orange-500 hover:from-fitcooker-orange hover:to-orange-600 text-white font-medium py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-                          Ver Perfil Completo
-                          <motion.span
-                            animate={{ x: [0, 5, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                            className="ml-2"
-                          >
-                            →
-                          </motion.span>
-                        </Button>
-                      </Link>
-                    </motion.div>
-
-                    {/* Membership Info */}
-                    <div className="flex items-center justify-center mt-4 text-xs text-gray-500">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      <span>Membro desde {new Date(chef.data_cadastro).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}</span>
+                      {/* Membership Info */}
+                      <div className="flex items-center justify-center mt-4 text-xs text-gray-500">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        <span>Membro desde {new Date(chef.data_cadastro).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}</span>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                  </div>
+                </motion.div>
+              );
+            })}
           </motion.div>
 
           {chefs.length === 0 && (
