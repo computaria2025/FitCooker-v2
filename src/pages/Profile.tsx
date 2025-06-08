@@ -94,12 +94,10 @@ const Profile: React.FC = () => {
 
     setIsUploading(true);
     try {
-      // Primeiro, vamos verificar se o bucket existe ou criar se necessário
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}-${Math.random()}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
 
-      // Upload do arquivo
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file);
@@ -108,12 +106,10 @@ const Profile: React.FC = () => {
         throw uploadError;
       }
 
-      // Obter URL pública
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      // Atualizar perfil com nova URL
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
@@ -123,7 +119,6 @@ const Profile: React.FC = () => {
         throw updateError;
       }
 
-      // Atualizar estado local
       setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
       
       toast({
@@ -173,7 +168,6 @@ const Profile: React.FC = () => {
         description: "Suas alterações foram salvas com sucesso.",
       });
 
-      // Refresh profile data
       await fetchProfile();
     } catch (error) {
       console.error('Unexpected error updating profile:', error);
@@ -212,14 +206,13 @@ const Profile: React.FC = () => {
       
       <main className="flex-grow py-12">
         <div className="container mx-auto px-4 md:px-6 max-w-6xl">
-          {/* Header com Banner */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="relative bg-gradient-to-r from-fitcooker-orange to-orange-600 rounded-xl p-8 mb-8 text-white overflow-hidden"
           >
             <div className="absolute inset-0 bg-black opacity-20 rounded-xl"></div>
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.1\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"2\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
+            <div className="absolute inset-0 opacity-20 rounded-xl bg-pattern"></div>
             <div className="relative z-10">
               <h1 className="text-3xl md:text-4xl font-bold mb-2">Meu Perfil</h1>
               <p className="text-orange-100">
@@ -229,14 +222,12 @@ const Profile: React.FC = () => {
           </motion.div>
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Coluna 1: Avatar e Estatísticas */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
               className="space-y-6"
             >
-              {/* Avatar Card */}
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="text-center">
                   <CardTitle>Foto de Perfil</CardTitle>
@@ -280,7 +271,6 @@ const Profile: React.FC = () => {
                 </CardContent>
               </Card>
 
-              {/* Estatísticas */}
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -333,14 +323,12 @@ const Profile: React.FC = () => {
               </Card>
             </motion.div>
 
-            {/* Coluna 2: Formulários */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
               className="lg:col-span-2 space-y-6"
             >
-              {/* Informações Pessoais */}
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
                   <CardTitle>Informações Pessoais</CardTitle>
@@ -433,7 +421,6 @@ const Profile: React.FC = () => {
                 </CardContent>
               </Card>
 
-              {/* Configurações da Conta */}
               <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
                   <CardTitle>Configurações da Conta</CardTitle>
