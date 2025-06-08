@@ -30,8 +30,25 @@ export const useAuth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const checkEmailExists = async (email: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('email', email)
+      .single();
+    
+    return { exists: !!data, error };
+  };
+
   const signUp = async (email: string, password: string, metadata?: any) => {
     console.log('Attempting sign up for:', email);
+    
+    // Check if email already exists
+    const { exists } = await checkEmailExists(email);
+    if (exists) {
+      return { error: { message: 'Este email já está cadastrado' } };
+    }
+
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -45,6 +62,9 @@ export const useAuth = () => {
     
     if (error) {
       console.error('Sign up error:', error);
+      if (error.message === 'User already registered') {
+        return { error: { message: 'Este email já está cadastrado' } };
+      }
     } else {
       console.log('Sign up successful');
     }
@@ -97,6 +117,18 @@ export const useAuth = () => {
     return { error };
   };
 
+  const checkProfileComplete = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('bio, nome')
+      .eq('id', userId)
+      .single();
+    
+    if (error) return false;
+    
+    return !!(data?.bio && data?.bio.trim() !== '' && data?.nome && data?.nome.trim() !== '');
+  };
+
   return {
     user,
     session,
@@ -104,6 +136,8 @@ export const useAuth = () => {
     signUp,
     signIn,
     signOut,
-    resetPassword
+    resetPassword,
+    checkEmailExists,
+    checkProfileComplete
   };
 };

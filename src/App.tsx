@@ -12,6 +12,7 @@ import CookProfile from './pages/CookProfile';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import Profile from './pages/Profile';
+import Dashboard from './pages/Dashboard';
 import AddRecipe from './pages/AddRecipe';
 import ForgotPassword from './pages/ForgotPassword';
 import AlimentacaoSaudavel from './pages/AlimentacaoSaudavel';
@@ -26,6 +27,7 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/recipe/:id" element={<RecipeDetail />} />
           <Route path="/cooks" element={<Cooks />} />

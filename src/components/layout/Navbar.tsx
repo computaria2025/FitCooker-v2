@@ -1,262 +1,219 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChefHat, Search, User, Menu, X, Bell } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { User, Search, Menu, X, ChefHat, PlusCircle, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/components/ui/use-toast';
 import SearchDialog from './SearchDialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
 
 const Navbar: React.FC = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Mock auth state
+  const [isOpen, setIsOpen] = useState(false);
+  const [showSearchDialog, setShowSearchDialog] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
   const location = useLocation();
-  
-  // Mock user data - in a real app, this would come from auth context
-  const mockUser = {
-    name: 'João Silva',
-    email: 'joao@example.com',
-    avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
-  };
-  
+
+  // Close mobile menu on route change
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
+    setIsOpen(false);
+  }, [location]);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('#user-menu')) {
+        setShowUserMenu(false);
       }
     };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
-  
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location]);
-  
-  const handleOpenSearch = () => {
-    setIsSearchOpen(true);
+
+  const navigation = [
+    { name: 'Receitas', href: '/recipes' },
+    { name: 'Chefs', href: '/cooks' },
+    { name: 'Sobre', href: '/about' },
+    { name: 'Contato', href: '/contact' }
+  ];
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await signOut();
+      if (error) {
+        toast({
+          title: "Erro ao sair",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Logout realizado",
+          description: "Você saiu da sua conta com sucesso.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível fazer logout.",
+        variant: "destructive",
+      });
+    }
+    setShowUserMenu(false);
   };
 
-  // Toggle login state (just for demo)
-  const toggleLogin = () => {
-    setIsLoggedIn(!isLoggedIn);
-  };
-  
   return (
-    <header 
-      className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        isScrolled 
-          ? 'py-3 bg-white shadow-md' 
-          : 'py-5 bg-transparent'
-      )}
-    >
-      <div className="container mx-auto px-4 md:px-6">
-        <nav className="flex items-center justify-between">
-          {/* Logo */}
-          <Link 
-            to="/" 
-            className="flex items-center space-x-2 text-fitcooker-black hover:opacity-80 transition-opacity"
-          >
-            <ChefHat 
-              size={32} 
-              className={cn(
-                'text-fitcooker-orange transition-all duration-300',
-                isScrolled ? 'scale-90' : 'scale-100'
-              )} 
-            />
-            <span 
-              className={cn(
-                'font-bold tracking-tight text-gradient transition-all duration-300',
-                isScrolled ? 'text-2xl' : 'text-3xl'
-              )}
-            >
-              FitCooker
-            </span>
-          </Link>
-          
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
-            <Link to="/" className="nav-link">Home</Link>
-            <Link to="/destaques" className="nav-link">Destaques</Link>
-            <Link to="/recipes" className="nav-link">Receitas</Link>
-            <Link to="/cooks" className="nav-link">Cozinheiros</Link>
-            <Link to="/about" className="nav-link">Sobre</Link>
-            <Link to="/alimentacao-saudavel" className="nav-link">Alimentação</Link>
-          </div>
-          
-          {/* Right Side Actions */}
-          <div className="hidden md:flex items-center space-x-4">
-            <button 
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-              aria-label="Buscar receitas"
-              onClick={handleOpenSearch}
-            >
-              <Search size={20} />
-            </button>
-            
-            {isLoggedIn ? (
-              <div className="flex items-center space-x-4">
-                <button className="p-2 rounded-full hover:bg-gray-100 transition-colors relative">
-                  <Bell size={20} />
-                  <span className="absolute top-0 right-0 w-2 h-2 bg-fitcooker-orange rounded-full"></span>
-                </button>
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100">
-                      <Avatar className="w-9 h-9 border-2 border-fitcooker-orange/20">
-                        <AvatarImage src={mockUser.avatarUrl} alt={mockUser.name} />
-                        <AvatarFallback>{mockUser.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile" className="w-full cursor-pointer">Perfil</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/my-recipes" className="w-full cursor-pointer">Minhas Receitas</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/favorites" className="w-full cursor-pointer">Favoritos</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/settings" className="w-full cursor-pointer">Configurações</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={toggleLogin} className="text-red-600 cursor-pointer">
-                      Sair
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            ) : (
-              <Link 
-                to="/login" 
-                className="flex items-center space-x-2 px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors"
-                onClick={toggleLogin} // For demo purposes
+    <>
+      <nav className="bg-white shadow-sm sticky top-0 z-40">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2">
+              <ChefHat className="h-8 w-8 text-fitcooker-orange" />
+              <span className="text-xl font-bold">
+                Fit<span className="text-fitcooker-orange">Cooker</span>
+              </span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className="text-gray-700 hover:text-fitcooker-orange transition-colors"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+
+            {/* Right Side Actions */}
+            <div className="flex items-center space-x-4">
+              {/* Search Button */}
+              <button
+                onClick={() => setShowSearchDialog(true)}
+                className="p-2 text-gray-600 hover:text-fitcooker-orange transition-colors"
+                aria-label="Buscar receitas"
               >
-                <User size={20} />
-                <span>Entrar</span>
-              </Link>
-            )}
-            
-            <Link 
-              to="/add-recipe" 
-              className="btn btn-primary flex items-center px-6 py-3"
-            >
-              <span>Adicionar Receita</span>
-            </Link>
-          </div>
-          
-          {/* Mobile Menu Toggle */}
-          <div className="flex md:hidden items-center space-x-2">
-            <button 
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-              aria-label="Buscar receitas"
-              onClick={handleOpenSearch}
-            >
-              <Search size={20} />
-            </button>
-            
-            {isLoggedIn && (
-              <button className="p-2 rounded-full hover:bg-gray-100 transition-colors relative">
-                <Bell size={20} />
-                <span className="absolute top-0 right-0 w-2 h-2 bg-fitcooker-orange rounded-full"></span>
+                <Search className="h-5 w-5" />
               </button>
-            )}
-            
-            {isLoggedIn ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="p-1 rounded-full hover:bg-gray-100">
-                    <Avatar className="w-8 h-8 border-2 border-fitcooker-orange/20">
-                      <AvatarImage src={mockUser.avatarUrl} alt={mockUser.name} />
-                      <AvatarFallback>{mockUser.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={toggleLogin}>
-                    Sair
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : null}
-            
-            <button 
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu"}
-            >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+
+              {user ? (
+                <>
+                  {/* Add Recipe Button - Only for authenticated users */}
+                  <Link
+                    to="/add-recipe"
+                    className="hidden sm:flex items-center space-x-2 bg-fitcooker-orange text-white px-4 py-2 rounded-lg hover:bg-fitcooker-orange/90 transition-colors"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                    <span>Nova Receita</span>
+                  </Link>
+
+                  {/* User Menu */}
+                  <div className="relative" id="user-menu">
+                    <button
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      className="flex items-center space-x-2 text-gray-700 hover:text-fitcooker-orange transition-colors"
+                    >
+                      <User className="h-5 w-5" />
+                      <span className="hidden sm:inline">Meu Perfil</span>
+                    </button>
+
+                    {showUserMenu && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                        <Link
+                          to="/profile"
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-fitcooker-orange"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <User className="inline h-4 w-4 mr-2" />
+                          Meu Perfil
+                        </Link>
+                        <Link
+                          to="/add-recipe"
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-fitcooker-orange sm:hidden"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <PlusCircle className="inline h-4 w-4 mr-2" />
+                          Nova Receita
+                        </Link>
+                        <hr className="my-2" />
+                        <button
+                          onClick={handleSignOut}
+                          className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 hover:text-red-600"
+                        >
+                          <LogOut className="inline h-4 w-4 mr-2" />
+                          Sair
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Login/Signup for non-authenticated users */}
+                  <Link
+                    to="/login"
+                    className="hidden sm:block text-gray-700 hover:text-fitcooker-orange transition-colors"
+                  >
+                    Entrar
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="bg-fitcooker-orange text-white px-4 py-2 rounded-lg hover:bg-fitcooker-orange/90 transition-colors"
+                  >
+                    Cadastrar
+                  </Link>
+                </>
+              )}
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="md:hidden p-2 text-gray-600 hover:text-fitcooker-orange"
+                aria-label="Toggle menu"
+              >
+                {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
+            </div>
           </div>
-        </nav>
-      </div>
-      
-      {/* Mobile Navigation */}
-      <div 
-        className={cn(
-          'fixed inset-0 bg-white z-40 pt-20 px-6 transition-transform duration-300 ease-in-out transform md:hidden',
-          isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-        )}
-      >
-        <nav className="flex flex-col space-y-6">
-          <Link to="/" className="flex items-center py-3 border-b border-gray-100">
-            <span className="text-xl font-medium">Home</span>
-          </Link>
-          <Link to="/destaques" className="flex items-center py-3 border-b border-gray-100">
-            <span className="text-xl font-medium">Destaques</span>
-          </Link>
-          <Link to="/recipes" className="flex items-center py-3 border-b border-gray-100">
-            <span className="text-xl font-medium">Receitas</span>
-          </Link>
-          <Link to="/cooks" className="flex items-center py-3 border-b border-gray-100">
-            <span className="text-xl font-medium">Cozinheiros</span>
-          </Link>
-          <Link to="/about" className="flex items-center py-3 border-b border-gray-100">
-            <span className="text-xl font-medium">Sobre</span>
-          </Link>
-          <Link to="/alimentacao-saudavel" className="flex items-center py-3 border-b border-gray-100">
-            <span className="text-xl font-medium">Alimentação</span>
-          </Link>
-          
-          <div className="pt-6 flex flex-col space-y-4">
-            {!isLoggedIn && (
-              <Link to="/login" className="btn btn-outline flex items-center justify-center px-6 py-3" onClick={toggleLogin}>
-                <User size={20} className="mr-2" />
-                <span>Entrar</span>
-              </Link>
-            )}
-            
-            <Link to="/add-recipe" className="btn btn-primary flex items-center justify-center px-6 py-3">
-              <span>Adicionar Receita</span>
-            </Link>
-          </div>
-        </nav>
-      </div>
-      
-      {/* Search Dialog with improved design */}
-      <SearchDialog 
-        open={isSearchOpen} 
-        onOpenChange={setIsSearchOpen} 
-      />
-    </header>
+
+          {/* Mobile Navigation */}
+          {isOpen && (
+            <div className="md:hidden py-4 border-t border-gray-200">
+              <div className="flex flex-col space-y-4">
+                {navigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className="text-gray-700 hover:text-fitcooker-orange transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+                
+                {!user && (
+                  <Link
+                    to="/login"
+                    className="text-gray-700 hover:text-fitcooker-orange transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Entrar
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
+
+      {/* Search Dialog */}
+      <SearchDialog isOpen={showSearchDialog} onClose={() => setShowSearchDialog(false)} />
+    </>
   );
 };
 

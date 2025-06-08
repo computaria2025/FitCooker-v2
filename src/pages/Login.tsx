@@ -12,7 +12,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, user } = useAuth();
+  const { signIn, user, checkProfileComplete } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -56,7 +56,27 @@ const Login: React.FC = () => {
           title: "Login realizado com sucesso!",
           description: "Bem-vindo de volta ao FitCooker!",
         });
-        // Navigation will happen automatically via useEffect when user state changes
+        
+        // Check if profile is complete and redirect accordingly
+        setTimeout(async () => {
+          try {
+            // Get user from auth state (will be available after successful login)
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              const isProfileComplete = await checkProfileComplete(user.id);
+              if (isProfileComplete) {
+                navigate('/');
+              } else {
+                navigate('/profile');
+              }
+            } else {
+              navigate('/');
+            }
+          } catch (error) {
+            console.error('Error checking profile:', error);
+            navigate('/');
+          }
+        }, 100);
       }
     } catch (error) {
       console.error('Unexpected login error:', error);
