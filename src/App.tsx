@@ -20,6 +20,7 @@ import FeaturedPage from './pages/FeaturedPage';
 import QuemSomos from './pages/QuemSomos';
 import Privacidade from './pages/Privacidade';
 import TermosDeUso from './pages/TermosDeUso';
+import Ferramentas from './pages/Ferramentas';
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
           <Route path="/add-recipe" element={<AddRecipe />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/alimentacao-saudavel" element={<AlimentacaoSaudavel />} />
+          <Route path="/ferramentas" element={<Ferramentas />} />
           <Route path="/destaques" element={<FeaturedPage />} />
           <Route path="/quem-somos" element={<QuemSomos />} />
           <Route path="/privacidade" element={<Privacidade />} />

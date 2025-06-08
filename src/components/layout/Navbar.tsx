@@ -35,6 +35,8 @@ const Navbar: React.FC = () => {
   const navigation = [
     { name: 'Receitas', href: '/recipes' },
     { name: 'Chefs', href: '/cooks' },
+    { name: 'Alimentação', href: '/alimentacao-saudavel' },
+    { name: 'Ferramentas', href: '/ferramentas' },
     { name: 'Sobre', href: '/about' },
     { name: 'Contato', href: '/contact' }
   ];
@@ -212,7 +214,7 @@ const Navbar: React.FC = () => {
       </nav>
 
       {/* Search Dialog */}
-      <SearchDialog isOpen={showSearchDialog} onClose={() => setShowSearchDialog(false)} />
+      <SearchDialog open={showSearchDialog} onOpenChange={setShowSearchDialog} />
     </>
   );
 };
