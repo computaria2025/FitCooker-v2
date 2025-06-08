@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, Mail, Camera, Save, Award, ChefHat, Heart } from 'lucide-react';
 
 interface UserProfile {
@@ -34,8 +35,7 @@ const Profile: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     nome: '',
-    bio: '',
-    avatar_url: ''
+    bio: ''
   });
 
   useEffect(() => {
@@ -74,8 +74,7 @@ const Profile: React.FC = () => {
       setProfile(data);
       setFormData({
         nome: data.nome || '',
-        bio: data.bio || '',
-        avatar_url: data.avatar_url || ''
+        bio: data.bio || ''
       });
     } catch (error) {
       console.error('Unexpected error fetching profile:', error);
@@ -95,10 +94,12 @@ const Profile: React.FC = () => {
 
     setIsUploading(true);
     try {
+      // Primeiro, vamos verificar se o bucket existe ou criar se necessário
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}-${Math.random()}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
 
+      // Upload do arquivo
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file);
@@ -107,21 +108,33 @@ const Profile: React.FC = () => {
         throw uploadError;
       }
 
+      // Obter URL pública
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
+      // Atualizar perfil com nova URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      // Atualizar estado local
+      setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
       
       toast({
         title: "Imagem enviada!",
         description: "Sua foto de perfil foi atualizada com sucesso.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading file:', error);
       toast({
         title: "Erro no upload",
-        description: "Não foi possível enviar a imagem.",
+        description: error.message || "Não foi possível enviar a imagem.",
         variant: "destructive",
       });
     } finally {
@@ -140,8 +153,7 @@ const Profile: React.FC = () => {
         .from('profiles')
         .update({
           nome: formData.nome,
-          bio: formData.bio,
-          avatar_url: formData.avatar_url
+          bio: formData.bio
         })
         .eq('id', user.id);
 
@@ -204,9 +216,10 @@ const Profile: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative bg-gradient-to-r from-fitcooker-orange to-orange-600 rounded-xl p-8 mb-8 text-white"
+            className="relative bg-gradient-to-r from-fitcooker-orange to-orange-600 rounded-xl p-8 mb-8 text-white overflow-hidden"
           >
             <div className="absolute inset-0 bg-black opacity-20 rounded-xl"></div>
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
             <div className="relative z-10">
               <h1 className="text-3xl md:text-4xl font-bold mb-2">Meu Perfil</h1>
               <p className="text-orange-100">
@@ -224,28 +237,26 @@ const Profile: React.FC = () => {
               className="space-y-6"
             >
               {/* Avatar Card */}
-              <Card>
+              <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="text-center">
                   <CardTitle>Foto de Perfil</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center space-y-4">
                   <div className="relative inline-block">
-                    <div className="w-32 h-32 rounded-full bg-gray-200 overflow-hidden mx-auto border-4 border-white shadow-lg">
-                      {formData.avatar_url ? (
-                        <img
-                          src={formData.avatar_url}
-                          alt="Avatar"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <User className="w-12 h-12 text-gray-400" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="absolute bottom-0 right-0 bg-fitcooker-orange rounded-full p-2 shadow-lg">
+                    <Avatar className="w-32 h-32 mx-auto border-4 border-white shadow-lg">
+                      <AvatarImage src={profile?.avatar_url || ''} />
+                      <AvatarFallback className="text-2xl">
+                        <User className="w-12 h-12" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <motion.div 
+                      className="absolute bottom-0 right-0 bg-fitcooker-orange rounded-full p-2 shadow-lg cursor-pointer"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => document.getElementById('avatar-upload')?.click()}
+                    >
                       <Camera className="w-4 h-4 text-white" />
-                    </div>
+                    </motion.div>
                   </div>
                   
                   <div>
@@ -261,7 +272,7 @@ const Profile: React.FC = () => {
                       onClick={() => document.getElementById('avatar-upload')?.click()}
                       variant="outline"
                       disabled={isUploading}
-                      className="w-full"
+                      className="w-full hover:bg-fitcooker-orange hover:text-white transition-colors"
                     >
                       {isUploading ? 'Enviando...' : 'Alterar Foto'}
                     </Button>
@@ -270,7 +281,7 @@ const Profile: React.FC = () => {
               </Card>
 
               {/* Estatísticas */}
-              <Card>
+              <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Award className="w-5 h-5 mr-2 text-fitcooker-orange" />
@@ -279,35 +290,44 @@ const Profile: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                    <motion.div 
+                      className="flex items-center justify-between p-4 bg-orange-50 rounded-lg"
+                      whileHover={{ scale: 1.02 }}
+                    >
                       <div className="flex items-center">
-                        <ChefHat className="w-5 h-5 text-fitcooker-orange mr-2" />
-                        <span className="text-gray-700">Receitas</span>
+                        <ChefHat className="w-5 h-5 text-fitcooker-orange mr-3" />
+                        <span className="text-gray-700 font-medium">Receitas</span>
                       </div>
-                      <span className="font-bold text-fitcooker-orange">
+                      <span className="font-bold text-fitcooker-orange text-lg">
                         {profile?.receitas_count || 0}
                       </span>
-                    </div>
+                    </motion.div>
                     
-                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                    <motion.div 
+                      className="flex items-center justify-between p-4 bg-blue-50 rounded-lg"
+                      whileHover={{ scale: 1.02 }}
+                    >
                       <div className="flex items-center">
-                        <Heart className="w-5 h-5 text-blue-600 mr-2" />
-                        <span className="text-gray-700">Seguidores</span>
+                        <Heart className="w-5 h-5 text-blue-600 mr-3" />
+                        <span className="text-gray-700 font-medium">Seguidores</span>
                       </div>
-                      <span className="font-bold text-blue-600">
+                      <span className="font-bold text-blue-600 text-lg">
                         {profile?.seguidores_count || 0}
                       </span>
-                    </div>
+                    </motion.div>
                     
-                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <motion.div 
+                      className="flex items-center justify-between p-4 bg-green-50 rounded-lg"
+                      whileHover={{ scale: 1.02 }}
+                    >
                       <div className="flex items-center">
-                        <User className="w-5 h-5 text-green-600 mr-2" />
-                        <span className="text-gray-700">Seguindo</span>
+                        <User className="w-5 h-5 text-green-600 mr-3" />
+                        <span className="text-gray-700 font-medium">Seguindo</span>
                       </div>
-                      <span className="font-bold text-green-600">
+                      <span className="font-bold text-green-600 text-lg">
                         {profile?.seguindo_count || 0}
                       </span>
-                    </div>
+                    </motion.div>
                   </div>
                 </CardContent>
               </Card>
@@ -321,7 +341,7 @@ const Profile: React.FC = () => {
               className="lg:col-span-2 space-y-6"
             >
               {/* Informações Pessoais */}
-              <Card>
+              <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
                   <CardTitle>Informações Pessoais</CardTitle>
                   <CardDescription>
@@ -414,7 +434,7 @@ const Profile: React.FC = () => {
               </Card>
 
               {/* Configurações da Conta */}
-              <Card>
+              <Card className="hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
                   <CardTitle>Configurações da Conta</CardTitle>
                   <CardDescription>
@@ -422,14 +442,14 @@ const Profile: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <Button variant="outline" className="w-full justify-start">
+                  <div className="space-y-3">
+                    <Button variant="outline" className="w-full justify-start hover:bg-gray-50">
                       Alterar Senha
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start hover:bg-gray-50">
                       Preferências de Notificação
                     </Button>
-                    <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700">
+                    <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50">
                       Excluir Conta
                     </Button>
                   </div>
