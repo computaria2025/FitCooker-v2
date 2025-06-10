@@ -32,3 +32,11 @@ export interface Recipe {
     fat: number;
   };
 }
+
+export interface Category {
+  id: number;
+  nome: string;
+  descricao?: string;
+  ativa: boolean;
+  created_at?: string;
+}

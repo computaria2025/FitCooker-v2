@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart3, Zap, Beef, Wheat, Droplets, Eye } from 'lucide-react';
@@ -11,9 +10,18 @@ interface MacroDisplayProps {
   protein: number;
   carbs: number;
   fat: number;
+  compact?: boolean;
+  className?: string;
 }
 
-const MacroDisplay: React.FC<MacroDisplayProps> = ({ calories, protein, carbs, fat }) => {
+const MacroDisplay: React.FC<MacroDisplayProps> = ({ 
+  calories, 
+  protein, 
+  carbs, 
+  fat, 
+  compact = false,
+  className = "" 
+}) => {
   const [showTable, setShowTable] = useState(false);
 
   // Calculate percentages for visual display
@@ -64,8 +72,38 @@ const MacroDisplay: React.FC<MacroDisplayProps> = ({ calories, protein, carbs, f
     }
   ];
 
+  if (compact) {
+    return (
+      <div className={`space-y-3 ${className}`}>
+        {/* Compact Calories Display */}
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-fitcooker-orange to-orange-500 rounded-full mb-2">
+            <div className="text-center text-white">
+              <Zap className="w-5 h-5 mx-auto mb-1" />
+              <div className="text-xs font-medium">Cal</div>
+            </div>
+          </div>
+          <div className="text-xl font-bold text-gray-900">{Math.round(displayCalories)}</div>
+        </div>
+
+        {/* Compact Macro Breakdown */}
+        <div className="flex justify-between text-xs">
+          {macroData.map((macro) => (
+            <div key={macro.name} className="text-center">
+              <div className={`w-8 h-8 rounded-lg ${macro.bgColor} flex items-center justify-center mb-1`}>
+                <macro.icon className={`w-4 h-4 ${macro.color}`} />
+              </div>
+              <div className="font-bold text-gray-700">{macro.value}g</div>
+              <div className="text-gray-500">{macro.name.charAt(0)}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${className}`}>
       {/* Calories Display */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}

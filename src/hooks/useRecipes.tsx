@@ -84,8 +84,10 @@ export const useRecipes = () => {
   };
 
   return {
+    data: recipes,
     recipes,
     loading,
+    isLoading: loading,
     error,
     refetch: fetchRecipes
   };

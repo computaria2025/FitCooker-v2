@@ -33,8 +33,10 @@ export const useCategories = () => {
   };
 
   return {
+    data: categories,
     categories,
     loading,
+    isLoading: loading,
     error,
     refetch: fetchCategories
   };
