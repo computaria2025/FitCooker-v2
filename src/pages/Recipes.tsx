@@ -139,7 +139,7 @@ const Recipes: React.FC = () => {
                       <SelectValue placeholder="Categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todas</SelectItem>
+                      <SelectItem value="all">Todas</SelectItem>
                       {categories?.map(category => (
                         <SelectItem key={category.id} value={category.nome}>
                           {category.nome}
@@ -153,7 +153,7 @@ const Recipes: React.FC = () => {
                       <SelectValue placeholder="Dificuldade" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todas</SelectItem>
+                      <SelectItem value="all">Todas</SelectItem>
                       {difficulties.map(difficulty => (
                         <SelectItem key={difficulty} value={difficulty}>
                           {difficulty}
@@ -165,7 +165,7 @@ const Recipes: React.FC = () => {
                   <Button
                     variant="outline"
                     onClick={() => setShowFilters(!showFilters)}
-                    className="h-12 px-4"
+                    className="h-12 px-4 border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange hover:text-white"
                   >
                     <SlidersHorizontal className="w-4 h-4 mr-2" />
                     Filtros
@@ -248,14 +248,14 @@ const Recipes: React.FC = () => {
                     </Badge>
                   )}
                   
-                  {selectedCategory && (
+                  {selectedCategory && selectedCategory !== 'all' && (
                     <Badge variant="secondary" className="flex items-center gap-1">
                       {selectedCategory}
                       <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedCategory('')} />
                     </Badge>
                   )}
                   
-                  {selectedDifficulty && (
+                  {selectedDifficulty && selectedDifficulty !== 'all' && (
                     <Badge variant="secondary" className="flex items-center gap-1">
                       {selectedDifficulty}
                       <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedDifficulty('')} />

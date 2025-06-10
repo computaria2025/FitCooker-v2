@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Clock, Users, ChefHat, Star, ArrowLeft, Heart, Share2 } from 'lucide-react';
+import { Clock, Users, ChefHat, Star, ArrowLeft, Heart, Share2, BookOpen, Utensils } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import SaveRecipeButton from '@/components/recipe/SaveRecipeButton';
@@ -138,7 +138,6 @@ const RecipeDetail: React.FC = () => {
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      // You could add a toast notification here
     }
   };
 
@@ -261,7 +260,7 @@ const RecipeDetail: React.FC = () => {
                   currentRating={recipe.nota_media}
                   onRatingUpdate={handleRatingUpdate}
                 />
-                <Button onClick={shareRecipe} variant="outline">
+                <Button onClick={shareRecipe} variant="outline" className="border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange hover:text-white">
                   <Share2 className="w-4 h-4 mr-2" />
                   Compartilhar
                 </Button>
@@ -273,24 +272,24 @@ const RecipeDetail: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <ChefHat className="w-5 h-5 mr-2 text-fitcooker-orange" />
-                      Ingredientes
+                <Card className="shadow-lg border-0">
+                  <CardHeader className="bg-gradient-to-r from-fitcooker-orange/10 to-orange-100">
+                    <CardTitle className="flex items-center text-xl">
+                      <Utensils className="w-6 h-6 mr-3 text-fitcooker-orange" />
+                      Ingredientes ({ingredients.length})
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
+                  <CardContent className="p-6">
+                    <div className="grid md:grid-cols-2 gap-4">
                       {ingredients.map((ingredient, index) => (
-                        <li key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                          <span className="font-medium">{ingredient.ingredientes?.nome}</span>
-                          <span className="text-fitcooker-orange font-semibold">
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                          <span className="font-medium text-gray-800">{ingredient.ingredientes?.nome}</span>
+                          <span className="text-fitcooker-orange font-bold bg-white px-3 py-1 rounded-full text-sm">
                             {ingredient.quantidade} {ingredient.unidade}
                           </span>
-                        </li>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -301,21 +300,30 @@ const RecipeDetail: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Modo de Preparo</CardTitle>
+                <Card className="shadow-lg border-0">
+                  <CardHeader className="bg-gradient-to-r from-fitcooker-orange/10 to-orange-100">
+                    <CardTitle className="flex items-center text-xl">
+                      <BookOpen className="w-6 h-6 mr-3 text-fitcooker-orange" />
+                      Modo de Preparo
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <ol className="space-y-4">
+                  <CardContent className="p-6">
+                    <div className="space-y-6">
                       {steps.map((step, index) => (
-                        <li key={index} className="flex">
-                          <span className="flex-shrink-0 w-8 h-8 bg-fitcooker-orange text-white rounded-full flex items-center justify-center text-sm font-bold mr-4">
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1 * index }}
+                          className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                          <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-fitcooker-orange to-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg">
                             {step.ordem}
-                          </span>
-                          <p className="text-gray-700 leading-relaxed pt-1">{step.descricao}</p>
-                        </li>
+                          </div>
+                          <p className="text-gray-700 leading-relaxed pt-2 text-base">{step.descricao}</p>
+                        </motion.div>
                       ))}
-                    </ol>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -327,9 +335,12 @@ const RecipeDetail: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <Card>
+                  <Card className="shadow-lg border-0">
                     <CardHeader>
-                      <CardTitle>Avaliações ({reviews.length})</CardTitle>
+                      <CardTitle className="flex items-center">
+                        <Star className="w-5 h-5 mr-2 text-yellow-500" />
+                        Avaliações ({reviews.length})
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-6">
@@ -379,7 +390,7 @@ const RecipeDetail: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <Card>
+                <Card className="shadow-lg border-0">
                   <CardHeader>
                     <CardTitle>Chef</CardTitle>
                   </CardHeader>
@@ -387,7 +398,7 @@ const RecipeDetail: React.FC = () => {
                     <div className="flex items-center space-x-4">
                       <Avatar className="w-16 h-16">
                         <AvatarImage src={recipe.profiles?.avatar_url} />
-                        <AvatarFallback>{recipe.profiles?.nome?.[0] || 'C'}</AvatarFallback>
+                        <AvatarFallback><ChefHat className="w-8 h-8" /></AvatarFallback>
                       </Avatar>
                       <div>
                         <h3 className="font-bold text-lg">{recipe.profiles?.nome || 'Chef Anônimo'}</h3>
@@ -395,7 +406,7 @@ const RecipeDetail: React.FC = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => navigate(`/cook/${recipe.usuario_id}`)}
-                          className="mt-2"
+                          className="mt-2 border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange hover:text-white"
                         >
                           Ver Perfil
                         </Button>
@@ -412,12 +423,12 @@ const RecipeDetail: React.FC = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <Card>
-                    <CardHeader>
+                  <Card className="shadow-lg border-0">
+                    <CardHeader className="bg-gradient-to-r from-fitcooker-orange/10 to-orange-100">
                       <CardTitle>Informações Nutricionais</CardTitle>
                       <p className="text-sm text-gray-600">Por porção</p>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-6">
                       <MacroDisplay
                         calories={Math.round(nutrition.calorias_totais / recipe.porcoes)}
                         protein={Math.round(nutrition.proteinas_totais / recipe.porcoes)}
@@ -435,7 +446,7 @@ const RecipeDetail: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card>
+                <Card className="shadow-lg border-0">
                   <CardHeader>
                     <CardTitle>Detalhes da Receita</CardTitle>
                   </CardHeader>
