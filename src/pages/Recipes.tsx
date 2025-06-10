@@ -98,22 +98,43 @@ const Recipes: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
       <Navbar />
       
-      <main className="flex-grow py-8">
-        <div className="container mx-auto px-4 md:px-6">
-          {/* Header Section */}
+      <main className="flex-grow py-2">
+        {/* Enhanced Header Section with Interactive Background */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden bg-gradient-to-r from-fitcooker-orange via-orange-500 to-orange-600 text-white py-16 mb-8"
+        >
+          <div className="absolute inset-0 bg-black/10"></div>
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-fitcooker-orange to-orange-600 bg-clip-text text-transparent mb-4">
-              Descubra Receitas Incríveis
-            </h1>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Explore nossa coleção de receitas saudáveis e saborosas criadas por chefs talentosos
-            </p>
-          </motion.div>
+            className="absolute inset-0 opacity-20"
+            animate={{
+              background: [
+                "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.3) 0%, transparent 50%)",
+                "radial-gradient(circle at 80% 20%, rgba(255,255,255,0.3) 0%, transparent 50%)",
+                "radial-gradient(circle at 40% 40%, rgba(255,255,255,0.3) 0%, transparent 50%)"
+              ]
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          
+          <div className="relative container mx-auto px-4 md:px-6 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                Descubra Receitas Incríveis
+              </h1>
+              <p className="text-orange-100 text-lg max-w-2xl mx-auto">
+                Explore nossa coleção de receitas saudáveis e saborosas criadas por chefs talentosos
+              </p>
+            </motion.div>
+          </div>
+        </motion.div>
 
+        <div className="container mx-auto px-4 md:px-6">
           {/* Stats Section with Real Data */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

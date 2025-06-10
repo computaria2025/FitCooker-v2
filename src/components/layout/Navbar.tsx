@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
   // Handle scroll for sophisticated navbar
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0);
+      setIsScrolled(window.scrollY > 10);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -71,7 +71,7 @@ const Navbar: React.FC = () => {
         className={`fixed top-0 w-full z-50 transition-all duration-500 ease-in-out ${
           isScrolled 
             ? 'bg-white/95 backdrop-blur-xl shadow-2xl border-b border-gray-100/50' 
-            : 'bg-transparent'
+            : 'bg-transparent backdrop-blur-sm'
         }`}
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -109,10 +109,16 @@ const Navbar: React.FC = () => {
                   layout
                   className="relative"
                 >
-                  <span className={`font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent transition-all duration-500 ${
-                    isScrolled ? 'text-xl' : 'text-2xl'
+                  <span className={`font-bold transition-all duration-500 ${
+                    isScrolled 
+                      ? 'text-xl bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent' 
+                      : 'text-2xl text-white drop-shadow-lg'
                   }`}>
-                    Fit<span className="bg-gradient-to-r from-fitcooker-orange to-orange-500 bg-clip-text text-transparent">Cooker</span>
+                    Fit<span className={`transition-all duration-500 ${
+                      isScrolled 
+                        ? 'bg-gradient-to-r from-fitcooker-orange to-orange-500 bg-clip-text text-transparent'
+                        : 'text-orange-200'
+                    }`}>Cooker</span>
                   </span>
                   <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fitcooker-orange to-orange-500 group-hover:w-full transition-all duration-300"></div>
                 </motion.div>
@@ -130,10 +136,18 @@ const Navbar: React.FC = () => {
                 >
                   <Link
                     to={item.href}
-                    className="relative px-4 py-2 text-gray-700 hover:text-fitcooker-orange transition-all duration-300 group font-medium"
+                    className={`relative px-4 py-2 transition-all duration-300 group font-medium ${
+                      isScrolled 
+                        ? 'text-gray-700 hover:text-fitcooker-orange' 
+                        : 'text-white/90 hover:text-white drop-shadow-md'
+                    }`}
                   >
                     <span className="relative z-10">{item.name}</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-fitcooker-orange/10 to-orange-400/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 ease-out"></div>
+                    <div className={`absolute inset-0 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300 ease-out ${
+                      isScrolled 
+                        ? 'bg-gradient-to-r from-fitcooker-orange/10 to-orange-400/10'
+                        : 'bg-white/10 backdrop-blur-sm'
+                    }`}></div>
                     <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-fitcooker-orange to-orange-500 transition-all duration-300 group-hover:w-3/4 transform -translate-x-1/2"></div>
                   </Link>
                 </motion.div>
@@ -145,12 +159,20 @@ const Navbar: React.FC = () => {
               {/* Premium Search Button */}
               <motion.button
                 onClick={() => setShowSearchDialog(true)}
-                className="relative p-3 text-gray-600 hover:text-fitcooker-orange transition-all duration-300 group"
+                className={`relative p-3 transition-all duration-300 group ${
+                  isScrolled 
+                    ? 'text-gray-600 hover:text-fitcooker-orange'
+                    : 'text-white/90 hover:text-white'
+                }`}
                 aria-label="Buscar receitas"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-fitcooker-orange/20 to-orange-400/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                <div className={`absolute inset-0 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300 ${
+                  isScrolled 
+                    ? 'bg-gradient-to-r from-fitcooker-orange/20 to-orange-400/20'
+                    : 'bg-white/20 backdrop-blur-sm'
+                }`}></div>
                 <Search className="relative h-5 w-5" />
               </motion.button>
 
@@ -186,7 +208,11 @@ const Navbar: React.FC = () => {
                             </AvatarFallback>
                           </Avatar>
                         </div>
-                        <span className="hidden sm:inline text-gray-700 hover:text-fitcooker-orange font-medium transition-colors duration-300">
+                        <span className={`hidden sm:inline font-medium transition-colors duration-300 ${
+                          isScrolled 
+                            ? 'text-gray-700 hover:text-fitcooker-orange'
+                            : 'text-white/90 hover:text-white drop-shadow-md'
+                        }`}>
                           {user.user_metadata?.nome || user.email?.split('@')[0] || 'Usuário'}
                         </span>
                       </motion.button>
@@ -217,7 +243,11 @@ const Navbar: React.FC = () => {
                   {/* Enhanced Login/Signup for non-authenticated users */}
                   <Link
                     to="/login"
-                    className="hidden sm:block text-gray-700 hover:text-fitcooker-orange transition-colors duration-300 font-medium px-4 py-2"
+                    className={`hidden sm:block transition-colors duration-300 font-medium px-4 py-2 ${
+                      isScrolled 
+                        ? 'text-gray-700 hover:text-fitcooker-orange'
+                        : 'text-white/90 hover:text-white drop-shadow-md'
+                    }`}
                   >
                     Entrar
                   </Link>
@@ -238,7 +268,11 @@ const Navbar: React.FC = () => {
               {/* Enhanced Mobile Menu Button */}
               <motion.button
                 onClick={() => setIsOpen(!isOpen)}
-                className="md:hidden p-2 text-gray-600 hover:text-fitcooker-orange transition-colors duration-300"
+                className={`md:hidden p-2 transition-colors duration-300 ${
+                  isScrolled 
+                    ? 'text-gray-600 hover:text-fitcooker-orange'
+                    : 'text-white/90 hover:text-white'
+                }`}
                 aria-label="Toggle menu"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}

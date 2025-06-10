@@ -8,7 +8,7 @@ import MacroCalculator from '@/components/ferramentas/MacroCalculator';
 import IMCCalculator from '@/components/ferramentas/IMCCalculator';
 import UnitConverter from '@/components/ferramentas/UnitConverter';
 import NutrientCalculator from '@/components/ferramentas/NutrientCalculator';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 const Ferramentas: React.FC = () => {
   const [activeTab, setActiveTab] = useState('macros');
@@ -19,28 +19,32 @@ const Ferramentas: React.FC = () => {
       name: 'Macronutrientes', 
       icon: Calculator,
       description: 'Calcule suas necessidades diárias de proteínas, carboidratos e gorduras',
-      color: 'from-blue-500 to-blue-600'
+      color: 'from-blue-500 to-blue-600',
+      instructions: 'Insira suas informações pessoais (idade, peso, altura, sexo e nível de atividade) para calcular suas necessidades diárias de macronutrientes. A calculadora fornecerá recomendações personalizadas com base em seus objetivos.'
     },
     { 
       id: 'imc', 
       name: 'IMC', 
       icon: Scale,
       description: 'Descubra seu Índice de Massa Corporal e sua classificação',
-      color: 'from-green-500 to-green-600'
+      color: 'from-green-500 to-green-600',
+      instructions: 'Digite seu peso atual e altura para calcular automaticamente seu Índice de Massa Corporal. O resultado incluirá sua classificação (abaixo do peso, normal, sobrepeso, etc.) e dicas de saúde.'
     },
     { 
       id: 'conversor', 
       name: 'Conversor', 
       icon: Ruler,
       description: 'Converta medidas culinárias e unidades de peso facilmente',
-      color: 'from-purple-500 to-purple-600'
+      color: 'from-purple-500 to-purple-600',
+      instructions: 'Converta facilmente entre diferentes unidades de medida usadas na culinária. Ideal para adaptar receitas internacionais ou converter entre sistemas métrico e imperial.'
     },
     { 
       id: 'nutrientes', 
       name: 'Nutrientes', 
       icon: Search,
       description: 'Pesquise informações nutricionais detalhadas dos alimentos',
-      color: 'from-orange-500 to-orange-600'
+      color: 'from-orange-500 to-orange-600',
+      instructions: 'Pesquise alimentos específicos para obter informações nutricionais detalhadas, incluindo vitaminas, minerais e macronutrientes por porção.'
     }
   ];
 
@@ -110,15 +114,15 @@ const Ferramentas: React.FC = () => {
           </div>
         </motion.div>
 
-        <div className="container mx-auto px-4 md:px-6 py-12 max-w-7xl">
-          {/* Enhanced Tab Navigation */}
+        <div className="container mx-auto px-4 md:px-6 py-12 max-w-6xl">
+          {/* Enhanced Tab Navigation - Centered */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="flex justify-center mb-12"
           >
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-2 max-w-4xl w-full">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-2 max-w-5xl w-full">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 {tabs.map((tab, index) => (
                   <motion.button
@@ -159,16 +163,16 @@ const Ferramentas: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Enhanced Tool Info Card */}
+          {/* Enhanced Tool Info Card - Only shows for active tab */}
           {activeTabData && (
             <motion.div
               key={activeTab}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className="mb-8"
+              className="mb-8 flex justify-center"
             >
-              <Card className="border-0 bg-gradient-to-r from-gray-50 to-white shadow-lg">
+              <Card className="border-0 bg-gradient-to-r from-gray-50 to-white shadow-lg max-w-4xl w-full">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
                     <div className={`flex items-center justify-center w-12 h-12 bg-gradient-to-r ${activeTabData.color} rounded-xl text-white shadow-lg`}>
@@ -179,10 +183,7 @@ const Ferramentas: React.FC = () => {
                         Como usar: {activeTabData.name}
                       </h3>
                       <p className="text-gray-600 leading-relaxed">
-                        {activeTab === 'macros' && "Insira suas informações pessoais (idade, peso, altura, sexo e nível de atividade) para calcular suas necessidades diárias de macronutrientes. A calculadora fornecerá recomendações personalizadas com base em seus objetivos."}
-                        {activeTab === 'imc' && "Digite seu peso atual e altura para calcular automaticamente seu Índice de Massa Corporal. O resultado incluirá sua classificação (abaixo do peso, normal, sobrepeso, etc.) e dicas de saúde."}
-                        {activeTab === 'conversor' && "Converta facilmente entre diferentes unidades de medida usadas na culinária. Ideal para adaptar receitas internacionais ou converter entre sistemas métrico e imperial."}
-                        {activeTab === 'nutrientes' && "Pesquise alimentos específicos para obter informações nutricionais detalhadas, incluindo vitaminas, minerais e macronutrientes por porção."}
+                        {activeTabData.instructions}
                       </p>
                     </div>
                     <div className="flex items-center text-blue-600">
@@ -194,7 +195,7 @@ const Ferramentas: React.FC = () => {
             </motion.div>
           )}
 
-          {/* Tab Content */}
+          {/* Tab Content - Centered */}
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, y: 20 }}
