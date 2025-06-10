@@ -2,25 +2,23 @@
 export interface Recipe {
   id: number;
   titulo: string;
+  title: string;
   descricao: string;
+  description: string;
   imagem_url: string;
+  imageUrl: string;
   tempo_preparo: number;
+  preparationTime: number;
   porcoes: number;
+  servings: number;
   dificuldade: string;
+  difficulty: string;
   nota_media: number;
+  rating: number;
   avaliacoes_count: number;
   created_at: string;
   usuario_id: string;
-  
-  // Campos calculados/relacionados para compatibilidade com componentes existentes
-  title: string;
-  description: string;
-  imageUrl: string;
-  preparationTime: number;
-  servings: number;
-  difficulty: string;
-  rating: number;
-  
+  status?: string;
   author: {
     id: string;
     name: string;
@@ -33,11 +31,4 @@ export interface Recipe {
     carbs: number;
     fat: number;
   };
-}
-
-export interface Category {
-  id: number;
-  nome: string;
-  descricao: string;
-  ativa: boolean;
 }

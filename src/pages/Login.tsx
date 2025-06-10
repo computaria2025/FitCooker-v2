@@ -1,11 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChefHat, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 const Login: React.FC = () => {
@@ -13,37 +14,36 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, user, checkProfileComplete } = useAuth();
+  const { signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  
-  // Redirect if already logged in
-  useEffect(() => {
-    if (user) {
-      console.log('User already logged in, redirecting to home');
-      navigate('/');
-    }
-  }, [user, navigate]);
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha todos os campos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     
     try {
-      console.log('Attempting login with email:', email);
       const { error } = await signIn(email, password);
       
       if (error) {
-        console.error('Login error:', error);
-        let errorMessage = error.message;
+        let errorMessage = "Erro ao fazer login.";
         
-        // Melhor tratamento de erros
-        if (error.message === 'Invalid login credentials') {
-          errorMessage = 'Email ou senha incorretos';
-        } else if (error.message.includes('Email not confirmed')) {
-          errorMessage = 'Por favor, confirme seu email antes de fazer login';
-        } else if (error.message.includes('too many requests')) {
-          errorMessage = 'Muitas tentativas de login. Tente novamente em alguns minutos';
+        if (error.message.includes("Invalid login credentials")) {
+          errorMessage = "Email ou senha incorretos.";
+        } else if (error.message.includes("Email not confirmed")) {
+          errorMessage = "Por favor, confirme seu email antes de fazer login.";
+        } else if (error.message.includes("Too many requests")) {
+          errorMessage = "Muitas tentativas de login. Tente novamente mais tarde.";
         }
         
         toast({
@@ -52,108 +52,88 @@ const Login: React.FC = () => {
           variant: "destructive",
         });
       } else {
-        console.log('Login successful');
         toast({
-          title: "Login realizado com sucesso!",
-          description: "Bem-vindo de volta ao FitCooker!",
+          title: "Login realizado!",
+          description: "Bem-vindo de volta!",
         });
-        
-        // Check if profile is complete and redirect accordingly
-        setTimeout(async () => {
-          try {
-            // Get user from auth state (will be available after successful login)
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-              const isProfileComplete = await checkProfileComplete(user.id);
-              if (isProfileComplete) {
-                navigate('/');
-              } else {
-                navigate('/profile');
-              }
-            } else {
-              navigate('/');
-            }
-          } catch (error) {
-            console.error('Error checking profile:', error);
-            navigate('/');
-          }
-        }, 100);
+        navigate('/');
       }
     } catch (error) {
-      console.error('Unexpected login error:', error);
       toast({
-        title: "Erro de conexão",
-        description: "Não foi possível conectar ao servidor.",
+        title: "Erro",
+        description: "Ocorreu um erro inesperado.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <main className="flex-grow flex items-center justify-center py-24">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-md mx-auto">
-            <div className="text-center mb-12">
-              <div className="flex items-center justify-center mb-4">
-                <ChefHat size={40} className="text-fitcooker-orange mr-2" />
-                <h1 className="text-4xl font-bold">
-                  Fit<span className="text-fitcooker-orange">Cooker</span>
-                </h1>
-              </div>
-              <h2 className="heading-md mb-3">Bem-vindo de volta!</h2>
-              <p className="text-gray-600">
-                Entre para acessar suas receitas favoritas e mais
-              </p>
+    <div className="min-h-screen bg-gradient-to-br from-fitcooker-orange via-orange-500 to-orange-600 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md"
+      >
+        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+          <CardHeader className="text-center space-y-4">
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              className="w-16 h-16 bg-gradient-to-r from-fitcooker-orange to-orange-500 rounded-2xl flex items-center justify-center mx-auto"
+            >
+              <ChefHat className="w-8 h-8 text-white" />
+            </motion.div>
+            <div>
+              <CardTitle className="text-2xl font-bold text-gray-900">
+                Bem-vindo de volta!
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Faça login na sua conta FitCooker
+              </CardDescription>
             </div>
-            
-            <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          </CardHeader>
+          
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                     Email
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail size={18} className="text-gray-400" />
+                      <Mail className="h-5 w-5 text-gray-400" />
                     </div>
-                    <input
+                    <Input
                       id="email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="seu@email.com"
+                      className="pl-10 h-12"
                       required
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fitcooker-orange focus:border-transparent transition-all"
                     />
                   </div>
                 </div>
-                
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-1">
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                      Senha
-                    </label>
-                    <Link to="/forgot-password" className="text-sm text-fitcooker-orange hover:underline">
-                      Esqueceu a senha?
-                    </Link>
-                  </div>
+
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                    Senha
+                  </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock size={18} className="text-gray-400" />
+                      <Lock className="h-5 w-5 text-gray-400" />
                     </div>
-                    <input
+                    <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
+                      placeholder="Sua senha"
+                      className="pl-10 pr-10 h-12"
                       required
-                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-fitcooker-orange focus:border-transparent transition-all"
                     />
                     <button
                       type="button"
@@ -161,47 +141,55 @@ const Login: React.FC = () => {
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff size={18} className="text-gray-400" />
+                        <EyeOff className="h-5 w-5 text-gray-400" />
                       ) : (
-                        <Eye size={18} className="text-gray-400" />
+                        <Eye className="h-5 w-5 text-gray-400" />
                       )}
                     </button>
                   </div>
                 </div>
-                
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full btn btn-primary relative"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Entrando...</span>
-                    </div>
-                  ) : (
-                    <span>Entrar</span>
-                  )}
-                </button>
-              </form>
-              
-              <div className="mt-6 text-center">
-                <p className="text-gray-600">
-                  Não tem uma conta?{' '}
-                  <Link to="/signup" className="text-fitcooker-orange hover:underline font-medium">
-                    Registre-se
-                  </Link>
-                </p>
               </div>
-            </div>
-          </div>
-        </div>
-      </main>
-      
-      <Footer />
+
+              <div className="flex items-center justify-between">
+                <Link 
+                  to="/forgot-password" 
+                  className="text-sm text-fitcooker-orange hover:text-fitcooker-orange/80 transition-colors"
+                >
+                  Esqueceu a senha?
+                </Link>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-fitcooker-orange to-orange-500 hover:from-fitcooker-orange hover:to-orange-600 text-white h-14 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Entrando...
+                  </div>
+                ) : (
+                  'Entrar'
+                )}
+              </Button>
+
+              <div className="text-center">
+                <span className="text-gray-600">Não tem uma conta? </span>
+                <Link 
+                  to="/signup" 
+                  className="text-fitcooker-orange hover:text-fitcooker-orange/80 font-medium transition-colors"
+                >
+                  Criar conta
+                </Link>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 };

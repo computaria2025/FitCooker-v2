@@ -1,65 +1,78 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calculator, Scale, Ruler, Search, Info, Target, Activity, Zap } from 'lucide-react';
+import { Calculator, Activity, Target, Scale, Lightbulb } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import MacroCalculator from '@/components/ferramentas/MacroCalculator';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import IMCCalculator from '@/components/ferramentas/IMCCalculator';
-import UnitConverter from '@/components/ferramentas/UnitConverter';
+import MacroCalculator from '@/components/ferramentas/MacroCalculator';
 import NutrientCalculator from '@/components/ferramentas/NutrientCalculator';
-import { Card, CardContent } from '@/components/ui/card';
+import UnitConverter from '@/components/ferramentas/UnitConverter';
 
 const Ferramentas: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('macros');
+  const [activeTab, setActiveTab] = useState('imc');
+  const [activeTip, setActiveTip] = useState('imc');
 
-  const tabs = [
-    { 
-      id: 'macros', 
-      name: 'Macronutrientes', 
-      icon: Calculator,
-      description: 'Calcule suas necessidades diárias de proteínas, carboidratos e gorduras',
-      color: 'from-blue-500 to-blue-600',
-      instructions: 'Insira suas informações pessoais (idade, peso, altura, sexo e nível de atividade) para calcular suas necessidades diárias de macronutrientes. A calculadora fornecerá recomendações personalizadas com base em seus objetivos.'
-    },
-    { 
-      id: 'imc', 
-      name: 'IMC', 
+  const tools = [
+    {
+      id: 'imc',
+      name: 'IMC',
       icon: Scale,
-      description: 'Descubra seu Índice de Massa Corporal e sua classificação',
-      color: 'from-green-500 to-green-600',
-      instructions: 'Digite seu peso atual e altura para calcular automaticamente seu Índice de Massa Corporal. O resultado incluirá sua classificação (abaixo do peso, normal, sobrepeso, etc.) e dicas de saúde.'
+      description: 'Calcule seu Índice de Massa Corporal',
+      component: IMCCalculator,
+      tip: {
+        title: 'Calculadora de IMC',
+        content: 'O Índice de Massa Corporal (IMC) é uma medida que relaciona peso e altura para avaliar se uma pessoa está dentro do peso ideal. Insira seu peso em kg e altura em metros para obter uma classificação automática.'
+      }
     },
-    { 
-      id: 'conversor', 
-      name: 'Conversor', 
-      icon: Ruler,
-      description: 'Converta medidas culinárias e unidades de peso facilmente',
-      color: 'from-purple-500 to-purple-600',
-      instructions: 'Converta facilmente entre diferentes unidades de medida usadas na culinária. Ideal para adaptar receitas internacionais ou converter entre sistemas métrico e imperial.'
+    {
+      id: 'macros',
+      name: 'Macronutrientes',
+      icon: Target,
+      description: 'Calcule suas necessidades diárias',
+      component: MacroCalculator,
+      tip: {
+        title: 'Calculadora de Macronutrientes',
+        content: 'Esta ferramenta calcula suas necessidades diárias de proteínas, carboidratos e gorduras com base em seu perfil físico e objetivos. Os resultados incluem gráficos visuais e tabelas nutricionais detalhadas.'
+      }
     },
-    { 
-      id: 'nutrientes', 
-      name: 'Nutrientes', 
-      icon: Search,
-      description: 'Pesquise informações nutricionais detalhadas dos alimentos',
-      color: 'from-orange-500 to-orange-600',
-      instructions: 'Pesquise alimentos específicos para obter informações nutricionais detalhadas, incluindo vitaminas, minerais e macronutrientes por porção.'
+    {
+      id: 'nutrientes',
+      name: 'Nutrientes',
+      icon: Activity,
+      description: 'Analise valores nutricionais',
+      component: NutrientCalculator,
+      tip: {
+        title: 'Calculadora de Nutrientes',
+        content: 'Analise e compare valores nutricionais de diferentes alimentos. Útil para planejamento de refeições e controle da ingestão de vitaminas e minerais essenciais.'
+      }
+    },
+    {
+      id: 'conversao',
+      name: 'Conversão',
+      icon: Calculator,
+      description: 'Converta unidades culinárias',
+      component: UnitConverter,
+      tip: {
+        title: 'Conversor de Unidades',
+        content: 'Converta facilmente entre diferentes unidades de medida usadas na culinária: gramas, quilos, mililitros, litros, xícaras, colheres e muito mais. Essencial para seguir receitas de diferentes países.'
+      }
     }
   ];
 
-  const activeTabData = tabs.find(tab => tab.id === activeTab);
+  const currentTip = tools.find(tool => tool.id === activeTip)?.tip;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
       <Navbar />
       
-      <main className="flex-grow">
-        {/* Enhanced Hero Section */}
+      <main className="py-2">
+        {/* Enhanced Header Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden bg-gradient-to-r from-fitcooker-orange via-orange-500 to-orange-600 text-white py-20"
+          className="relative overflow-hidden bg-gradient-to-r from-fitcooker-orange via-orange-500 to-orange-600 text-white py-16 mb-8"
         >
           <div className="absolute inset-0 bg-black/10"></div>
           <motion.div
@@ -79,136 +92,112 @@ const Ferramentas: React.FC = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="max-w-4xl mx-auto"
             >
-              <div className="flex items-center justify-center mb-6">
-                <motion.div
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="bg-white/20 p-4 rounded-2xl backdrop-blur-sm"
-                >
-                  <Calculator className="w-12 h-12" />
-                </motion.div>
-              </div>
-              <h1 className="text-5xl md:text-6xl font-bold mb-6">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
                 Ferramentas Culinárias
               </h1>
-              <p className="text-xl md:text-2xl text-orange-100 mb-8 leading-relaxed">
-                Calculadoras e conversores profissionais para uma alimentação mais precisa e consciente
+              <p className="text-orange-100 text-lg max-w-2xl mx-auto">
+                Calculadoras e conversores essenciais para sua jornada culinária saudável
               </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <div className="flex items-center bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
-                  <Target className="w-5 h-5 mr-2" />
-                  <span className="font-medium">Precisão Nutricional</span>
-                </div>
-                <div className="flex items-center bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
-                  <Activity className="w-5 h-5 mr-2" />
-                  <span className="font-medium">Resultados Instantâneos</span>
-                </div>
-                <div className="flex items-center bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
-                  <Zap className="w-5 h-5 mr-2" />
-                  <span className="font-medium">Fácil de Usar</span>
-                </div>
-              </div>
             </motion.div>
           </div>
         </motion.div>
 
-        <div className="container mx-auto px-4 md:px-6 py-12 max-w-6xl">
-          {/* Enhanced Tab Navigation - Centered */}
+        <div className="container mx-auto px-4 md:px-6">
+          {/* Tools Navigation */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="flex justify-center mb-12"
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
           >
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-2 max-w-5xl w-full">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                {tabs.map((tab, index) => (
-                  <motion.button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`relative p-4 rounded-xl transition-all duration-300 text-left ${
-                      activeTab === tab.id 
-                        ? 'text-white shadow-lg' 
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            {tools.map((tool, index) => {
+              const Icon = tool.icon;
+              return (
+                <motion.div
+                  key={tool.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + (index * 0.1) }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Card 
+                    className={`cursor-pointer transition-all duration-300 hover:shadow-xl ${
+                      activeTab === tool.id 
+                        ? 'ring-2 ring-fitcooker-orange bg-gradient-to-br from-fitcooker-orange/5 to-orange-100/30' 
+                        : 'hover:shadow-lg'
                     }`}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    onClick={() => {
+                      setActiveTab(tool.id);
+                      setActiveTip(tool.id);
+                    }}
                   >
-                    {activeTab === tab.id && (
-                      <motion.div
-                        layoutId="activeTab"
-                        className={`absolute inset-0 bg-gradient-to-r ${tab.color} rounded-xl`}
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                      />
-                    )}
-                    <div className="relative z-10">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <tab.icon className="w-5 h-5" />
-                        <span className="font-semibold">{tab.name}</span>
-                      </div>
-                      <p className={`text-sm ${
-                        activeTab === tab.id ? 'text-white/90' : 'text-gray-500'
+                    <CardContent className="p-6 text-center">
+                      <div className={`w-12 h-12 mx-auto mb-3 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+                        activeTab === tool.id 
+                          ? 'bg-gradient-to-r from-fitcooker-orange to-orange-500 text-white shadow-lg' 
+                          : 'bg-gray-100 text-gray-600 group-hover:bg-fitcooker-orange group-hover:text-white'
                       }`}>
-                        {tab.description}
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <h3 className={`font-bold mb-1 transition-colors duration-300 ${
+                        activeTab === tool.id ? 'text-fitcooker-orange' : 'text-gray-900'
+                      }`}>
+                        {tool.name}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {tool.description}
                       </p>
-                    </div>
-                  </motion.button>
-                ))}
-              </div>
-            </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </motion.div>
 
-          {/* Enhanced Tool Info Card - Only shows for active tab */}
-          {activeTabData && (
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mb-8 flex justify-center"
-            >
-              <Card className="border-0 bg-gradient-to-r from-gray-50 to-white shadow-lg max-w-4xl w-full">
-                <CardContent className="p-6">
-                  <div className="flex items-start space-x-4">
-                    <div className={`flex items-center justify-center w-12 h-12 bg-gradient-to-r ${activeTabData.color} rounded-xl text-white shadow-lg`}>
-                      <activeTabData.icon className="w-6 h-6" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        Como usar: {activeTabData.name}
-                      </h3>
-                      <p className="text-gray-600 leading-relaxed">
-                        {activeTabData.instructions}
-                      </p>
-                    </div>
-                    <div className="flex items-center text-blue-600">
-                      <Info className="w-5 h-5" />
-                    </div>
+          {/* Usage Tips Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mb-8"
+          >
+            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+              <CardHeader className="pb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                    <Lightbulb className="w-5 h-5 text-white" />
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
+                  <div>
+                    <CardTitle className="text-blue-900">{currentTip?.title}</CardTitle>
+                    <CardDescription className="text-blue-700">Como usar esta ferramenta</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-blue-800 leading-relaxed">
+                  {currentTip?.content}
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          {/* Tab Content - Centered */}
+          {/* Active Tool Component */}
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="flex justify-center"
+            className="mb-8"
           >
-            <div className="w-full max-w-4xl">
-              {activeTab === 'macros' && <MacroCalculator />}
-              {activeTab === 'imc' && <IMCCalculator />}
-              {activeTab === 'conversor' && <UnitConverter />}
-              {activeTab === 'nutrientes' && <NutrientCalculator />}
-            </div>
+            {tools.map((tool) => {
+              if (tool.id === activeTab) {
+                const Component = tool.component;
+                return <Component key={tool.id} />;
+              }
+              return null;
+            })}
           </motion.div>
         </div>
       </main>

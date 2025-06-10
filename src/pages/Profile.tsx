@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import RecipeCard from '@/components/ui/RecipeCard';
+import SaveRecipeButton from '@/components/recipe/SaveRecipeButton';
 import { User, Mail, Camera, Save, Award, ChefHat, Heart, Edit, Trash2, Settings } from 'lucide-react';
 import { Recipe } from '@/types/recipe';
 
@@ -64,6 +65,7 @@ const Profile: React.FC = () => {
     if (!user) return;
 
     try {
+      // Get profile with real stats
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -80,7 +82,32 @@ const Profile: React.FC = () => {
         return;
       }
 
-      setProfile(data);
+      // Get real recipe count
+      const { count: recipeCount } = await supabase
+        .from('receitas')
+        .select('*', { count: 'exact', head: true })
+        .eq('usuario_id', user.id);
+
+      // Get real followers count
+      const { count: followersCount } = await supabase
+        .from('seguidores')
+        .select('*', { count: 'exact', head: true })
+        .eq('seguido_id', user.id);
+
+      // Get real following count
+      const { count: followingCount } = await supabase
+        .from('seguidores')
+        .select('*', { count: 'exact', head: true })
+        .eq('seguidor_id', user.id);
+
+      const profileWithStats = {
+        ...data,
+        receitas_count: recipeCount || 0,
+        seguidores_count: followersCount || 0,
+        seguindo_count: followingCount || 0
+      };
+
+      setProfile(profileWithStats);
       setFormData({
         nome: data.nome || '',
         bio: data.bio || '',
@@ -330,11 +357,40 @@ const Profile: React.FC = () => {
       });
 
       fetchUserRecipes();
+      fetchProfile(); // Refresh stats
     } catch (error) {
       console.error('Error deleting recipe:', error);
       toast({
         title: "Erro ao deletar",
         description: "Não foi possível deletar a receita.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUnsaveRecipe = async (recipeId: number) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('receitas_salvas')
+        .delete()
+        .eq('usuario_id', user.id)
+        .eq('receita_id', recipeId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Receita removida",
+        description: "Receita removida dos seus favoritos.",
+      });
+
+      fetchSavedRecipes();
+    } catch (error) {
+      console.error('Error unsaving recipe:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover a receita.",
         variant: "destructive",
       });
     }
@@ -624,11 +680,13 @@ const Profile: React.FC = () => {
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
-                          <div className="mt-2">
-                            <Badge variant={recipe.status === 'ativa' ? 'default' : 'secondary'}>
-                              {recipe.status === 'ativa' ? 'Ativa' : 'Inativa'}
-                            </Badge>
-                          </div>
+                          {recipe.status && (
+                            <div className="mt-2">
+                              <Badge variant={recipe.status === 'ativa' ? 'default' : 'secondary'}>
+                                {recipe.status === 'ativa' ? 'Ativa' : 'Inativa'}
+                              </Badge>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -657,7 +715,19 @@ const Profile: React.FC = () => {
                   {savedRecipes.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {savedRecipes.map((recipe) => (
-                        <RecipeCard key={recipe.id} recipe={recipe} />
+                        <div key={recipe.id} className="relative">
+                          <RecipeCard recipe={recipe} />
+                          <div className="absolute top-2 right-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="bg-white/90 hover:bg-red-50 text-red-600"
+                              onClick={() => handleUnsaveRecipe(recipe.id)}
+                            >
+                              <Heart className="w-4 h-4 fill-current" />
+                            </Button>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   ) : (

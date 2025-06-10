@@ -10,10 +10,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 
 const Recipes: React.FC = () => {
   const { recipes, loading } = useRecipes();
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [categories, setCategories] = useState<string[]>([]);
   const [stats, setStats] = useState({
     totalRecipes: 0,
     averageRating: 0,
@@ -66,11 +72,56 @@ const Recipes: React.FC = () => {
     fetchStats();
   }, []);
 
-  const filteredRecipes = recipes.filter(recipe =>
-    recipe.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    recipe.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    recipe.categories.some(cat => cat.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('categorias')
+          .select('nome')
+          .eq('ativa', true);
+
+        if (error) throw error;
+
+        setCategories(data?.map(cat => cat.nome) || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const filteredRecipes = recipes.filter(recipe => {
+    const matchesSearch = recipe.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      recipe.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      recipe.categories.some(cat => cat.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesCategory = !selectedCategory || recipe.categories.includes(selectedCategory);
+    
+    const matchesDifficulty = !selectedDifficulty || recipe.dificuldade === selectedDifficulty;
+    
+    const matchesTime = !selectedTime || (() => {
+      const time = recipe.tempo_preparo;
+      switch (selectedTime) {
+        case 'quick': return time <= 30;
+        case 'medium': return time > 30 && time <= 60;
+        case 'long': return time > 60;
+        default: return true;
+      }
+    })();
+
+    return matchesSearch && matchesCategory && matchesDifficulty && matchesTime;
+  });
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSelectedCategory('');
+    setSelectedDifficulty('');
+    setSelectedTime('');
+  };
+
+  const activeFiltersCount = [selectedCategory, selectedDifficulty, selectedTime].filter(Boolean).length;
 
   if (loading) {
     return (
@@ -99,11 +150,11 @@ const Recipes: React.FC = () => {
       <Navbar />
       
       <main className="flex-grow py-2">
-        {/* Enhanced Header Section with Interactive Background */}
+        {/* Enhanced Header Section with Animated Background */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden bg-gradient-to-r from-fitcooker-orange via-orange-500 to-orange-600 text-white py-16 mb-8"
+          className="relative overflow-hidden bg-gradient-to-r from-fitcooker-orange via-orange-500 to-orange-600 text-white py-12 mb-8"
         >
           <div className="absolute inset-0 bg-black/10"></div>
           <motion.div
@@ -191,27 +242,98 @@ const Recipes: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          {/* Search and Filter Section */}
+          {/* Enhanced Search and Filter Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-col md:flex-row gap-4 mb-8"
+            className="mb-8"
           >
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <Input
-                type="text"
-                placeholder="Buscar receitas, ingredientes ou categorias..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-12 border-gray-200 focus:border-fitcooker-orange"
-              />
-            </div>
-            <Button variant="outline" className="h-12 px-6 border-gray-200 hover:bg-gray-50">
-              <Filter className="w-4 h-4 mr-2" />
-              Filtros
-            </Button>
+            <Card className="p-6 shadow-lg">
+              <div className="space-y-4">
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Input
+                    type="text"
+                    placeholder="Buscar receitas, ingredientes ou categorias..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 h-12 border-gray-200 focus:border-fitcooker-orange"
+                  />
+                </div>
+
+                {/* Filters */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Dificuldade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Fácil">Fácil</SelectItem>
+                      <SelectItem value="Médio">Médio</SelectItem>
+                      <SelectItem value="Difícil">Difícil</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={selectedTime} onValueChange={setSelectedTime}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tempo de preparo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="quick">Até 30 min</SelectItem>
+                      <SelectItem value="medium">30-60 min</SelectItem>
+                      <SelectItem value="long">Mais de 60 min</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Button
+                    variant="outline"
+                    onClick={clearFilters}
+                    className="flex items-center justify-center"
+                    disabled={activeFiltersCount === 0}
+                  >
+                    <Filter className="w-4 h-4 mr-2" />
+                    Limpar {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+                  </Button>
+                </div>
+
+                {/* Active Filters */}
+                {activeFiltersCount > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCategory && (
+                      <Badge variant="secondary" className="cursor-pointer" onClick={() => setSelectedCategory('')}>
+                        {selectedCategory} ×
+                      </Badge>
+                    )}
+                    {selectedDifficulty && (
+                      <Badge variant="secondary" className="cursor-pointer" onClick={() => setSelectedDifficulty('')}>
+                        {selectedDifficulty} ×
+                      </Badge>
+                    )}
+                    {selectedTime && (
+                      <Badge variant="secondary" className="cursor-pointer" onClick={() => setSelectedTime('')}>
+                        {selectedTime === 'quick' ? 'Até 30 min' : 
+                         selectedTime === 'medium' ? '30-60 min' : 'Mais de 60 min'} ×
+                      </Badge>
+                    )}
+                  </div>
+                )}
+              </div>
+            </Card>
           </motion.div>
 
           {/* Recipes Grid */}
@@ -222,7 +344,7 @@ const Recipes: React.FC = () => {
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {searchTerm ? `Resultados para "${searchTerm}"` : 'Todas as Receitas'}
+                {searchTerm || activeFiltersCount > 0 ? 'Resultados da busca' : 'Todas as Receitas'}
               </h2>
               <span className="text-gray-500">
                 {filteredRecipes.length} receita{filteredRecipes.length !== 1 ? 's' : ''} encontrada{filteredRecipes.length !== 1 ? 's' : ''}
@@ -250,20 +372,20 @@ const Recipes: React.FC = () => {
               >
                 <ChefHat className="w-20 h-20 text-gray-300 mx-auto mb-6" />
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  {searchTerm ? 'Nenhuma receita encontrada' : 'Nenhuma receita disponível'}
+                  {searchTerm || activeFiltersCount > 0 ? 'Nenhuma receita encontrada' : 'Nenhuma receita disponível'}
                 </h3>
                 <p className="text-gray-600 text-lg mb-8">
-                  {searchTerm 
-                    ? 'Tente ajustar sua busca ou explorar outras categorias'
+                  {searchTerm || activeFiltersCount > 0
+                    ? 'Tente ajustar sua busca ou filtros'
                     : 'Seja o primeiro a compartilhar uma receita deliciosa!'
                   }
                 </p>
-                {searchTerm && (
+                {(searchTerm || activeFiltersCount > 0) && (
                   <Button 
-                    onClick={() => setSearchTerm('')}
+                    onClick={clearFilters}
                     className="bg-fitcooker-orange hover:bg-fitcooker-orange/90"
                   >
-                    Limpar Busca
+                    Limpar Filtros
                   </Button>
                 )}
               </motion.div>
