@@ -1,122 +1,86 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { User, Settings, BookOpen, Heart, Save, Edit, Trash2, MapPin, Calendar } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import RecipeCard from '@/components/ui/RecipeCard';
-import SaveRecipeButton from '@/components/recipe/SaveRecipeButton';
-import { User, Mail, Camera, Save, Award, ChefHat, Heart, Edit, Trash2, Settings } from 'lucide-react';
+import ProfilePictureUpload from '@/components/ui/ProfilePictureUpload';
 import { Recipe } from '@/types/recipe';
 
-interface UserProfile {
-  id: string;
-  nome: string;
-  email: string;
-  bio: string | null;
-  avatar_url: string | null;
-  preferencias: string[] | null;
+interface ProfileStats {
   receitas_count: number;
   seguidores_count: number;
   seguindo_count: number;
 }
 
+interface SavedRecipe {
+  id: number;
+  created_at: string;
+  receitas: Recipe;
+}
+
 const Profile: React.FC = () => {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [stats, setStats] = useState<ProfileStats>({ receitas_count: 0, seguidores_count: 0, seguindo_count: 0 });
   const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
-  const [savedRecipes, setSavedRecipes] = useState<Recipe[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [savedRecipes, setSavedRecipes] = useState<SavedRecipe[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [formData, setFormData] = useState({
     nome: '',
     bio: '',
-    preferencias: [] as string[]
+    preferencias: [] as string[],
   });
   const [newPreference, setNewPreference] = useState('');
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login');
-      return;
-    }
-
     if (user) {
       fetchProfile();
       fetchUserRecipes();
       fetchSavedRecipes();
     }
-  }, [user, loading, navigate]);
+  }, [user]);
 
   const fetchProfile = async () => {
     if (!user) return;
 
     try {
-      // Get profile with real stats
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
-        toast({
-          title: "Erro ao carregar perfil",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
+      if (error) throw error;
 
-      // Get real recipe count
-      const { count: recipeCount } = await supabase
-        .from('receitas')
-        .select('*', { count: 'exact', head: true })
-        .eq('usuario_id', user.id);
-
-      // Get real followers count
-      const { count: followersCount } = await supabase
-        .from('seguidores')
-        .select('*', { count: 'exact', head: true })
-        .eq('seguido_id', user.id);
-
-      // Get real following count
-      const { count: followingCount } = await supabase
-        .from('seguidores')
-        .select('*', { count: 'exact', head: true })
-        .eq('seguidor_id', user.id);
-
-      const profileWithStats = {
-        ...data,
-        receitas_count: recipeCount || 0,
-        seguidores_count: followersCount || 0,
-        seguindo_count: followingCount || 0
-      };
-
-      setProfile(profileWithStats);
+      setProfile(data);
+      setStats({
+        receitas_count: data.receitas_count || 0,
+        seguidores_count: data.seguidores_count || 0,
+        seguindo_count: data.seguindo_count || 0,
+      });
       setFormData({
         nome: data.nome || '',
         bio: data.bio || '',
-        preferencias: data.preferencias || []
+        preferencias: data.preferencias || [],
       });
     } catch (error) {
-      console.error('Unexpected error fetching profile:', error);
+      console.error('Error fetching profile:', error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -133,45 +97,46 @@ const Profile: React.FC = () => {
           informacao_nutricional(*)
         `)
         .eq('usuario_id', user.id)
+        .eq('status', 'ativa')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const formattedRecipes = (data || []).map((recipe: any) => ({
+      const transformedRecipes = data?.map(recipe => ({
         id: recipe.id,
         titulo: recipe.titulo,
         title: recipe.titulo,
         descricao: recipe.descricao,
         description: recipe.descricao,
-        imagem_url: recipe.imagem_url || '/placeholder.svg',
-        imageUrl: recipe.imagem_url || '/placeholder.svg',
+        imagem_url: recipe.imagem_url,
+        imageUrl: recipe.imagem_url,
         tempo_preparo: recipe.tempo_preparo,
         preparationTime: recipe.tempo_preparo,
         porcoes: recipe.porcoes,
         servings: recipe.porcoes,
         dificuldade: recipe.dificuldade,
         difficulty: recipe.dificuldade,
-        nota_media: recipe.nota_media || 0,
-        rating: recipe.nota_media || 0,
-        avaliacoes_count: recipe.avaliacoes_count || 0,
+        nota_media: recipe.nota_media,
+        rating: recipe.nota_media,
+        avaliacoes_count: recipe.avaliacoes_count,
         created_at: recipe.created_at,
         usuario_id: recipe.usuario_id,
         status: recipe.status,
         author: {
-          id: recipe.usuario_id,
+          id: recipe.profiles?.id || recipe.usuario_id,
           name: recipe.profiles?.nome || 'Chef Anônimo',
-          avatarUrl: recipe.profiles?.avatar_url || '/placeholder.svg'
+          avatarUrl: recipe.profiles?.avatar_url || '',
         },
         categories: recipe.receita_categorias?.map((rc: any) => rc.categorias?.nome).filter(Boolean) || [],
-        macros: {
-          calories: recipe.informacao_nutricional?.[0]?.calorias_totais || 0,
-          protein: recipe.informacao_nutricional?.[0]?.proteinas_totais || 0,
-          carbs: recipe.informacao_nutricional?.[0]?.carboidratos_totais || 0,
-          fat: recipe.informacao_nutricional?.[0]?.gorduras_totais || 0
-        }
-      }));
+        macros: recipe.informacao_nutricional?.[0] ? {
+          calories: Math.round(recipe.informacao_nutricional[0].calorias_totais / recipe.porcoes),
+          protein: Math.round(recipe.informacao_nutricional[0].proteinas_totais / recipe.porcoes),
+          carbs: Math.round(recipe.informacao_nutricional[0].carboidratos_totais / recipe.porcoes),
+          fat: Math.round(recipe.informacao_nutricional[0].gorduras_totais / recipe.porcoes),
+        } : { calories: 0, protein: 0, carbs: 0, fat: 0 },
+      })) || [];
 
-      setUserRecipes(formattedRecipes);
+      setUserRecipes(transformedRecipes);
     } catch (error) {
       console.error('Error fetching user recipes:', error);
     }
@@ -184,7 +149,7 @@ const Profile: React.FC = () => {
       const { data, error } = await supabase
         .from('receitas_salvas')
         .select(`
-          receita_id,
+          *,
           receitas(
             *,
             profiles(nome, avatar_url),
@@ -192,98 +157,78 @@ const Profile: React.FC = () => {
             informacao_nutricional(*)
           )
         `)
-        .eq('usuario_id', user.id);
+        .eq('usuario_id', user.id)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const formattedRecipes = (data || []).map((item: any) => {
-        const recipe = item.receitas;
-        return {
-          id: recipe.id,
-          titulo: recipe.titulo,
-          title: recipe.titulo,
-          descricao: recipe.descricao,
-          description: recipe.descricao,
-          imagem_url: recipe.imagem_url || '/placeholder.svg',
-          imageUrl: recipe.imagem_url || '/placeholder.svg',
-          tempo_preparo: recipe.tempo_preparo,
-          preparationTime: recipe.tempo_preparo,
-          porcoes: recipe.porcoes,
-          servings: recipe.porcoes,
-          dificuldade: recipe.dificuldade,
-          difficulty: recipe.dificuldade,
-          nota_media: recipe.nota_media || 0,
-          rating: recipe.nota_media || 0,
-          avaliacoes_count: recipe.avaliacoes_count || 0,
-          created_at: recipe.created_at,
-          usuario_id: recipe.usuario_id,
-          author: {
-            id: recipe.usuario_id,
-            name: recipe.profiles?.nome || 'Chef Anônimo',
-            avatarUrl: recipe.profiles?.avatar_url || '/placeholder.svg'
-          },
-          categories: recipe.receita_categorias?.map((rc: any) => rc.categorias?.nome).filter(Boolean) || [],
-          macros: {
-            calories: recipe.informacao_nutricional?.[0]?.calorias_totais || 0,
-            protein: recipe.informacao_nutricional?.[0]?.proteinas_totais || 0,
-            carbs: recipe.informacao_nutricional?.[0]?.carboidratos_totais || 0,
-            fat: recipe.informacao_nutricional?.[0]?.gorduras_totais || 0
-          }
-        };
-      });
-
-      setSavedRecipes(formattedRecipes);
+      setSavedRecipes(data || []);
     } catch (error) {
       console.error('Error fetching saved recipes:', error);
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !user) return;
+  const handleProfileUpdate = async () => {
+    if (!user) return;
 
-    setIsUploading(true);
+    setUpdating(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      const { error: updateError } = await supabase
+      const { error } = await supabase
         .from('profiles')
-        .update({ avatar_url: publicUrl })
+        .update({
+          nome: formData.nome,
+          bio: formData.bio,
+          preferencias: formData.preferencias,
+        })
         .eq('id', user.id);
 
-      if (updateError) {
-        throw updateError;
-      }
+      if (error) throw error;
 
-      setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
-      
-      toast({
-        title: "Imagem enviada!",
-        description: "Sua foto de perfil foi atualizada com sucesso.",
+      // Update user metadata
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { nome: formData.nome }
       });
-    } catch (error: any) {
-      console.error('Error uploading file:', error);
+
+      if (authError) console.error('Error updating auth metadata:', authError);
+
       toast({
-        title: "Erro no upload",
-        description: error.message || "Não foi possível enviar a imagem.",
+        title: "Perfil atualizado!",
+        description: "Suas informações foram salvas com sucesso.",
+      });
+
+      fetchProfile();
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o perfil.",
         variant: "destructive",
       });
     } finally {
-      setIsUploading(false);
+      setUpdating(false);
+    }
+  };
+
+  const handleAvatarUpload = async (avatarUrl: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ avatar_url: avatarUrl })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Update user metadata
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { avatar_url: avatarUrl }
+      });
+
+      if (authError) console.error('Error updating auth metadata:', authError);
+
+      setProfile(prev => ({ ...prev, avatar_url: avatarUrl }));
+    } catch (error) {
+      console.error('Error updating avatar:', error);
     }
   };
 
@@ -304,99 +249,58 @@ const Profile: React.FC = () => {
     }));
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-
-    setIsSaving(true);
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          nome: formData.nome,
-          bio: formData.bio,
-          preferencias: formData.preferencias
-        })
-        .eq('id', user.id);
-
-      if (error) {
-        toast({
-          title: "Erro ao salvar",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      toast({
-        title: "Perfil atualizado!",
-        description: "Suas alterações foram salvas com sucesso.",
-      });
-
-      await fetchProfile();
-    } catch (error) {
-      console.error('Unexpected error updating profile:', error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const deleteRecipe = async (recipeId: number) => {
+  const handleDeleteRecipe = async (recipeId: number) => {
     try {
       const { error } = await supabase
         .from('receitas')
-        .delete()
+        .update({ status: 'inativa' })
         .eq('id', recipeId)
         .eq('usuario_id', user?.id);
 
       if (error) throw error;
 
       toast({
-        title: "Receita deletada",
+        title: "Receita excluída!",
         description: "A receita foi removida com sucesso.",
       });
 
       fetchUserRecipes();
-      fetchProfile(); // Refresh stats
+      fetchProfile(); // Update recipe count
     } catch (error) {
-      console.error('Error deleting recipe:', error);
       toast({
-        title: "Erro ao deletar",
-        description: "Não foi possível deletar a receita.",
+        title: "Erro",
+        description: "Não foi possível excluir a receita.",
         variant: "destructive",
       });
     }
   };
 
   const handleUnsaveRecipe = async (recipeId: number) => {
-    if (!user) return;
-
     try {
       const { error } = await supabase
         .from('receitas_salvas')
         .delete()
-        .eq('usuario_id', user.id)
-        .eq('receita_id', recipeId);
+        .eq('receita_id', recipeId)
+        .eq('usuario_id', user?.id);
 
       if (error) throw error;
 
       toast({
-        title: "Receita removida",
-        description: "Receita removida dos seus favoritos.",
+        title: "Receita removida!",
+        description: "A receita foi removida dos seus favoritos.",
       });
 
       fetchSavedRecipes();
     } catch (error) {
-      console.error('Error unsaving recipe:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível remover a receita.",
+        description: "Não foi possível remover a receita dos favoritos.",
         variant: "destructive",
       });
     }
   };
 
-  if (loading || isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -411,291 +315,191 @@ const Profile: React.FC = () => {
     );
   }
 
-  if (!user) {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
       <Navbar />
       
-      <main className="flex-grow py-12">
-        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
+      <main className="py-8">
+        <div className="container mx-auto px-4 md:px-6">
+          {/* Profile Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative bg-gradient-to-r from-fitcooker-orange to-orange-600 rounded-xl p-8 mb-8 text-white overflow-hidden"
+            className="bg-gradient-to-r from-fitcooker-orange via-orange-500 to-orange-600 rounded-3xl p-8 mb-8 text-white"
           >
-            <div className="absolute inset-0 bg-black opacity-20 rounded-xl"></div>
-            <div className="absolute inset-0 opacity-20 rounded-xl bg-pattern"></div>
-            <div className="relative z-10">
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">Meu Perfil</h1>
-              <p className="text-orange-100">
-                Gerencie suas informações pessoais e configurações da conta
-              </p>
+            <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
+              <div className="relative">
+                <Avatar className="w-32 h-32 border-4 border-white shadow-xl">
+                  <AvatarImage src={profile?.avatar_url} className="object-cover" />
+                  <AvatarFallback className="text-4xl bg-white text-fitcooker-orange">
+                    <User className="w-16 h-16" />
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              
+              <div className="flex-1 text-center md:text-left">
+                <h1 className="text-3xl md:text-4xl font-bold mb-2">{profile?.nome || 'Usuário'}</h1>
+                {profile?.bio && (
+                  <p className="text-orange-100 text-lg mb-4">{profile.bio}</p>
+                )}
+                
+                <div className="flex flex-wrap justify-center md:justify-start gap-6 mb-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{stats.receitas_count}</div>
+                    <div className="text-orange-200 text-sm">Receitas</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{stats.seguidores_count}</div>
+                    <div className="text-orange-200 text-sm">Seguidores</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{stats.seguindo_count}</div>
+                    <div className="text-orange-200 text-sm">Seguindo</div>
+                  </div>
+                </div>
+
+                {profile?.preferencias && profile.preferencias.length > 0 && (
+                  <div className="flex flex-wrap justify-center md:justify-start gap-2">
+                    {profile.preferencias.map((pref: string, index: number) => (
+                      <Badge key={index} variant="outline" className="bg-white/20 border-white/30 text-white">
+                        {pref}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
 
-          <Tabs defaultValue="profile" className="space-y-6">
+          {/* Tabs */}
+          <Tabs defaultValue="perfil" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="profile">Perfil</TabsTrigger>
-              <TabsTrigger value="recipes">Minhas Receitas</TabsTrigger>
-              <TabsTrigger value="saved">Receitas Salvas</TabsTrigger>
-              <TabsTrigger value="preferences">Preferências</TabsTrigger>
+              <TabsTrigger value="perfil">Perfil</TabsTrigger>
+              <TabsTrigger value="receitas">Minhas Receitas</TabsTrigger>
+              <TabsTrigger value="favoritas">Favoritas</TabsTrigger>
+              <TabsTrigger value="configuracoes">Configurações</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="profile" className="space-y-6">
-              <div className="grid lg:grid-cols-3 gap-8">
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="space-y-6"
-                >
-                  <Card className="hover:shadow-lg transition-shadow duration-300">
-                    <CardHeader className="text-center">
-                      <CardTitle>Foto de Perfil</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-center space-y-4">
-                      <div className="relative inline-block">
-                        <Avatar className="w-32 h-32 mx-auto border-4 border-white shadow-lg">
-                          <AvatarImage src={profile?.avatar_url || ''} />
-                          <AvatarFallback className="text-2xl">
-                            <User className="w-12 h-12" />
-                          </AvatarFallback>
-                        </Avatar>
-                        <motion.div 
-                          className="absolute bottom-0 right-0 bg-fitcooker-orange rounded-full p-2 shadow-lg cursor-pointer"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => document.getElementById('avatar-upload')?.click()}
-                        >
-                          <Camera className="w-4 h-4 text-white" />
-                        </motion.div>
-                      </div>
-                      
-                      <div>
-                        <input
-                          type="file"
-                          id="avatar-upload"
-                          className="hidden"
-                          accept="image/*"
-                          onChange={handleFileUpload}
-                          disabled={isUploading}
-                        />
-                        <Button
-                          onClick={() => document.getElementById('avatar-upload')?.click()}
-                          variant="outline"
-                          disabled={isUploading}
-                          className="w-full hover:bg-fitcooker-orange hover:text-white transition-colors"
-                        >
-                          {isUploading ? 'Enviando...' : 'Alterar Foto'}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+            {/* Profile Tab */}
+            <TabsContent value="perfil">
+              <div className="grid gap-6 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Informações Pessoais</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Nome</label>
+                      <Input
+                        value={formData.nome}
+                        onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
+                        placeholder="Seu nome"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Bio</label>
+                      <Textarea
+                        value={formData.bio}
+                        onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                        placeholder="Conte um pouco sobre você..."
+                        rows={3}
+                      />
+                    </div>
+                    <Button onClick={handleProfileUpdate} disabled={updating} className="w-full">
+                      {updating ? 'Salvando...' : 'Salvar Alterações'}
+                    </Button>
+                  </CardContent>
+                </Card>
 
-                  <Card className="hover:shadow-lg transition-shadow duration-300">
-                    <CardHeader>
-                      <CardTitle className="flex items-center">
-                        <Award className="w-5 h-5 mr-2 text-fitcooker-orange" />
-                        Estatísticas do Chef
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <motion.div 
-                          className="flex items-center justify-between p-4 bg-orange-50 rounded-lg"
-                          whileHover={{ scale: 1.02 }}
-                        >
-                          <div className="flex items-center">
-                            <ChefHat className="w-5 h-5 text-fitcooker-orange mr-3" />
-                            <span className="text-gray-700 font-medium">Receitas</span>
-                          </div>
-                          <span className="font-bold text-fitcooker-orange text-lg">
-                            {profile?.receitas_count || 0}
-                          </span>
-                        </motion.div>
-                        
-                        <motion.div 
-                          className="flex items-center justify-between p-4 bg-blue-50 rounded-lg"
-                          whileHover={{ scale: 1.02 }}
-                        >
-                          <div className="flex items-center">
-                            <Heart className="w-5 h-5 text-blue-600 mr-3" />
-                            <span className="text-gray-700 font-medium">Seguidores</span>
-                          </div>
-                          <span className="font-bold text-blue-600 text-lg">
-                            {profile?.seguidores_count || 0}
-                          </span>
-                        </motion.div>
-                        
-                        <motion.div 
-                          className="flex items-center justify-between p-4 bg-green-50 rounded-lg"
-                          whileHover={{ scale: 1.02 }}
-                        >
-                          <div className="flex items-center">
-                            <User className="w-5 h-5 text-green-600 mr-3" />
-                            <span className="text-gray-700 font-medium">Seguindo</span>
-                          </div>
-                          <span className="font-bold text-green-600 text-lg">
-                            {profile?.seguindo_count || 0}
-                          </span>
-                        </motion.div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Foto de Perfil</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ProfilePictureUpload
+                      currentAvatarUrl={profile?.avatar_url}
+                      onUploadComplete={handleAvatarUpload}
+                    />
+                  </CardContent>
+                </Card>
 
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="lg:col-span-2 space-y-6"
-                >
-                  <Card className="hover:shadow-lg transition-shadow duration-300">
-                    <CardHeader>
-                      <CardTitle>Informações Pessoais</CardTitle>
-                      <CardDescription>
-                        Atualize suas informações básicas de perfil
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <form onSubmit={handleSave} className="space-y-6">
-                        <div className="grid md:grid-cols-2 gap-6">
-                          <div>
-                            <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-2">
-                              Nome
-                            </label>
-                            <div className="relative">
-                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <User size={18} className="text-gray-400" />
-                              </div>
-                              <Input
-                                id="nome"
-                                type="text"
-                                value={formData.nome}
-                                onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
-                                placeholder="Seu nome"
-                                required
-                                className="pl-10"
-                              />
-                            </div>
-                          </div>
-
-                          <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                              Email
-                            </label>
-                            <div className="relative">
-                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Mail size={18} className="text-gray-400" />
-                              </div>
-                              <Input
-                                id="email"
-                                type="email"
-                                value={profile?.email || ''}
-                                readOnly
-                                className="pl-10 bg-gray-50"
-                              />
-                            </div>
-                            <p className="text-sm text-gray-500 mt-1">
-                              O email não pode ser alterado
-                            </p>
-                          </div>
-                        </div>
-
-                        <div>
-                          <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2">
-                            Bio
-                          </label>
-                          <Textarea
-                            id="bio"
-                            value={formData.bio}
-                            onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
-                            placeholder="Conte um pouco sobre você, sua paixão pela culinária..."
-                            rows={4}
-                            className="resize-none"
-                          />
-                        </div>
-
-                        <div className="flex justify-end">
-                          <Button
-                            type="submit"
-                            disabled={isSaving}
-                            className="bg-fitcooker-orange hover:bg-fitcooker-orange/90"
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Preferências Culinárias</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex space-x-2">
+                      <Input
+                        value={newPreference}
+                        onChange={(e) => setNewPreference(e.target.value)}
+                        placeholder="Adicionar preferência..."
+                        onKeyPress={(e) => e.key === 'Enter' && addPreference()}
+                      />
+                      <Button onClick={addPreference}>Adicionar</Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.preferencias.map((pref, index) => (
+                        <Badge key={index} variant="outline" className="group">
+                          {pref}
+                          <button
+                            onClick={() => removePreference(pref)}
+                            className="ml-2 text-red-500 hover:text-red-700"
                           >
-                            {isSaving ? (
-                              <div className="flex items-center">
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Salvando...</span>
-                              </div>
-                            ) : (
-                              <>
-                                <Save className="w-4 h-4 mr-2" />
-                                <span>Salvar Alterações</span>
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      </form>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                            ×
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                    <Button onClick={handleProfileUpdate} disabled={updating} className="w-full">
+                      {updating ? 'Salvando...' : 'Salvar Preferências'}
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
             </TabsContent>
 
-            <TabsContent value="recipes" className="space-y-6">
+            {/* My Recipes Tab */}
+            <TabsContent value="receitas">
               <Card>
                 <CardHeader>
                   <CardTitle>Minhas Receitas ({userRecipes.length})</CardTitle>
                   <CardDescription>
-                    Gerencie todas as receitas que você criou
+                    Gerencie suas receitas criadas
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {userRecipes.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {userRecipes.map((recipe) => (
-                        <div key={recipe.id} className="relative">
+                        <div key={recipe.id} className="relative group">
                           <RecipeCard recipe={recipe} />
-                          <div className="absolute top-2 right-2 flex space-x-2">
+                          <div className="absolute top-4 right-4 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button
                               size="sm"
                               variant="outline"
-                              className="bg-white/90 hover:bg-white"
-                              onClick={() => navigate(`/receita/${recipe.id}/edit`)}
+                              className="bg-white/90"
+                              onClick={() => window.open(`/recipe/edit/${recipe.id}`, '_blank')}
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
                             <Button
                               size="sm"
-                              variant="outline"
-                              className="bg-white/90 hover:bg-red-50 text-red-600"
-                              onClick={() => deleteRecipe(recipe.id)}
+                              variant="destructive"
+                              className="bg-red-500/90"
+                              onClick={() => handleDeleteRecipe(recipe.id)}
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
-                          {recipe.status && (
-                            <div className="mt-2">
-                              <Badge variant={recipe.status === 'ativa' ? 'default' : 'secondary'}>
-                                {recipe.status === 'ativa' ? 'Ativa' : 'Inativa'}
-                              </Badge>
-                            </div>
-                          )}
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <ChefHat className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-600 mb-4">Você ainda não criou nenhuma receita</p>
-                      <Button onClick={() => navigate('/add-recipe')}>
-                        Criar Primeira Receita
+                      <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500 mb-4">Você ainda não criou nenhuma receita</p>
+                      <Button asChild>
+                        <a href="/add-recipe">Criar Primeira Receita</a>
                       </Button>
                     </div>
                   )}
@@ -703,39 +507,72 @@ const Profile: React.FC = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="saved" className="space-y-6">
+            {/* Saved Recipes Tab */}
+            <TabsContent value="favoritas">
               <Card>
                 <CardHeader>
                   <CardTitle>Receitas Salvas ({savedRecipes.length})</CardTitle>
                   <CardDescription>
-                    Suas receitas favoritas salvas para consulta rápida
+                    Suas receitas favoritas
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {savedRecipes.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {savedRecipes.map((recipe) => (
-                        <div key={recipe.id} className="relative">
-                          <RecipeCard recipe={recipe} />
-                          <div className="absolute top-2 right-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="bg-white/90 hover:bg-red-50 text-red-600"
-                              onClick={() => handleUnsaveRecipe(recipe.id)}
-                            >
-                              <Heart className="w-4 h-4 fill-current" />
-                            </Button>
+                      {savedRecipes.map((savedRecipe) => {
+                        const recipe = savedRecipe.receitas;
+                        const transformedRecipe: Recipe = {
+                          id: recipe.id,
+                          titulo: recipe.titulo,
+                          title: recipe.titulo,
+                          descricao: recipe.descricao,
+                          description: recipe.descricao,
+                          imagem_url: recipe.imagem_url,
+                          imageUrl: recipe.imagem_url,
+                          tempo_preparo: recipe.tempo_preparo,
+                          preparationTime: recipe.tempo_preparo,
+                          porcoes: recipe.porcoes,
+                          servings: recipe.porcoes,
+                          dificuldade: recipe.dificuldade,
+                          difficulty: recipe.dificuldade,
+                          nota_media: recipe.nota_media,
+                          rating: recipe.nota_media,
+                          avaliacoes_count: recipe.avaliacoes_count,
+                          created_at: recipe.created_at,
+                          usuario_id: recipe.usuario_id,
+                          status: recipe.status,
+                          author: {
+                            id: (recipe as any).profiles?.id || recipe.usuario_id,
+                            name: (recipe as any).profiles?.nome || 'Chef Anônimo',
+                            avatarUrl: (recipe as any).profiles?.avatar_url || '',
+                          },
+                          categories: (recipe as any).receita_categorias?.map((rc: any) => rc.categorias?.nome).filter(Boolean) || [],
+                          macros: { calories: 0, protein: 0, carbs: 0, fat: 0 },
+                        };
+
+                        return (
+                          <div key={savedRecipe.id} className="relative group">
+                            <RecipeCard recipe={transformedRecipe} />
+                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                className="bg-red-500/90"
+                                onClick={() => handleUnsaveRecipe(recipe.id)}
+                              >
+                                <Heart className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="text-center py-12">
                       <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-600 mb-4">Você ainda não salvou nenhuma receita</p>
-                      <Button onClick={() => navigate('/recipes')}>
-                        Explorar Receitas
+                      <p className="text-gray-500 mb-4">Você ainda não salvou nenhuma receita</p>
+                      <Button asChild>
+                        <a href="/recipes">Explorar Receitas</a>
                       </Button>
                     </div>
                   )}
@@ -743,54 +580,23 @@ const Profile: React.FC = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="preferences" className="space-y-6">
+            {/* Settings Tab */}
+            <TabsContent value="configuracoes">
               <Card>
                 <CardHeader>
-                  <CardTitle>Suas Preferências</CardTitle>
-                  <CardDescription>
-                    Defina suas preferências culinárias que aparecerão no seu perfil público
-                  </CardDescription>
+                  <CardTitle>Configurações da Conta</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex space-x-2">
-                    <Input
-                      placeholder="Ex: Italiana, Vegana, Doces..."
-                      value={newPreference}
-                      onChange={(e) => setNewPreference(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && addPreference()}
-                    />
-                    <Button onClick={addPreference} disabled={!newPreference.trim()}>
-                      Adicionar
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <h4 className="font-medium">Suas preferências atuais:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {formData.preferencias.map((preference, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="cursor-pointer hover:bg-red-50 hover:text-red-600"
-                          onClick={() => removePreference(preference)}
-                        >
-                          {preference} ×
-                        </Badge>
-                      ))}
-                      {formData.preferencias.length === 0 && (
-                        <p className="text-gray-500">Nenhuma preferência definida ainda</p>
-                      )}
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Email</label>
+                      <Input value={user?.email || ''} disabled />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Data de Cadastro</label>
+                      <Input value={profile?.data_cadastro ? new Date(profile.data_cadastro).toLocaleDateString('pt-BR') : ''} disabled />
                     </div>
                   </div>
-                  
-                  <Button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="bg-fitcooker-orange hover:bg-fitcooker-orange/90"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    Salvar Preferências
-                  </Button>
                 </CardContent>
               </Card>
             </TabsContent>

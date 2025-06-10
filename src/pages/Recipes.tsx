@@ -1,160 +1,85 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, ChefHat, Clock, Users, Star, TrendingUp, Award } from 'lucide-react';
+import { Search, Filter, Clock, Users, Star, SlidersHorizontal, X } from 'lucide-react';
+import { useRecipes } from '@/hooks/useRecipes';
+import { useCategories } from '@/hooks/useCategories';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import RecipeCard from '@/components/ui/RecipeCard';
-import { useRecipes } from '@/hooks/useRecipes';
-import { supabase } from '@/integrations/supabase/client';
+import RecipeCardSkeleton from '@/components/ui/RecipeCardSkeleton';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const Recipes: React.FC = () => {
-  const { recipes, loading } = useRecipes();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedDifficulty, setSelectedDifficulty] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  const [categories, setCategories] = useState<string[]>([]);
-  const [stats, setStats] = useState({
-    totalRecipes: 0,
-    averageRating: 0,
-    totalChefs: 0,
-    activeRecipes: 0
-  });
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('');
+  const [maxTime, setMaxTime] = useState<number>(180);
+  const [minRating, setMinRating] = useState<number>(0);
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  
+  const { data: recipes, isLoading } = useRecipes();
+  const { data: categories } = useCategories();
 
-  // Fetch real statistics from database
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        // Get total recipes count
-        const { count: totalRecipes } = await supabase
-          .from('receitas')
-          .select('*', { count: 'exact', head: true });
+  const difficulties = ['Fácil', 'Médio', 'Difícil'];
 
-        // Get active recipes count
-        const { count: activeRecipes } = await supabase
-          .from('receitas')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'ativa');
-
-        // Get average rating
-        const { data: avgData } = await supabase
-          .from('receitas')
-          .select('nota_media')
-          .eq('status', 'ativa')
-          .not('nota_media', 'is', null);
-
-        const averageRating = avgData && avgData.length > 0 
-          ? avgData.reduce((sum, recipe) => sum + (recipe.nota_media || 0), 0) / avgData.length
-          : 0;
-
-        // Get total chefs count
-        const { count: totalChefs } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true });
-
-        setStats({
-          totalRecipes: totalRecipes || 0,
-          averageRating: Number(averageRating.toFixed(1)),
-          totalChefs: totalChefs || 0,
-          activeRecipes: activeRecipes || 0
-        });
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-      }
-    };
-
-    fetchStats();
-  }, []);
-
-  // Fetch categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('categorias')
-          .select('nome')
-          .eq('ativa', true);
-
-        if (error) throw error;
-
-        setCategories(data?.map(cat => cat.nome) || []);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  const filteredRecipes = recipes.filter(recipe => {
+  const filteredRecipes = recipes?.filter(recipe => {
     const matchesSearch = recipe.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      recipe.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      recipe.categories.some(cat => cat.toLowerCase().includes(searchTerm.toLowerCase()));
-
-    const matchesCategory = !selectedCategory || recipe.categories.includes(selectedCategory);
+                         recipe.descricao.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = !selectedCategory || 
+                           recipe.categories?.some(cat => cat.toLowerCase().includes(selectedCategory.toLowerCase()));
+    
+    const matchesCategories = selectedCategories.length === 0 ||
+                             selectedCategories.some(cat => 
+                               recipe.categories?.some(recipeCategory => 
+                                 recipeCategory.toLowerCase().includes(cat.toLowerCase())
+                               )
+                             );
     
     const matchesDifficulty = !selectedDifficulty || recipe.dificuldade === selectedDifficulty;
-    
-    const matchesTime = !selectedTime || (() => {
-      const time = recipe.tempo_preparo;
-      switch (selectedTime) {
-        case 'quick': return time <= 30;
-        case 'medium': return time > 30 && time <= 60;
-        case 'long': return time > 60;
-        default: return true;
-      }
-    })();
+    const matchesTime = recipe.tempo_preparo <= maxTime;
+    const matchesRating = recipe.nota_media >= minRating;
 
-    return matchesSearch && matchesCategory && matchesDifficulty && matchesTime;
-  });
+    return matchesSearch && matchesCategory && matchesCategories && matchesDifficulty && matchesTime && matchesRating;
+  }) || [];
 
   const clearFilters = () => {
-    setSearchTerm('');
     setSelectedCategory('');
     setSelectedDifficulty('');
-    setSelectedTime('');
+    setMaxTime(180);
+    setMinRating(0);
+    setSelectedCategories([]);
+    setSearchTerm('');
   };
 
-  const activeFiltersCount = [selectedCategory, selectedDifficulty, selectedTime].filter(Boolean).length;
+  const hasActiveFilters = selectedCategory || selectedDifficulty || maxTime < 180 || minRating > 0 || selectedCategories.length > 0 || searchTerm;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow flex items-center justify-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center"
-          >
-            <div className="relative">
-              <div className="animate-spin rounded-full h-20 w-20 border-4 border-fitcooker-orange/20 border-t-fitcooker-orange mx-auto mb-6"></div>
-              <ChefHat className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-8 w-8 text-fitcooker-orange" />
-            </div>
-            <p className="text-gray-600 font-medium">Carregando receitas deliciosas...</p>
-          </motion.div>
-        </main>
-        <Footer />
-      </div>
+  const toggleCategory = (category: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
     );
-  }
+  };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
       <Navbar />
       
-      <main className="flex-grow py-2">
-        {/* Enhanced Header Section with Animated Background */}
+      <main className="py-2">
+        {/* Enhanced Hero Section with Background */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden bg-gradient-to-r from-fitcooker-orange via-orange-500 to-orange-600 text-white py-12 mb-8"
+          className="relative overflow-hidden bg-gradient-to-r from-fitcooker-orange via-orange-500 to-orange-600 text-white py-16 mb-8"
         >
           <div className="absolute inset-0 bg-black/10"></div>
           <motion.div
@@ -179,161 +104,208 @@ const Recipes: React.FC = () => {
                 Descubra Receitas Incríveis
               </h1>
               <p className="text-orange-100 text-lg max-w-2xl mx-auto">
-                Explore nossa coleção de receitas saudáveis e saborosas criadas por chefs talentosos
+                Explore nossa coleção de receitas saudáveis e deliciosas
               </p>
             </motion.div>
           </div>
         </motion.div>
 
         <div className="container mx-auto px-4 md:px-6">
-          {/* Stats Section with Real Data */}
+          {/* Search and Filter Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8"
-          >
-            <motion.div whileHover={{ scale: 1.05, y: -5 }}>
-              <Card className="border-0 bg-gradient-to-br from-white to-orange-50/50 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <div className="flex items-center justify-center w-12 h-12 bg-orange-500 rounded-2xl mx-auto mb-4">
-                    <ChefHat className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-3xl font-bold text-orange-600 mb-1">{stats.totalRecipes}</p>
-                  <p className="text-sm text-gray-600">Total de Receitas</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div whileHover={{ scale: 1.05, y: -5 }}>
-              <Card className="border-0 bg-gradient-to-br from-white to-yellow-50/50 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <div className="flex items-center justify-center w-12 h-12 bg-yellow-500 rounded-2xl mx-auto mb-4">
-                    <Star className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-3xl font-bold text-yellow-600 mb-1">{stats.averageRating}</p>
-                  <p className="text-sm text-gray-600">Avaliação Média</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div whileHover={{ scale: 1.05, y: -5 }}>
-              <Card className="border-0 bg-gradient-to-br from-white to-green-50/50 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <div className="flex items-center justify-center w-12 h-12 bg-green-500 rounded-2xl mx-auto mb-4">
-                    <TrendingUp className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-3xl font-bold text-green-600 mb-1">{stats.activeRecipes}</p>
-                  <p className="text-sm text-gray-600">Receitas Ativas</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div whileHover={{ scale: 1.05, y: -5 }}>
-              <Card className="border-0 bg-gradient-to-br from-white to-blue-50/50 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <div className="flex items-center justify-center w-12 h-12 bg-blue-500 rounded-2xl mx-auto mb-4">
-                    <Users className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-3xl font-bold text-blue-600 mb-1">{stats.totalChefs}</p>
-                  <p className="text-sm text-gray-600">Chefs Ativos</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </motion.div>
-
-          {/* Enhanced Search and Filter Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
             className="mb-8"
           >
-            <Card className="p-6 shadow-lg">
-              <div className="space-y-4">
+            <Card className="p-6 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+              <div className="flex flex-col lg:flex-row gap-4">
                 {/* Search Bar */}
-                <div className="relative">
+                <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <Input
                     type="text"
-                    placeholder="Buscar receitas, ingredientes ou categorias..."
+                    placeholder="Buscar receitas..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 h-12 border-gray-200 focus:border-fitcooker-orange"
                   />
                 </div>
 
-                {/* Filters */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Quick Filters */}
+                <div className="flex flex-wrap gap-3 lg:flex-nowrap">
                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full lg:w-40 h-12">
                       <SelectValue placeholder="Categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
+                      <SelectItem value="">Todas</SelectItem>
+                      {categories?.map(category => (
+                        <SelectItem key={category.id} value={category.nome}>
+                          {category.nome}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
 
                   <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full lg:w-32 h-12">
                       <SelectValue placeholder="Dificuldade" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Fácil">Fácil</SelectItem>
-                      <SelectItem value="Médio">Médio</SelectItem>
-                      <SelectItem value="Difícil">Difícil</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={selectedTime} onValueChange={setSelectedTime}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Tempo de preparo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="quick">Até 30 min</SelectItem>
-                      <SelectItem value="medium">30-60 min</SelectItem>
-                      <SelectItem value="long">Mais de 60 min</SelectItem>
+                      <SelectItem value="">Todas</SelectItem>
+                      {difficulties.map(difficulty => (
+                        <SelectItem key={difficulty} value={difficulty}>
+                          {difficulty}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
 
                   <Button
                     variant="outline"
-                    onClick={clearFilters}
-                    className="flex items-center justify-center"
-                    disabled={activeFiltersCount === 0}
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="h-12 px-4"
                   >
-                    <Filter className="w-4 h-4 mr-2" />
-                    Limpar {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+                    <SlidersHorizontal className="w-4 h-4 mr-2" />
+                    Filtros
                   </Button>
                 </div>
-
-                {/* Active Filters */}
-                {activeFiltersCount > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {selectedCategory && (
-                      <Badge variant="secondary" className="cursor-pointer" onClick={() => setSelectedCategory('')}>
-                        {selectedCategory} ×
-                      </Badge>
-                    )}
-                    {selectedDifficulty && (
-                      <Badge variant="secondary" className="cursor-pointer" onClick={() => setSelectedDifficulty('')}>
-                        {selectedDifficulty} ×
-                      </Badge>
-                    )}
-                    {selectedTime && (
-                      <Badge variant="secondary" className="cursor-pointer" onClick={() => setSelectedTime('')}>
-                        {selectedTime === 'quick' ? 'Até 30 min' : 
-                         selectedTime === 'medium' ? '30-60 min' : 'Mais de 60 min'} ×
-                      </Badge>
-                    )}
-                  </div>
-                )}
               </div>
+
+              {/* Advanced Filters */}
+              {showFilters && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-6 pt-6 border-t border-gray-200"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {/* Time Filter */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-gray-700">
+                        Tempo máximo: {maxTime} min
+                      </label>
+                      <Slider
+                        value={[maxTime]}
+                        onValueChange={([value]) => setMaxTime(value)}
+                        max={180}
+                        min={10}
+                        step={10}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Rating Filter */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-gray-700">
+                        Avaliação mínima: {minRating}★
+                      </label>
+                      <Slider
+                        value={[minRating]}
+                        onValueChange={([value]) => setMinRating(value)}
+                        max={5}
+                        min={0}
+                        step={0.5}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Categories Filter */}
+                    <div className="space-y-3 md:col-span-2">
+                      <label className="text-sm font-medium text-gray-700">
+                        Categorias específicas
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {categories?.slice(0, 8).map(category => (
+                          <div key={category.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={category.nome}
+                              checked={selectedCategories.includes(category.nome)}
+                              onCheckedChange={() => toggleCategory(category.nome)}
+                            />
+                            <label htmlFor={category.nome} className="text-sm cursor-pointer">
+                              {category.nome}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Active Filters */}
+              {hasActiveFilters && (
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-medium text-gray-600">Filtros ativos:</span>
+                  
+                  {searchTerm && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      Busca: "{searchTerm}"
+                      <X className="w-3 h-3 cursor-pointer" onClick={() => setSearchTerm('')} />
+                    </Badge>
+                  )}
+                  
+                  {selectedCategory && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      {selectedCategory}
+                      <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedCategory('')} />
+                    </Badge>
+                  )}
+                  
+                  {selectedDifficulty && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      {selectedDifficulty}
+                      <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedDifficulty('')} />
+                    </Badge>
+                  )}
+                  
+                  {selectedCategories.map(category => (
+                    <Badge key={category} variant="secondary" className="flex items-center gap-1">
+                      {category}
+                      <X className="w-3 h-3 cursor-pointer" onClick={() => toggleCategory(category)} />
+                    </Badge>
+                  ))}
+                  
+                  {maxTime < 180 && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      ≤ {maxTime} min
+                      <X className="w-3 h-3 cursor-pointer" onClick={() => setMaxTime(180)} />
+                    </Badge>
+                  )}
+                  
+                  {minRating > 0 && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      ≥ {minRating}★
+                      <X className="w-3 h-3 cursor-pointer" onClick={() => setMinRating(0)} />
+                    </Badge>
+                  )}
+                  
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="text-fitcooker-orange">
+                    Limpar todos
+                  </Button>
+                </div>
+              )}
             </Card>
+          </motion.div>
+
+          {/* Results Summary */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-6"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {searchTerm || hasActiveFilters 
+                  ? `Resultados da busca (${filteredRecipes.length})` 
+                  : `Todas as Receitas (${filteredRecipes.length})`
+                }
+              </h2>
+            </div>
           </motion.div>
 
           {/* Recipes Grid */}
@@ -342,23 +314,20 @@ const Recipes: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {searchTerm || activeFiltersCount > 0 ? 'Resultados da busca' : 'Todas as Receitas'}
-              </h2>
-              <span className="text-gray-500">
-                {filteredRecipes.length} receita{filteredRecipes.length !== 1 ? 's' : ''} encontrada{filteredRecipes.length !== 1 ? 's' : ''}
-              </span>
-            </div>
-
-            {filteredRecipes.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {Array.from({ length: 8 }, (_, i) => (
+                  <RecipeCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : filteredRecipes.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredRecipes.map((recipe, index) => (
                   <motion.div
                     key={recipe.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 + (index * 0.1) }}
+                    transition={{ delay: 0.1 * (index % 8) }}
                   >
                     <RecipeCard recipe={recipe} />
                   </motion.div>
@@ -370,24 +339,16 @@ const Recipes: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center py-20"
               >
-                <ChefHat className="w-20 h-20 text-gray-300 mx-auto mb-6" />
+                <Search className="w-20 h-20 text-gray-300 mx-auto mb-6" />
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  {searchTerm || activeFiltersCount > 0 ? 'Nenhuma receita encontrada' : 'Nenhuma receita disponível'}
+                  Nenhuma receita encontrada
                 </h3>
                 <p className="text-gray-600 text-lg mb-8">
-                  {searchTerm || activeFiltersCount > 0
-                    ? 'Tente ajustar sua busca ou filtros'
-                    : 'Seja o primeiro a compartilhar uma receita deliciosa!'
-                  }
+                  Tente ajustar seus filtros ou buscar por outros termos
                 </p>
-                {(searchTerm || activeFiltersCount > 0) && (
-                  <Button 
-                    onClick={clearFilters}
-                    className="bg-fitcooker-orange hover:bg-fitcooker-orange/90"
-                  >
-                    Limpar Filtros
-                  </Button>
-                )}
+                <Button onClick={clearFilters} className="bg-fitcooker-orange hover:bg-fitcooker-orange/90">
+                  Limpar Filtros
+                </Button>
               </motion.div>
             )}
           </motion.div>

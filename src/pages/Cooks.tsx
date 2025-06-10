@@ -317,7 +317,7 @@ const Cooks: React.FC = () => {
                 )}
               </motion.div>
             )}
-          </div>
+          </motion.div>
         </div>
       </main>
       

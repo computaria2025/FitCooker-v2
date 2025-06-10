@@ -112,12 +112,12 @@ const Navbar: React.FC = () => {
                   <span className={`font-bold transition-all duration-500 ${
                     isScrolled 
                       ? 'text-xl bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent' 
-                      : 'text-2xl text-white drop-shadow-lg'
+                      : 'text-2xl text-fitcooker-orange drop-shadow-lg'
                   }`}>
                     Fit<span className={`transition-all duration-500 ${
                       isScrolled 
                         ? 'bg-gradient-to-r from-fitcooker-orange to-orange-500 bg-clip-text text-transparent'
-                        : 'text-orange-200'
+                        : 'text-orange-600'
                     }`}>Cooker</span>
                   </span>
                   <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-fitcooker-orange to-orange-500 group-hover:w-full transition-all duration-300"></div>
@@ -139,7 +139,7 @@ const Navbar: React.FC = () => {
                     className={`relative px-4 py-2 transition-all duration-300 group font-medium ${
                       isScrolled 
                         ? 'text-gray-700 hover:text-fitcooker-orange' 
-                        : 'text-white hover:text-white drop-shadow-md'
+                        : 'text-fitcooker-orange hover:text-orange-600 drop-shadow-md'
                     }`}
                   >
                     <span className="relative z-10">{item.name}</span>
@@ -162,7 +162,7 @@ const Navbar: React.FC = () => {
                 className={`relative p-3 transition-all duration-300 group ${
                   isScrolled 
                     ? 'text-gray-600 hover:text-fitcooker-orange'
-                    : 'text-white hover:text-white'
+                    : 'text-fitcooker-orange hover:text-orange-600'
                 }`}
                 aria-label="Buscar receitas"
                 whileHover={{ scale: 1.1 }}
@@ -211,7 +211,7 @@ const Navbar: React.FC = () => {
                         <span className={`hidden sm:inline font-medium transition-colors duration-300 ${
                           isScrolled 
                             ? 'text-gray-700 hover:text-fitcooker-orange'
-                            : 'text-white hover:text-white drop-shadow-md'
+                            : 'text-fitcooker-orange hover:text-orange-600 drop-shadow-md'
                         }`}>
                           {user.user_metadata?.nome || user.email?.split('@')[0] || 'Usuário'}
                         </span>
@@ -246,7 +246,7 @@ const Navbar: React.FC = () => {
                     className={`hidden sm:block transition-colors duration-300 font-medium px-4 py-2 ${
                       isScrolled 
                         ? 'text-gray-700 hover:text-fitcooker-orange'
-                        : 'text-white hover:text-white drop-shadow-md'
+                        : 'text-fitcooker-orange hover:text-orange-600 drop-shadow-md'
                     }`}
                   >
                     Entrar
@@ -271,7 +271,7 @@ const Navbar: React.FC = () => {
                 className={`md:hidden p-2 transition-colors duration-300 ${
                   isScrolled 
                     ? 'text-gray-600 hover:text-fitcooker-orange'
-                    : 'text-white hover:text-white'
+                    : 'text-fitcooker-orange hover:text-orange-600'
                 }`}
                 aria-label="Toggle menu"
                 whileHover={{ scale: 1.1 }}
