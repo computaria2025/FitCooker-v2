@@ -260,6 +260,44 @@ export type Database = {
           },
         ]
       }
+      receita_midias: {
+        Row: {
+          created_at: string | null
+          id: number
+          is_principal: boolean | null
+          ordem: number | null
+          receita_id: number
+          tipo: string
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          is_principal?: boolean | null
+          ordem?: number | null
+          receita_id: number
+          tipo: string
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          is_principal?: boolean | null
+          ordem?: number | null
+          receita_id?: number
+          tipo?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receita_midias_receita_id_fkey"
+            columns: ["receita_id"]
+            isOneToOne: false
+            referencedRelation: "receitas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       receita_passos: {
         Row: {
           descricao: string

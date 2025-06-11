@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
@@ -197,7 +196,6 @@ const AddRecipe: React.FC = () => {
   
   // Handler for adding a custom ingredient
   const handleAddCustomIngredient = () => {
-    // This is handled in the IngredientSelector component now
     setNewIngredientName('');
     setShowAddIngredientForm(false);
     setShowIngredientSelector(false);
@@ -298,18 +296,19 @@ const AddRecipe: React.FC = () => {
   };
 
   // Upload media files to Supabase Storage
-  const uploadMediaFiles = async (): Promise<{ mainImageUrl?: string; videoUrl?: string }> => {
-    const results: { mainImageUrl?: string; videoUrl?: string } = {};
+  const uploadMediaFiles = async (): Promise<{ mediaUrls: { url: string; type: 'image' | 'video'; isMain: boolean; order: number }[] }> => {
+    const mediaUrls: { url: string; type: 'image' | 'video'; isMain: boolean; order: number }[] = [];
     
-    for (const mediaItem of mediaItems) {
+    for (let i = 0; i < mediaItems.length; i++) {
+      const mediaItem = mediaItems[i];
+      
       if (mediaItem.file) {
         const fileExt = mediaItem.file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-        const filePath = `recipes/${fileName}`;
+        const fileName = `${user?.id}/${Date.now()}-${Math.random()}.${fileExt}`;
         
         const { data, error } = await supabase.storage
           .from('recipe-media')
-          .upload(filePath, mediaItem.file);
+          .upload(fileName, mediaItem.file);
         
         if (error) {
           console.error('Erro no upload:', error);
@@ -318,19 +317,25 @@ const AddRecipe: React.FC = () => {
         
         const { data: urlData } = supabase.storage
           .from('recipe-media')
-          .getPublicUrl(filePath);
+          .getPublicUrl(fileName);
         
-        if (mediaItem.isMain) {
-          results.mainImageUrl = urlData.publicUrl;
-        } else if (mediaItem.type === 'video') {
-          results.videoUrl = urlData.publicUrl;
-        }
-      } else if (mediaItem.url && mediaItem.type === 'video') {
-        results.videoUrl = mediaItem.url;
+        mediaUrls.push({
+          url: urlData.publicUrl,
+          type: mediaItem.type,
+          isMain: mediaItem.isMain,
+          order: i
+        });
+      } else if (mediaItem.url) {
+        mediaUrls.push({
+          url: mediaItem.url,
+          type: mediaItem.type,
+          isMain: mediaItem.isMain,
+          order: i
+        });
       }
     }
     
-    return results;
+    return { mediaUrls };
   };
   
   // Check if user is logged in before proceeding
@@ -363,9 +368,10 @@ const AddRecipe: React.FC = () => {
     
     try {
       // 1. Upload media files
-      const { mainImageUrl, videoUrl } = await uploadMediaFiles();
+      const { mediaUrls } = await uploadMediaFiles();
       
       // 2. Create recipe
+      const mainImage = mediaUrls.find(m => m.isMain);
       const { data: recipeData, error: recipeError } = await supabase
         .from('receitas')
         .insert({
@@ -374,8 +380,7 @@ const AddRecipe: React.FC = () => {
           tempo_preparo: parseInt(preparationTime),
           porcoes: parseInt(servings),
           dificuldade: difficulty,
-          imagem_url: mainImageUrl,
-          video_url: videoUrl,
+          imagem_url: mainImage?.url,
           usuario_id: user.id
         })
         .select()
@@ -385,12 +390,28 @@ const AddRecipe: React.FC = () => {
       
       const recipeId = recipeData.id;
       
-      // 3. Add ingredients
+      // 3. Save all media items to receita_midias table
+      if (mediaUrls.length > 0) {
+        const mediaInserts = mediaUrls.map(media => ({
+          receita_id: recipeId,
+          url: media.url,
+          tipo: media.type,
+          is_principal: media.isMain,
+          ordem: media.order
+        }));
+        
+        const { error: mediaError } = await supabase
+          .from('receita_midias')
+          .insert(mediaInserts);
+        
+        if (mediaError) throw mediaError;
+      }
+      
+      // 4. Add ingredients
       const validIngredients = ingredients.filter(ing => ing.name.trim() && ing.quantity > 0);
       for (let i = 0; i < validIngredients.length; i++) {
         const ingredient = validIngredients[i];
         
-        // Find or create ingredient in database
         let { data: existingIngredient } = await supabase
           .from('ingredientes')
           .select('id')
@@ -417,7 +438,6 @@ const AddRecipe: React.FC = () => {
           ingredientId = newIngredient.id;
         }
         
-        // Link ingredient to recipe
         const { error: linkError } = await supabase
           .from('receita_ingredientes')
           .insert({
@@ -431,7 +451,7 @@ const AddRecipe: React.FC = () => {
         if (linkError) throw linkError;
       }
       
-      // 4. Add steps
+      // 5. Add steps
       const validSteps = steps.filter(step => step.description.trim());
       for (const step of validSteps) {
         const { error: stepError } = await supabase
@@ -445,7 +465,7 @@ const AddRecipe: React.FC = () => {
         if (stepError) throw stepError;
       }
       
-      // 5. Add categories
+      // 6. Add categories
       for (const categoryId of selectedCategories) {
         const { error: categoryError } = await supabase
           .from('receita_categorias')
@@ -457,7 +477,7 @@ const AddRecipe: React.FC = () => {
         if (categoryError) throw categoryError;
       }
       
-      // 6. Calculate nutritional information
+      // 7. Calculate nutritional information
       const { error: macroError } = await supabase.rpc('calcular_macros_receita', {
         receita_id_param: recipeId
       });
@@ -470,7 +490,6 @@ const AddRecipe: React.FC = () => {
         duration: 3000,
       });
       
-      // Reset form and redirect
       navigate(`/recipe/${recipeId}`);
       
     } catch (error) {
@@ -552,7 +571,7 @@ const AddRecipe: React.FC = () => {
                 <div className="lg:hidden">
                   <Button 
                     type="submit" 
-                    className="w-full" 
+                    className="w-full bg-fitcooker-orange hover:bg-fitcooker-orange/90" 
                     size="lg"
                     disabled={isSubmitting}
                   >

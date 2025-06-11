@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChefHat, Star, Users, Award, Search, Filter, MapPin, Calendar } from 'lucide-react';
+import { ChefHat, Star, Users, Search, Filter, MapPin, Calendar, Sparkles, Crown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
 
 interface Chef {
@@ -17,7 +18,6 @@ interface Chef {
   nome: string;
   bio: string | null;
   avatar_url: string | null;
-  is_chef: boolean;
   preferencias: string[] | null;
   receitas_count: number;
   seguidores_count: number;
@@ -30,7 +30,7 @@ const Cooks: React.FC = () => {
   const [chefs, setChefs] = useState<Chef[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterVerified, setFilterVerified] = useState(false);
+  const [sortBy, setSortBy] = useState('data_cadastro');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,10 +49,8 @@ const Cooks: React.FC = () => {
 
       if (error) throw error;
 
-      // Calculate stats for each chef
       const chefsWithStats = await Promise.all(
         (chefData || []).map(async (chef) => {
-          // Get recipe count and average rating
           const { data: recipes } = await supabase
             .from('receitas')
             .select('nota_media')
@@ -86,11 +84,43 @@ const Cooks: React.FC = () => {
     }
   };
 
-  const filteredChefs = chefs.filter(chef => {
-    const matchesSearch = chef.nome.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = !filterVerified || chef.is_chef;
-    return matchesSearch && matchesFilter;
-  });
+  const sortOptions = [
+    { value: 'data_cadastro', label: 'Mais Recentes' },
+    { value: 'receitas_count', label: 'Mais Receitas' },
+    { value: 'seguidores_count', label: 'Mais Seguidores' },
+    { value: 'nota_media', label: 'Melhor Avaliados' },
+    { value: 'nome', label: 'Nome A-Z' }
+  ];
+
+  const filteredChefs = React.useMemo(() => {
+    let filtered = [...chefs];
+
+    if (searchTerm) {
+      filtered = filtered.filter(chef =>
+        chef.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        chef.bio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        chef.preferencias?.some(pref => pref.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'receitas_count':
+          return b.receitas_count - a.receitas_count;
+        case 'seguidores_count':
+          return b.seguidores_count - a.seguidores_count;
+        case 'nota_media':
+          return (b.nota_media || 0) - (a.nota_media || 0);
+        case 'nome':
+          return a.nome.localeCompare(b.nome);
+        case 'data_cadastro':
+        default:
+          return new Date(b.data_cadastro).getTime() - new Date(a.data_cadastro).getTime();
+      }
+    });
+
+    return filtered;
+  }, [chefs, searchTerm, sortBy]);
 
   const handleChefClick = (chefId: string) => {
     navigate(`/cook/${chefId}`);
@@ -126,12 +156,25 @@ const Cooks: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <ChefHat className="w-16 h-16 mx-auto mb-6 text-white" />
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                Conheça Nossos Chefs
-              </h1>
+              <div className="flex items-center justify-center gap-3 mb-6">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Crown className="w-12 h-12 text-yellow-300" />
+                </motion.div>
+                <h1 className="text-4xl md:text-5xl font-bold">
+                  Mestres da Culinária
+                </h1>
+                <motion.div
+                  animate={{ rotate: [0, -10, 10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                >
+                  <Sparkles className="w-12 h-12 text-yellow-300" />
+                </motion.div>
+              </div>
               <p className="text-orange-100 text-lg max-w-2xl mx-auto">
-                Descubra os talentosos cozinheiros da nossa comunidade
+                Conheça os talentosos cozinheiros que fazem a magia acontecer na nossa comunidade
               </p>
             </motion.div>
           </div>
@@ -151,20 +194,26 @@ const Cooks: React.FC = () => {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <Input
                     type="text"
-                    placeholder="Buscar chefs..."
+                    placeholder="Buscar chefs por nome, bio ou preferências..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 h-12 border-gray-200 focus:border-fitcooker-orange"
                   />
                 </div>
-                <Button
-                  variant={filterVerified ? "default" : "outline"}
-                  onClick={() => setFilterVerified(!filterVerified)}
-                  className={filterVerified ? "bg-fitcooker-orange hover:bg-fitcooker-orange/90" : "border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange hover:text-white"}
-                >
-                  <Award className="w-4 h-4 mr-2" />
-                  Chefs Verificados
-                </Button>
+                <div className="w-full md:w-48">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sortOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </Card>
           </motion.div>
@@ -190,11 +239,16 @@ const Cooks: React.FC = () => {
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {Array.from({ length: 8 }, (_, i) => (
-                  <Card key={i} className="animate-pulse">
+                  <Card key={i} className="animate-pulse overflow-hidden">
+                    <div className="h-32 bg-gray-200"></div>
                     <CardContent className="p-6">
-                      <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-4"></div>
-                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-2/3 mx-auto"></div>
+                      <div className="flex justify-center mb-4">
+                        <div className="w-16 h-16 bg-gray-200 rounded-full"></div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -207,110 +261,115 @@ const Cooks: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 * (index % 8) }}
-                    whileHover={{ y: -5 }}
+                    whileHover={{ y: -8, scale: 1.02 }}
                     className="cursor-pointer"
                     onClick={() => handleChefClick(chef.id)}
                   >
-                    <Card className="h-full shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-white overflow-hidden group">
-                      <CardContent className="p-0">
-                        {/* Card Header with Gradient */}
-                        <div className="relative bg-gradient-to-br from-fitcooker-orange to-orange-500 p-6 text-white">
-                          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors"></div>
-                          <div className="relative z-10">
-                            <div className="flex justify-center mb-4">
-                              <div className="relative">
-                                <Avatar className="w-20 h-20 border-4 border-white shadow-lg ring-4 ring-white/20">
-                                  <AvatarImage src={chef.avatar_url || ''} className="object-cover" />
-                                  <AvatarFallback className="bg-white text-fitcooker-orange text-xl font-bold">
-                                    <ChefHat className="w-10 h-10" />
-                                  </AvatarFallback>
-                                </Avatar>
-                                {chef.is_chef && (
-                                  <motion.div
-                                    animate={{ rotate: [0, 10, -10, 0] }}
-                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                                    className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg"
-                                  >
-                                    <Award className="w-4 h-4 text-white" />
-                                  </motion.div>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="text-center">
-                              <h3 className="font-bold text-lg mb-1 text-white group-hover:text-orange-100 transition-colors">
-                                {chef.nome}
-                              </h3>
-                              {chef.is_chef && (
-                                <Badge className="bg-white/20 border-white/30 text-white text-xs mb-2">
-                                  Chef Verificado
+                    <Card className="h-full shadow-lg hover:shadow-2xl transition-all duration-500 border-0 bg-white overflow-hidden group">
+                      {/* Header Gradient */}
+                      <div className="relative h-24 bg-gradient-to-r from-fitcooker-orange via-orange-500 to-orange-600">
+                        <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors"></div>
+                        <motion.div
+                          className="absolute inset-0 opacity-30"
+                          animate={{
+                            background: [
+                              "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.2) 0%, transparent 50%)",
+                              "radial-gradient(circle at 80% 20%, rgba(255,255,255,0.2) 0%, transparent 50%)"
+                            ]
+                          }}
+                          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                      </div>
+
+                      <CardContent className="relative p-6 -mt-8">
+                        {/* Avatar */}
+                        <div className="flex justify-center mb-4">
+                          <motion.div
+                            whileHover={{ scale: 1.1 }}
+                            transition={{ duration: 0.2 }}
+                            className="relative"
+                          >
+                            <Avatar className="w-16 h-16 border-4 border-white shadow-lg ring-4 ring-orange-100">
+                              <AvatarImage src={chef.avatar_url || ''} className="object-cover" />
+                              <AvatarFallback className="bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600">
+                                <ChefHat className="w-8 h-8" />
+                              </AvatarFallback>
+                            </Avatar>
+                            {chef.receitas_count >= 10 && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg"
+                              >
+                                <Crown className="w-3 h-3 text-white" />
+                              </motion.div>
+                            )}
+                          </motion.div>
+                        </div>
+                        
+                        {/* Chef Info */}
+                        <div className="text-center mb-4">
+                          <h3 className="font-bold text-lg mb-1 text-gray-900 group-hover:text-fitcooker-orange transition-colors">
+                            {chef.nome}
+                          </h3>
+                          {chef.bio && (
+                            <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-3">
+                              {chef.bio}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-3 gap-3 mb-4">
+                          <div className="text-center p-2 bg-gray-50 rounded-lg group-hover:bg-orange-50 transition-colors">
+                            <div className="font-bold text-gray-900">{chef.receitas_count}</div>
+                            <div className="text-xs text-gray-500">Receitas</div>
+                          </div>
+                          <div className="text-center p-2 bg-gray-50 rounded-lg group-hover:bg-orange-50 transition-colors">
+                            <div className="font-bold text-gray-900">{chef.seguidores_count}</div>
+                            <div className="text-xs text-gray-500">Seguidores</div>
+                          </div>
+                          <div className="text-center p-2 bg-gray-50 rounded-lg group-hover:bg-orange-50 transition-colors">
+                            {chef.nota_media ? (
+                              <>
+                                <div className="flex items-center justify-center space-x-1">
+                                  <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                                  <span className="font-bold text-gray-900">{chef.nota_media}</span>
+                                </div>
+                                <div className="text-xs text-gray-500">Avaliação</div>
+                              </>
+                            ) : (
+                              <>
+                                <div className="font-bold text-gray-400">-</div>
+                                <div className="text-xs text-gray-500">Sem nota</div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Preferences */}
+                        {chef.preferencias && chef.preferencias.length > 0 && (
+                          <div className="mb-4">
+                            <div className="text-xs font-medium text-gray-500 mb-2">Preferências:</div>
+                            <div className="flex flex-wrap gap-1">
+                              {chef.preferencias.slice(0, 2).map((pref, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs bg-orange-100 text-orange-700">
+                                  {pref}
+                                </Badge>
+                              ))}
+                              {chef.preferencias.length > 2 && (
+                                <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">
+                                  +{chef.preferencias.length - 2}
                                 </Badge>
                               )}
                             </div>
                           </div>
-                        </div>
+                        )}
 
-                        {/* Card Body */}
-                        <div className="p-6 space-y-4">
-                          {/* Bio */}
-                          {chef.bio && (
-                            <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                              {chef.bio}
-                            </p>
-                          )}
-
-                          {/* Stats */}
-                          <div className="grid grid-cols-3 gap-4 text-center">
-                            <div>
-                              <div className="text-lg font-bold text-gray-900">{chef.receitas_count}</div>
-                              <div className="text-xs text-gray-500">Receitas</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-bold text-gray-900">{chef.seguidores_count}</div>
-                              <div className="text-xs text-gray-500">Seguidores</div>
-                            </div>
-                            <div>
-                              {chef.nota_media ? (
-                                <>
-                                  <div className="flex items-center justify-center space-x-1">
-                                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                                    <span className="text-lg font-bold text-gray-900">{chef.nota_media}</span>
-                                  </div>
-                                  <div className="text-xs text-gray-500">Avaliação</div>
-                                </>
-                              ) : (
-                                <>
-                                  <div className="text-lg font-bold text-gray-400">-</div>
-                                  <div className="text-xs text-gray-500">Sem avaliação</div>
-                                </>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Preferences */}
-                          {chef.preferencias && chef.preferencias.length > 0 && (
-                            <div>
-                              <div className="text-xs font-medium text-gray-500 mb-2">Preferências:</div>
-                              <div className="flex flex-wrap gap-1">
-                                {chef.preferencias.slice(0, 3).map((pref, index) => (
-                                  <Badge key={index} variant="secondary" className="text-xs">
-                                    {pref}
-                                  </Badge>
-                                ))}
-                                {chef.preferencias.length > 3 && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    +{chef.preferencias.length - 3}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Join Date */}
-                          <div className="flex items-center justify-center text-xs text-gray-500 pt-2 border-t">
-                            <Calendar className="w-3 h-3 mr-1" />
-                            <span>Desde {new Date(chef.data_cadastro).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}</span>
-                          </div>
+                        {/* Join Date */}
+                        <div className="flex items-center justify-center text-xs text-gray-500 pt-3 border-t border-gray-100">
+                          <Calendar className="w-3 h-3 mr-1" />
+                          <span>Membro desde {new Date(chef.data_cadastro).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -333,7 +392,7 @@ const Cooks: React.FC = () => {
                 <Button 
                   onClick={() => {
                     setSearchTerm('');
-                    setFilterVerified(false);
+                    setSortBy('data_cadastro');
                   }} 
                   className="bg-fitcooker-orange hover:bg-fitcooker-orange/90"
                 >

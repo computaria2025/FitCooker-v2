@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Recipe } from '@/types/recipe';
 import CategoryBadge from './CategoryBadge';
 import { Clock, Users, Star, ChefHat, Zap, Beef, Wheat, Droplets } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -14,10 +15,40 @@ interface RecipeCardProps {
   similar?: boolean;
 }
 
+interface MediaItem {
+  id: number;
+  url: string;
+  tipo: 'image' | 'video';
+  is_principal: boolean;
+  ordem: number;
+}
+
 const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, className, featured = false, similar = false }) => {
   const { id, title, description, imageUrl, preparationTime, difficulty, macros, author, categories, rating, servings } = recipe;
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [mainImageUrl, setMainImageUrl] = useState(imageUrl);
+  
+  useEffect(() => {
+    const fetchRecipeMedia = async () => {
+      try {
+        const { data: mediaData } = await supabase
+          .from('receita_midias')
+          .select('*')
+          .eq('receita_id', id)
+          .eq('is_principal', true)
+          .single();
+        
+        if (mediaData && mediaData.url) {
+          setMainImageUrl(mediaData.url);
+        }
+      } catch (error) {
+        console.log('Usando imagem padrão da receita');
+      }
+    };
+    
+    fetchRecipeMedia();
+  }, [id]);
   
   return (
     <div 
@@ -36,7 +67,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, className, featured = f
           {!imageError ? (
             <>
               <img 
-                src={imageUrl} 
+                src={mainImageUrl} 
                 alt={title}
                 loading="lazy"
                 onLoad={() => setImageLoaded(true)}
@@ -71,7 +102,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, className, featured = f
           </div>
         </Link>
         
-        {/* Categories as small icons */}
+        {/* Categories as small badges */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1 max-w-[90%]">
           {categories.slice(0, 3).map((category, index) => (
             <Badge key={index} variant="secondary" className="text-xs px-2 py-1 bg-white/90 backdrop-blur-sm text-gray-700">
