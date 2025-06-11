@@ -56,14 +56,16 @@ const FollowSection: React.FC = () => {
       if (followersData) {
         const formattedFollowers = followersData
           .map(f => f.profiles)
-          .filter(Boolean) as User[];
+          .filter((profile): profile is User => profile !== null)
+          .flat();
         setFollowers(formattedFollowers);
       }
       
       if (followingData) {
         const formattedFollowing = followingData
           .map(f => f.profiles)
-          .filter(Boolean) as User[];
+          .filter((profile): profile is User => profile !== null)
+          .flat();
         setFollowing(formattedFollowing);
       }
     } catch (error) {
