@@ -21,9 +21,22 @@ import RecipeCard from '@/components/ui/RecipeCard';
 import FollowSection from '@/components/profile/FollowSection';
 import { Recipe } from '@/types/recipe';
 
+interface Profile {
+  id: string;
+  nome: string;
+  email: string;
+  bio: string | null;
+  avatar_url: string | null;
+  preferencias: string[] | null;
+  receitas_count: number;
+  seguidores_count: number;
+  seguindo_count: number;
+}
+
 const Profile: React.FC = () => {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -33,40 +46,34 @@ const Profile: React.FC = () => {
     preferencias: [] as string[]
   });
   const [newPreference, setNewPreference] = useState('');
-  const [profileStats, setProfileStats] = useState({
-    receitas_count: 0,
-    seguidores_count: 0,
-    seguindo_count: 0
-  });
 
   useEffect(() => {
-    if (user && profile) {
+    if (user) {
+      fetchProfile();
       fetchUserRecipes();
-      fetchProfileStats();
-      setEditForm({
-        nome: profile.nome || '',
-        bio: profile.bio || '',
-        preferencias: profile.preferencias || []
-      });
     }
-  }, [user, profile]);
+  }, [user]);
 
-  const fetchProfileStats = async () => {
+  const fetchProfile = async () => {
     if (!user) return;
     
     try {
-      // Buscar stats reais do banco
-      const { data: profileData } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
-        .select('receitas_count, seguidores_count, seguindo_count')
+        .select('*')
         .eq('id', user.id)
         .single();
-      
-      if (profileData) {
-        setProfileStats(profileData);
-      }
+
+      if (error) throw error;
+
+      setProfile(data);
+      setEditForm({
+        nome: data.nome || '',
+        bio: data.bio || '',
+        preferencias: data.preferencias || []
+      });
     } catch (error) {
-      console.error('Erro ao buscar estatísticas do perfil:', error);
+      console.error('Erro ao buscar perfil:', error);
     }
   };
 
@@ -159,7 +166,7 @@ const Profile: React.FC = () => {
       });
       
       setEditing(false);
-      refreshProfile();
+      fetchProfile();
     } catch (error) {
       console.error('Erro ao atualizar perfil:', error);
       toast({
@@ -185,7 +192,7 @@ const Profile: React.FC = () => {
       });
       
       fetchUserRecipes();
-      fetchProfileStats();
+      fetchProfile();
     } catch (error) {
       console.error('Erro ao deletar receita:', error);
       toast({
@@ -254,7 +261,7 @@ const Profile: React.FC = () => {
                     {!editing && (
                       <ProfilePictureUpload
                         currentAvatarUrl={profile.avatar_url}
-                        onUploadComplete={refreshProfile}
+                        onUploadComplete={fetchProfile}
                       />
                     )}
                   </div>
@@ -289,15 +296,15 @@ const Profile: React.FC = () => {
                     {/* Stats */}
                     <div className="flex gap-6 mt-4">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-gray-900">{profileStats.receitas_count}</div>
+                        <div className="text-2xl font-bold text-gray-900">{profile.receitas_count}</div>
                         <div className="text-sm text-gray-500">Receitas</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-gray-900">{profileStats.seguidores_count}</div>
+                        <div className="text-2xl font-bold text-gray-900">{profile.seguidores_count}</div>
                         <div className="text-sm text-gray-500">Seguidores</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-gray-900">{profileStats.seguindo_count}</div>
+                        <div className="text-2xl font-bold text-gray-900">{profile.seguindo_count}</div>
                         <div className="text-sm text-gray-500">Seguindo</div>
                       </div>
                     </div>

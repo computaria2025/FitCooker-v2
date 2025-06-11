@@ -54,11 +54,17 @@ const FollowSection: React.FC = () => {
         .eq('seguidor_id', user.id);
 
       if (followersData) {
-        setFollowers(followersData.map(f => f.profiles).filter(Boolean) as User[]);
+        const formattedFollowers = followersData
+          .map(f => f.profiles)
+          .filter(Boolean) as User[];
+        setFollowers(formattedFollowers);
       }
       
       if (followingData) {
-        setFollowing(followingData.map(f => f.profiles).filter(Boolean) as User[]);
+        const formattedFollowing = followingData
+          .map(f => f.profiles)
+          .filter(Boolean) as User[];
+        setFollowing(formattedFollowing);
       }
     } catch (error) {
       console.error('Erro ao buscar dados de seguidores:', error);

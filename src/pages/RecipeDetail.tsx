@@ -114,6 +114,10 @@ const RecipeDetail: React.FC = () => {
     }
   };
 
+  const handleRatingUpdate = () => {
+    fetchRecipeDetail();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -245,7 +249,11 @@ const RecipeDetail: React.FC = () => {
                       
                       {/* Action Buttons */}
                       <div className="flex flex-wrap gap-3">
-                        <RateRecipeButton recipeId={recipe.id} />
+                        <RateRecipeButton 
+                          recipeId={recipe.id} 
+                          currentRating={recipe.nota_media || 0}
+                          onRatingUpdate={handleRatingUpdate}
+                        />
                         <SaveRecipeButton recipeId={recipe.id} />
                         <ShareButton recipeId={recipe.id} recipeTitle={recipe.titulo} />
                       </div>
