@@ -1,13 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Users, Search, User } from 'lucide-react';
+import { Users, Search, User, UserPlus, UserMinus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/components/ui/use-toast';
 
 interface User {
   id: string;
@@ -18,10 +18,12 @@ interface User {
 
 const FollowSection: React.FC = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [followers, setFollowers] = useState<User[]>([]);
   const [following, setFollowing] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (user) {
@@ -56,17 +58,19 @@ const FollowSection: React.FC = () => {
       if (followersData) {
         const formattedFollowers = followersData
           .map(f => f.profiles)
-          .filter((profile): profile is User => profile !== null)
-          .flat();
+          .filter((profile): profile is User => profile !== null);
         setFollowers(formattedFollowers);
       }
       
       if (followingData) {
         const formattedFollowing = followingData
           .map(f => f.profiles)
-          .filter((profile): profile is User => profile !== null)
-          .flat();
+          .filter((profile): profile is User => profile !== null);
         setFollowing(formattedFollowing);
+        
+        // Criar set de IDs que o usuário está seguindo
+        const followingIdsSet = new Set(formattedFollowing.map(u => u.id));
+        setFollowingIds(followingIdsSet);
       }
     } catch (error) {
       console.error('Erro ao buscar dados de seguidores:', error);
@@ -75,9 +79,82 @@ const FollowSection: React.FC = () => {
     }
   };
 
-  const UserList: React.FC<{ users: User[]; title: string }> = ({ users, title }) => {
-    const filteredUsers = users.filter(user =>
-      user.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleFollow = async (targetUserId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('seguidores')
+        .insert({
+          seguidor_id: user.id,
+          seguido_id: targetUserId
+        });
+
+      if (error) throw error;
+
+      // Atualizar estado local
+      setFollowingIds(prev => new Set([...prev, targetUserId]));
+      
+      toast({
+        title: "Usuário seguido!",
+        description: "Você agora está seguindo este usuário.",
+      });
+
+      // Recarregar dados
+      fetchFollowData();
+    } catch (error) {
+      console.error('Erro ao seguir usuário:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível seguir o usuário.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUnfollow = async (targetUserId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('seguidores')
+        .delete()
+        .eq('seguidor_id', user.id)
+        .eq('seguido_id', targetUserId);
+
+      if (error) throw error;
+
+      // Atualizar estado local
+      setFollowingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(targetUserId);
+        return newSet;
+      });
+      
+      toast({
+        title: "Deixou de seguir!",
+        description: "Você não está mais seguindo este usuário.",
+      });
+
+      // Recarregar dados
+      fetchFollowData();
+    } catch (error) {
+      console.error('Erro ao deixar de seguir usuário:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível deixar de seguir o usuário.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const UserList: React.FC<{ users: User[]; title: string; showFollowButton?: boolean }> = ({ 
+    users, 
+    title, 
+    showFollowButton = false 
+  }) => {
+    const filteredUsers = users.filter(userItem =>
+      userItem.nome.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -114,13 +191,37 @@ const FollowSection: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => window.location.href = `/cook/${userItem.id}`}
-                >
-                  Ver Perfil
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => window.location.href = `/cook/${userItem.id}`}
+                  >
+                    Ver Perfil
+                  </Button>
+                  {showFollowButton && userItem.id !== user?.id && (
+                    followingIds.has(userItem.id) ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleUnfollow(userItem.id)}
+                        className="text-red-600 border-red-600 hover:bg-red-50"
+                      >
+                        <UserMinus className="w-4 h-4 mr-1" />
+                        Deixar de Seguir
+                      </Button>
+                    ) : (
+                      <Button 
+                        size="sm"
+                        onClick={() => handleFollow(userItem.id)}
+                        className="bg-fitcooker-orange hover:bg-fitcooker-orange/90"
+                      >
+                        <UserPlus className="w-4 h-4 mr-1" />
+                        Seguir
+                      </Button>
+                    )
+                  )}
+                </div>
               </div>
             ))
           ) : (
@@ -189,7 +290,7 @@ const FollowSection: React.FC = () => {
                     <DialogHeader>
                       <DialogTitle>Seus Seguidores</DialogTitle>
                     </DialogHeader>
-                    <UserList users={followers} title="Seguidores" />
+                    <UserList users={followers} title="Seguidores" showFollowButton={true} />
                   </DialogContent>
                 </Dialog>
               )}
@@ -240,7 +341,7 @@ const FollowSection: React.FC = () => {
                     <DialogHeader>
                       <DialogTitle>Pessoas que Você Segue</DialogTitle>
                     </DialogHeader>
-                    <UserList users={following} title="Seguindo" />
+                    <UserList users={following} title="Seguindo" showFollowButton={true} />
                   </DialogContent>
                 </Dialog>
               )}
