@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -18,6 +17,8 @@ import SaveRecipeButton from '@/components/recipe/SaveRecipeButton';
 import MediaCarousel from '@/components/recipe/MediaCarousel';
 import NutritionalInfo from '@/components/recipe/NutritionalInfo';
 import ShareButton from '@/components/recipe/ShareButton';
+import RecipeReviews from '@/components/recipe/RecipeReviews';
+import MacroDisplay from '@/components/ui/MacroDisplay';
 
 interface RecipeDetailData {
   id: number;
@@ -316,6 +317,19 @@ const RecipeDetail: React.FC = () => {
                   </CardContent>
                 </Card>
               </motion.div>
+
+              {/* Recipe Reviews */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <RecipeReviews 
+                  recipeId={recipe.id}
+                  averageRating={recipe.nota_media || 0}
+                  totalReviews={recipe.avaliacoes_count || 0}
+                />
+              </motion.div>
             </div>
 
             {/* Sidebar */}
@@ -363,10 +377,25 @@ const RecipeDetail: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <NutritionalInfo 
-                    macros={macros}
-                    servings={recipe.porcoes}
-                  />
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Informações Nutricionais</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <MacroDisplay 
+                        calories={macros.calories}
+                        protein={macros.protein}
+                        carbs={macros.carbs}
+                        fat={macros.fat}
+                        compact={false}
+                      />
+                      <div className="mt-4 p-3 bg-orange-50 rounded-lg">
+                        <p className="text-xs text-orange-700">
+                          * Valores por porção ({recipe.porcoes} porções no total)
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </motion.div>
               )}
             </div>
