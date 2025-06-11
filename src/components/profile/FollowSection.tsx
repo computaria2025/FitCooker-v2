@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -57,15 +58,15 @@ const FollowSection: React.FC = () => {
 
       if (followersData) {
         const formattedFollowers = followersData
-          .map(f => f.profiles)
-          .filter((profile): profile is User => profile !== null);
+          .filter(f => f.profiles !== null)
+          .map(f => f.profiles as User);
         setFollowers(formattedFollowers);
       }
       
       if (followingData) {
         const formattedFollowing = followingData
-          .map(f => f.profiles)
-          .filter((profile): profile is User => profile !== null);
+          .filter(f => f.profiles !== null)
+          .map(f => f.profiles as User);
         setFollowing(formattedFollowing);
         
         // Criar set de IDs que o usuário está seguindo

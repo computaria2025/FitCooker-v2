@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Edit3, Trash2, Users, ChefHat, Heart, User, Plus } from 'lucide-react';
+import { Edit3, Trash2, Users, ChefHat, Heart, User, Plus, Settings, Lock, Bell, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import ProfilePictureUpload from '@/components/ui/ProfilePictureUpload';
 import RecipeCard from '@/components/ui/RecipeCard';
 import FollowSection from '@/components/profile/FollowSection';
@@ -416,10 +417,11 @@ const Profile: React.FC = () => {
             </motion.div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* My Recipes */}
+          {/* Main Content - 2 Columns Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Coluna Esquerda */}
+            <div className="space-y-8">
+              {/* Minhas Receitas */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -434,10 +436,10 @@ const Profile: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     {loading ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {Array(4).fill(0).map((_, i) => (
+                      <div className="grid grid-cols-1 gap-4">
+                        {Array(3).fill(0).map((_, i) => (
                           <Card key={i} className="animate-pulse">
-                            <div className="h-48 bg-gray-200 rounded-t"></div>
+                            <div className="h-32 bg-gray-200 rounded-t"></div>
                             <CardContent className="p-4">
                               <div className="h-4 bg-gray-200 rounded mb-2"></div>
                               <div className="h-3 bg-gray-200 rounded w-2/3"></div>
@@ -446,7 +448,7 @@ const Profile: React.FC = () => {
                         ))}
                       </div>
                     ) : userRecipes.length > 0 ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4 max-h-96 overflow-y-auto">
                         {userRecipes.map((recipe) => (
                           <div key={recipe.id} className="relative group">
                             <RecipeCard recipe={recipe} />
@@ -502,17 +504,147 @@ const Profile: React.FC = () => {
                   </CardContent>
                 </Card>
               </motion.div>
-            </div>
 
-            {/* Sidebar */}
-            <div className="space-y-8">
-              {/* Follow Section */}
+              {/* Configurações de Conta */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-fitcooker-orange" />
+                      Configurações de Conta
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="font-medium">Email</p>
+                        <p className="text-sm text-gray-500">{profile.email}</p>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        Alterar
+                      </Button>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="font-medium">Senha</p>
+                        <p className="text-sm text-gray-500">••••••••</p>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        <Lock className="w-4 h-4 mr-2" />
+                        Alterar
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+
+            {/* Coluna Direita */}
+            <div className="space-y-8">
+              {/* Seguidores e Seguindo */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
                 <FollowSection />
+              </motion.div>
+
+              {/* Configurações de Privacidade */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-fitcooker-orange" />
+                      Privacidade
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="font-medium">Perfil Público</p>
+                        <p className="text-sm text-gray-500">Permitir que outros vejam seu perfil</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="font-medium">Mostrar Seguidores</p>
+                        <p className="text-sm text-gray-500">Exibir lista de seguidores publicamente</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="font-medium">Receitas Públicas</p>
+                        <p className="text-sm text-gray-500">Permitir que outros vejam suas receitas</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Notificações */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bell className="w-5 h-5 text-fitcooker-orange" />
+                      Notificações
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="font-medium">Novos Seguidores</p>
+                        <p className="text-sm text-gray-500">Ser notificado quando alguém me seguir</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="font-medium">Comentários</p>
+                        <p className="text-sm text-gray-500">Notificar sobre comentários nas receitas</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="font-medium">Avaliações</p>
+                        <p className="text-sm text-gray-500">Notificar quando avaliarem minhas receitas</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                  </CardContent>
+                </Card>
               </motion.div>
             </div>
           </div>
