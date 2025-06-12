@@ -55,7 +55,7 @@ const RecipeReviews: React.FC<RecipeReviewsProps> = ({
       if (error) throw error;
 
       // Process the data to match our interface
-      const processedReviews = (data || []).map(item => ({
+      const processedReviews: Review[] = (data || []).map(item => ({
         id: item.id,
         nota: item.nota,
         comentario: item.comentario,
@@ -65,7 +65,12 @@ const RecipeReviews: React.FC<RecipeReviewsProps> = ({
               nome: item.profiles[0].nome,
               avatar_url: item.profiles[0].avatar_url
             }
-          : item.profiles
+          : item.profiles && typeof item.profiles === 'object'
+          ? {
+              nome: item.profiles.nome,
+              avatar_url: item.profiles.avatar_url
+            }
+          : null
       }));
 
       setReviews(processedReviews);

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Edit3, Trash2, Users, ChefHat, Heart, User, Plus, Settings, Lock, Bell, Shield } from 'lucide-react';
+import { Edit3, Trash2, Users, ChefHat, Heart, User, Plus, Settings, Lock, Bell, Shield, Camera } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -14,12 +14,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import ProfilePictureUpload from '@/components/ui/ProfilePictureUpload';
 import RecipeCard from '@/components/ui/RecipeCard';
 import FollowSection from '@/components/profile/FollowSection';
+import SavedRecipesSection from '@/components/profile/SavedRecipesSection';
 import { Recipe } from '@/types/recipe';
 
 interface Profile {
@@ -223,7 +223,7 @@ const Profile: React.FC = () => {
 
   if (!user || !profile) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
         <Navbar />
         <div className="pt-24 pb-16">
           <div className="container mx-auto px-4 md:px-6 text-center">
@@ -236,94 +236,123 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
       <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 md:px-6">
-          {/* Profile Header */}
+          {/* Profile Header - Redesigned */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <Card className="overflow-hidden">
-              <div className="bg-gradient-to-r from-fitcooker-orange to-orange-500 h-32"></div>
-              <CardContent className="relative pt-0 pb-6">
-                <div className="flex flex-col md:flex-row items-start md:items-end gap-6 -mt-16">
-                  {/* Avatar */}
-                  <div className="relative">
-                    <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
-                      <AvatarImage src={profile.avatar_url || ''} className="object-cover" />
-                      <AvatarFallback className="bg-gray-200 text-4xl">
-                        <User className="w-16 h-16" />
-                      </AvatarFallback>
-                    </Avatar>
+            <Card className="overflow-hidden shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+              {/* Header Background */}
+              <div className="relative h-40 bg-gradient-to-r from-fitcooker-orange via-orange-500 to-red-500">
+                <div className="absolute inset-0 bg-black/20"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/40 to-transparent"></div>
+              </div>
+              
+              <CardContent className="relative pt-0 pb-8">
+                <div className="flex flex-col md:flex-row items-start md:items-end gap-6 -mt-20">
+                  {/* Avatar Section */}
+                  <div className="relative group">
+                    <div className="relative">
+                      <Avatar className="w-40 h-40 border-6 border-white shadow-2xl ring-4 ring-fitcooker-orange/20">
+                        <AvatarImage src={profile.avatar_url || ''} className="object-cover" />
+                        <AvatarFallback className="bg-gradient-to-br from-orange-100 to-orange-200 text-6xl">
+                          <User className="w-20 h-20 text-orange-600" />
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      {/* Camera Icon Overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Camera className="w-8 h-8 text-white" />
+                      </div>
+                    </div>
+                    
                     {!editing && (
-                      <ProfilePictureUpload
-                        currentAvatarUrl={profile.avatar_url}
-                        onUploadComplete={fetchProfile}
-                      />
+                      <div className="absolute -bottom-2 -right-2">
+                        <ProfilePictureUpload
+                          currentAvatarUrl={profile.avatar_url}
+                          onUploadComplete={fetchProfile}
+                        />
+                      </div>
                     )}
                   </div>
                   
                   {/* Profile Info */}
-                  <div className="flex-1 mt-4 md:mt-0">
+                  <div className="flex-1 mt-4 md:mt-0 text-center md:text-left">
                     {editing ? (
                       <div className="space-y-4">
                         <Input
                           value={editForm.nome}
                           onChange={(e) => setEditForm({ ...editForm, nome: e.target.value })}
                           placeholder="Seu nome"
-                          className="text-2xl font-bold h-12"
+                          className="text-2xl font-bold h-14 text-center md:text-left bg-white/80 backdrop-blur-sm"
                         />
                         <Textarea
                           value={editForm.bio}
                           onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                           placeholder="Conte um pouco sobre você..."
-                          className="resize-none"
+                          className="resize-none bg-white/80 backdrop-blur-sm"
                           rows={3}
                         />
                       </div>
                     ) : (
                       <>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">{profile.nome}</h1>
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-3">
+                          {profile.nome}
+                        </h1>
                         {profile.bio && (
-                          <p className="text-gray-600 leading-relaxed mb-4">{profile.bio}</p>
+                          <p className="text-gray-600 leading-relaxed mb-6 text-lg max-w-2xl">
+                            {profile.bio}
+                          </p>
                         )}
                       </>
                     )}
                     
                     {/* Stats */}
-                    <div className="flex gap-6 mt-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-gray-900">{profile.receitas_count}</div>
-                        <div className="text-sm text-gray-500">Receitas</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-gray-900">{profile.seguidores_count}</div>
-                        <div className="text-sm text-gray-500">Seguidores</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-gray-900">{profile.seguindo_count}</div>
-                        <div className="text-sm text-gray-500">Seguindo</div>
-                      </div>
+                    <div className="flex justify-center md:justify-start gap-8 mt-6">
+                      <motion.div 
+                        whileHover={{ scale: 1.05 }}
+                        className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 min-w-[100px]"
+                      >
+                        <div className="text-3xl font-bold text-blue-700">{profile.receitas_count}</div>
+                        <div className="text-sm text-blue-600">Receitas</div>
+                      </motion.div>
+                      <motion.div 
+                        whileHover={{ scale: 1.05 }}
+                        className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 min-w-[100px]"
+                      >
+                        <div className="text-3xl font-bold text-green-700">{profile.seguidores_count}</div>
+                        <div className="text-sm text-green-600">Seguidores</div>
+                      </motion.div>
+                      <motion.div 
+                        whileHover={{ scale: 1.05 }}
+                        className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 min-w-[100px]"
+                      >
+                        <div className="text-3xl font-bold text-purple-700">{profile.seguindo_count}</div>
+                        <div className="text-sm text-purple-600">Seguindo</div>
+                      </motion.div>
                     </div>
                   </div>
                   
                   {/* Action Buttons */}
-                  <div className="flex gap-2">
+                  <div className="flex gap-3 mt-4 md:mt-0">
                     {editing ? (
                       <>
                         <Button 
                           onClick={handleSaveProfile}
-                          className="bg-fitcooker-orange hover:bg-fitcooker-orange/90"
+                          className="bg-gradient-to-r from-fitcooker-orange to-orange-500 hover:from-orange-500 hover:to-red-500 text-white shadow-lg"
                         >
                           Salvar
                         </Button>
                         <Button 
                           variant="outline" 
                           onClick={() => setEditing(false)}
+                          className="border-2 border-gray-300 hover:bg-gray-50"
                         >
                           Cancelar
                         </Button>
@@ -332,7 +361,7 @@ const Profile: React.FC = () => {
                       <Button 
                         onClick={() => setEditing(true)}
                         variant="outline"
-                        className="gap-2 border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange hover:text-white"
+                        className="gap-2 border-2 border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange hover:text-white transition-all shadow-lg"
                       >
                         <Edit3 className="w-4 h-4" />
                         Editar Perfil
@@ -351,7 +380,7 @@ const Profile: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               className="mb-8"
             >
-              <Card>
+              <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle>Preferências Culinárias</CardTitle>
                 </CardHeader>
@@ -397,7 +426,7 @@ const Profile: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               className="mb-8"
             >
-              <Card>
+              <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Heart className="w-5 h-5 text-fitcooker-orange" />
@@ -427,7 +456,7 @@ const Profile: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <Card>
+                <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <ChefHat className="w-5 h-5 text-fitcooker-orange" />
@@ -505,13 +534,22 @@ const Profile: React.FC = () => {
                 </Card>
               </motion.div>
 
-              {/* Configurações de Conta */}
+              {/* Receitas Salvas */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <Card>
+                <SavedRecipesSection />
+              </motion.div>
+
+              {/* Configurações de Conta */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Settings className="w-5 h-5 text-fitcooker-orange" />
@@ -563,7 +601,7 @@ const Profile: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card>
+                <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Shield className="w-5 h-5 text-fitcooker-orange" />
@@ -608,7 +646,7 @@ const Profile: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <Card>
+                <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Bell className="w-5 h-5 text-fitcooker-orange" />

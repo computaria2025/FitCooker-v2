@@ -60,20 +60,28 @@ const FollowSection: React.FC = () => {
       if (followingError) throw followingError;
 
       // Processar dados dos seguidores
-      const processedFollowers = followersData?.map(item => ({
-        id: item.profiles?.id || '',
-        nome: item.profiles?.nome || '',
-        avatar_url: item.profiles?.avatar_url || null,
-        bio: item.profiles?.bio || null
-      })).filter(user => user.id) || [];
+      const processedFollowers: User[] = (followersData || [])
+        .map(item => item.profiles)
+        .filter(profile => profile && typeof profile === 'object' && !Array.isArray(profile))
+        .map(profile => ({
+          id: profile.id || '',
+          nome: profile.nome || '',
+          avatar_url: profile.avatar_url || null,
+          bio: profile.bio || null
+        }))
+        .filter(user => user.id);
 
       // Processar dados dos seguindo
-      const processedFollowing = followingData?.map(item => ({
-        id: item.profiles?.id || '',
-        nome: item.profiles?.nome || '',
-        avatar_url: item.profiles?.avatar_url || null,
-        bio: item.profiles?.bio || null
-      })).filter(user => user.id) || [];
+      const processedFollowing: User[] = (followingData || [])
+        .map(item => item.profiles)
+        .filter(profile => profile && typeof profile === 'object' && !Array.isArray(profile))
+        .map(profile => ({
+          id: profile.id || '',
+          nome: profile.nome || '',
+          avatar_url: profile.avatar_url || null,
+          bio: profile.bio || null
+        }))
+        .filter(user => user.id);
 
       setFollowers(processedFollowers);
       setFollowing(processedFollowing);

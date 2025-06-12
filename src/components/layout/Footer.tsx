@@ -5,14 +5,16 @@ import { ChefHat, Instagram, Facebook, Twitter, Mail } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-gray-900 text-white py-16">
+    <footer className="bg-black text-white py-16">
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and Description */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <ChefHat className="w-8 h-8 text-fitcooker-orange" />
-              <span className="text-2xl font-bold">FitCooker</span>
+              <span className="text-2xl font-bold bg-gradient-to-r from-fitcooker-orange via-yellow-400 to-red-500 bg-clip-text text-transparent animate-pulse shadow-2xl">
+                FitCooker
+              </span>
             </div>
             <p className="text-gray-400 mb-4 leading-relaxed">
               Desperte o chef que há em você! Uma plataforma completa para descobrir, criar e compartilhar receitas saudáveis e deliciosas.
