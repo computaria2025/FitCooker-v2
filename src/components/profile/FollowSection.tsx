@@ -61,27 +61,23 @@ const FollowSection: React.FC = () => {
 
       // Processar dados dos seguidores
       const processedFollowers: User[] = (followersData || [])
-        .map(item => item.profiles)
-        .filter(profile => profile && typeof profile === 'object' && !Array.isArray(profile))
-        .map(profile => ({
-          id: profile.id || '',
-          nome: profile.nome || '',
-          avatar_url: profile.avatar_url || null,
-          bio: profile.bio || null
-        }))
-        .filter(user => user.id);
+        .filter(item => item.profiles && !Array.isArray(item.profiles))
+        .map(item => ({
+          id: (item.profiles as any).id,
+          nome: (item.profiles as any).nome || '',
+          avatar_url: (item.profiles as any).avatar_url || null,
+          bio: (item.profiles as any).bio || null
+        }));
 
       // Processar dados dos seguindo
       const processedFollowing: User[] = (followingData || [])
-        .map(item => item.profiles)
-        .filter(profile => profile && typeof profile === 'object' && !Array.isArray(profile))
-        .map(profile => ({
-          id: profile.id || '',
-          nome: profile.nome || '',
-          avatar_url: profile.avatar_url || null,
-          bio: profile.bio || null
-        }))
-        .filter(user => user.id);
+        .filter(item => item.profiles && !Array.isArray(item.profiles))
+        .map(item => ({
+          id: (item.profiles as any).id,
+          nome: (item.profiles as any).nome || '',
+          avatar_url: (item.profiles as any).avatar_url || null,
+          bio: (item.profiles as any).bio || null
+        }));
 
       setFollowers(processedFollowers);
       setFollowing(processedFollowing);

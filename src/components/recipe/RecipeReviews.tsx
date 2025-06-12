@@ -60,15 +60,12 @@ const RecipeReviews: React.FC<RecipeReviewsProps> = ({
         nota: item.nota,
         comentario: item.comentario,
         created_at: item.created_at,
-        profiles: Array.isArray(item.profiles) && item.profiles.length > 0 
-          ? {
-              nome: item.profiles[0].nome,
-              avatar_url: item.profiles[0].avatar_url
-            }
+        profiles: Array.isArray(item.profiles) 
+          ? null 
           : item.profiles && typeof item.profiles === 'object'
           ? {
-              nome: item.profiles.nome,
-              avatar_url: item.profiles.avatar_url
+              nome: (item.profiles as any).nome || '',
+              avatar_url: (item.profiles as any).avatar_url || null
             }
           : null
       }));

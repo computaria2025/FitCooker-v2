@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Edit3, Trash2, Users, ChefHat, Heart, User, Plus, Settings, Lock, Bell, Shield, Camera } from 'lucide-react';
+import { Edit3, Trash2, Plus, Settings, Lock, Bell, Shield, Upload, Camera } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -16,7 +16,6 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import ProfilePictureUpload from '@/components/ui/ProfilePictureUpload';
 import RecipeCard from '@/components/ui/RecipeCard';
 import FollowSection from '@/components/profile/FollowSection';
 import SavedRecipesSection from '@/components/profile/SavedRecipesSection';
@@ -41,6 +40,7 @@ const Profile: React.FC = () => {
   const [userRecipes, setUserRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [editForm, setEditForm] = useState({
     nome: '',
     bio: '',
@@ -143,6 +143,55 @@ const Profile: React.FC = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error('Você deve selecionar uma imagem para upload.');
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: data.publicUrl })
+        .eq('id', user?.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Sucesso!",
+        description: "Foto de perfil atualizada com sucesso.",
+      });
+
+      fetchProfile();
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Erro ao fazer upload da imagem.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -249,64 +298,74 @@ const Profile: React.FC = () => {
           >
             <Card className="overflow-hidden shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
               {/* Header Background */}
-              <div className="relative h-40 bg-gradient-to-r from-fitcooker-orange via-orange-500 to-red-500">
+              <div className="relative h-48 bg-gradient-to-r from-fitcooker-orange via-orange-500 to-red-500">
                 <div className="absolute inset-0 bg-black/20"></div>
                 <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/40 to-transparent"></div>
               </div>
               
               <CardContent className="relative pt-0 pb-8">
-                <div className="flex flex-col md:flex-row items-start md:items-end gap-6 -mt-20">
+                <div className="flex flex-col items-center text-center -mt-24">
                   {/* Avatar Section */}
-                  <div className="relative group">
-                    <div className="relative">
-                      <Avatar className="w-40 h-40 border-6 border-white shadow-2xl ring-4 ring-fitcooker-orange/20">
-                        <AvatarImage src={profile.avatar_url || ''} className="object-cover" />
-                        <AvatarFallback className="bg-gradient-to-br from-orange-100 to-orange-200 text-6xl">
-                          <User className="w-20 h-20 text-orange-600" />
-                        </AvatarFallback>
-                      </Avatar>
-                      
-                      {/* Camera Icon Overlay */}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Camera className="w-8 h-8 text-white" />
-                      </div>
-                    </div>
+                  <div className="relative group mb-6">
+                    <Avatar className="w-48 h-48 border-6 border-white shadow-2xl ring-4 ring-fitcooker-orange/20">
+                      <AvatarImage src={profile.avatar_url || ''} className="object-cover" />
+                      <AvatarFallback className="bg-gradient-to-br from-orange-100 to-orange-200 text-6xl">
+                        <Camera className="w-24 h-24 text-orange-600" />
+                      </AvatarFallback>
+                    </Avatar>
                     
-                    {!editing && (
-                      <div className="absolute -bottom-2 -right-2">
-                        <ProfilePictureUpload
-                          currentAvatarUrl={profile.avatar_url}
-                          onUploadComplete={fetchProfile}
-                        />
+                    {/* Upload overlay */}
+                    <label
+                      htmlFor="avatar-upload"
+                      className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                    >
+                      <div className="text-white text-center">
+                        {uploading ? (
+                          <div className="animate-spin rounded-full h-12 w-12 border-2 border-white border-t-transparent mx-auto"></div>
+                        ) : (
+                          <>
+                            <Upload className="w-12 h-12 mx-auto mb-2" />
+                            <span className="text-sm font-medium">Alterar Foto</span>
+                          </>
+                        )}
                       </div>
-                    )}
+                    </label>
+                    
+                    <input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={uploadAvatar}
+                      disabled={uploading}
+                      className="hidden"
+                    />
                   </div>
                   
                   {/* Profile Info */}
-                  <div className="flex-1 mt-4 md:mt-0 text-center md:text-left">
+                  <div className="w-full max-w-2xl">
                     {editing ? (
-                      <div className="space-y-4">
+                      <div className="space-y-6">
                         <Input
                           value={editForm.nome}
                           onChange={(e) => setEditForm({ ...editForm, nome: e.target.value })}
                           placeholder="Seu nome"
-                          className="text-2xl font-bold h-14 text-center md:text-left bg-white/80 backdrop-blur-sm"
+                          className="text-3xl font-bold h-16 text-center bg-white/80 backdrop-blur-sm"
                         />
                         <Textarea
                           value={editForm.bio}
                           onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                           placeholder="Conte um pouco sobre você..."
-                          className="resize-none bg-white/80 backdrop-blur-sm"
-                          rows={3}
+                          className="resize-none bg-white/80 backdrop-blur-sm text-center"
+                          rows={4}
                         />
                       </div>
                     ) : (
                       <>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-3">
+                        <h1 className="text-5xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-4">
                           {profile.nome}
                         </h1>
                         {profile.bio && (
-                          <p className="text-gray-600 leading-relaxed mb-6 text-lg max-w-2xl">
+                          <p className="text-gray-600 leading-relaxed mb-8 text-lg max-w-2xl mx-auto">
                             {profile.bio}
                           </p>
                         )}
@@ -314,59 +373,59 @@ const Profile: React.FC = () => {
                     )}
                     
                     {/* Stats */}
-                    <div className="flex justify-center md:justify-start gap-8 mt-6">
+                    <div className="flex justify-center gap-8 mb-8">
                       <motion.div 
                         whileHover={{ scale: 1.05 }}
-                        className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 min-w-[100px]"
+                        className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 min-w-[120px]"
                       >
-                        <div className="text-3xl font-bold text-blue-700">{profile.receitas_count}</div>
+                        <div className="text-4xl font-bold text-blue-700">{profile.receitas_count}</div>
                         <div className="text-sm text-blue-600">Receitas</div>
                       </motion.div>
                       <motion.div 
                         whileHover={{ scale: 1.05 }}
-                        className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 min-w-[100px]"
+                        className="text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 min-w-[120px]"
                       >
-                        <div className="text-3xl font-bold text-green-700">{profile.seguidores_count}</div>
+                        <div className="text-4xl font-bold text-green-700">{profile.seguidores_count}</div>
                         <div className="text-sm text-green-600">Seguidores</div>
                       </motion.div>
                       <motion.div 
                         whileHover={{ scale: 1.05 }}
-                        className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 min-w-[100px]"
+                        className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 min-w-[120px]"
                       >
-                        <div className="text-3xl font-bold text-purple-700">{profile.seguindo_count}</div>
+                        <div className="text-4xl font-bold text-purple-700">{profile.seguindo_count}</div>
                         <div className="text-sm text-purple-600">Seguindo</div>
                       </motion.div>
                     </div>
-                  </div>
-                  
-                  {/* Action Buttons */}
-                  <div className="flex gap-3 mt-4 md:mt-0">
-                    {editing ? (
-                      <>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex justify-center gap-4">
+                      {editing ? (
+                        <>
+                          <Button 
+                            onClick={handleSaveProfile}
+                            className="bg-gradient-to-r from-fitcooker-orange to-orange-500 hover:from-orange-500 hover:to-red-500 text-white shadow-lg px-8"
+                          >
+                            Salvar Alterações
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => setEditing(false)}
+                            className="border-2 border-gray-300 hover:bg-gray-50 px-8"
+                          >
+                            Cancelar
+                          </Button>
+                        </>
+                      ) : (
                         <Button 
-                          onClick={handleSaveProfile}
-                          className="bg-gradient-to-r from-fitcooker-orange to-orange-500 hover:from-orange-500 hover:to-red-500 text-white shadow-lg"
+                          onClick={() => setEditing(true)}
+                          variant="outline"
+                          className="gap-2 border-2 border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange hover:text-white transition-all shadow-lg px-8"
                         >
-                          Salvar
+                          <Edit3 className="w-5 h-5" />
+                          Editar Perfil
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setEditing(false)}
-                          className="border-2 border-gray-300 hover:bg-gray-50"
-                        >
-                          Cancelar
-                        </Button>
-                      </>
-                    ) : (
-                      <Button 
-                        onClick={() => setEditing(true)}
-                        variant="outline"
-                        className="gap-2 border-2 border-fitcooker-orange text-fitcooker-orange hover:bg-fitcooker-orange hover:text-white transition-all shadow-lg"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                        Editar Perfil
-                      </Button>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -429,7 +488,6 @@ const Profile: React.FC = () => {
               <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-fitcooker-orange" />
                     Preferências Culinárias
                   </CardTitle>
                 </CardHeader>
