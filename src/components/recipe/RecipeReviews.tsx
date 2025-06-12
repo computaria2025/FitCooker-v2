@@ -14,7 +14,7 @@ interface Review {
   profiles: {
     nome: string;
     avatar_url: string | null;
-  };
+  } | null;
 }
 
 interface RecipeReviewsProps {
@@ -54,7 +54,21 @@ const RecipeReviews: React.FC<RecipeReviewsProps> = ({
 
       if (error) throw error;
 
-      setReviews(data || []);
+      // Process the data to match our interface
+      const processedReviews = (data || []).map(item => ({
+        id: item.id,
+        nota: item.nota,
+        comentario: item.comentario,
+        created_at: item.created_at,
+        profiles: Array.isArray(item.profiles) && item.profiles.length > 0 
+          ? {
+              nome: item.profiles[0].nome,
+              avatar_url: item.profiles[0].avatar_url
+            }
+          : item.profiles
+      }));
+
+      setReviews(processedReviews);
     } catch (error) {
       console.error('Erro ao buscar avaliações:', error);
     } finally {
@@ -83,10 +97,10 @@ const RecipeReviews: React.FC<RecipeReviewsProps> = ({
 
   if (loading) {
     return (
-      <Card>
+      <Card className="shadow-lg border-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5" />
+            <MessageSquare className="w-5 h-5 text-fitcooker-orange" />
             Avaliações
           </CardTitle>
         </CardHeader>
@@ -109,28 +123,28 @@ const RecipeReviews: React.FC<RecipeReviewsProps> = ({
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
+      <CardHeader className="bg-gradient-to-r from-fitcooker-orange/10 to-orange-100/50">
         <CardTitle className="flex items-center gap-2">
-          <MessageSquare className="w-5 h-5" />
+          <MessageSquare className="w-5 h-5 text-fitcooker-orange" />
           Avaliações ({totalReviews})
         </CardTitle>
         
         {/* Rating Summary */}
         <div className="flex items-center gap-4 pt-2">
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold">{averageRating.toFixed(1)}</span>
+            <span className="text-3xl font-bold text-fitcooker-orange">{averageRating.toFixed(1)}</span>
             <div className="flex items-center">
               {renderStars(Math.round(averageRating))}
             </div>
           </div>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-600">
             Baseado em {totalReviews} avaliação{totalReviews !== 1 ? 'ões' : ''}
           </span>
         </div>
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="p-6">
         <div className="space-y-6">
           {reviews.length > 0 ? (
             reviews.map((review, index) => (
@@ -139,31 +153,31 @@ const RecipeReviews: React.FC<RecipeReviewsProps> = ({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="border-b border-gray-100 last:border-b-0 pb-4 last:pb-0"
+                className="border-l-4 border-fitcooker-orange/30 pl-4 py-3 bg-gradient-to-r from-orange-50/50 to-transparent rounded-r-lg"
               >
                 <div className="flex items-start gap-3">
-                  <Avatar className="w-10 h-10">
+                  <Avatar className="w-12 h-12 border-2 border-orange-200">
                     <AvatarImage src={review.profiles?.avatar_url || ''} />
-                    <AvatarFallback>
-                      <User className="w-5 h-5" />
+                    <AvatarFallback className="bg-orange-100">
+                      <User className="w-6 h-6 text-orange-600" />
                     </AvatarFallback>
                   </Avatar>
                   
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-gray-900">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-semibold text-gray-900">
                         {review.profiles?.nome || 'Usuário'}
                       </span>
                       <div className="flex items-center">
                         {renderStars(review.nota)}
                       </div>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-500 ml-auto">
                         {formatDate(review.created_at)}
                       </span>
                     </div>
                     
                     {review.comentario && (
-                      <p className="text-gray-700 leading-relaxed">
+                      <p className="text-gray-700 leading-relaxed bg-white/60 p-3 rounded-lg">
                         {review.comentario}
                       </p>
                     )}
@@ -172,10 +186,12 @@ const RecipeReviews: React.FC<RecipeReviewsProps> = ({
               </motion.div>
             ))
           ) : (
-            <div className="text-center py-8 text-gray-500">
-              <MessageSquare className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-              <p>Ainda não há avaliações para esta receita</p>
-              <p className="text-sm">Seja o primeiro a avaliar!</p>
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="w-8 h-8 text-orange-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Ainda não há avaliações</h3>
+              <p className="text-gray-600">Seja o primeiro a avaliar esta receita!</p>
             </div>
           )}
         </div>

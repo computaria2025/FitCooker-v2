@@ -1,14 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Users, UserPlus, UserMinus, Heart, Crown } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Users, Search, User, UserPlus, UserMinus } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/components/ui/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface User {
   id: string;
@@ -22,9 +23,7 @@ const FollowSection: React.FC = () => {
   const { toast } = useToast();
   const [followers, setFollowers] = useState<User[]>([]);
   const [following, setFollowing] = useState<User[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (user) {
@@ -39,7 +38,7 @@ const FollowSection: React.FC = () => {
       setLoading(true);
       
       // Buscar seguidores
-      const { data: followersData } = await supabase
+      const { data: followersData, error: followersError } = await supabase
         .from('seguidores')
         .select(`
           seguidor_id,
@@ -47,8 +46,10 @@ const FollowSection: React.FC = () => {
         `)
         .eq('seguido_id', user.id);
 
+      if (followersError) throw followersError;
+
       // Buscar seguindo
-      const { data: followingData } = await supabase
+      const { data: followingData, error: followingError } = await supabase
         .from('seguidores')
         .select(`
           seguido_id,
@@ -56,23 +57,26 @@ const FollowSection: React.FC = () => {
         `)
         .eq('seguidor_id', user.id);
 
-      if (followersData) {
-        const formattedFollowers = followersData
-          .filter(f => f.profiles !== null)
-          .map(f => f.profiles as User);
-        setFollowers(formattedFollowers);
-      }
-      
-      if (followingData) {
-        const formattedFollowing = followingData
-          .filter(f => f.profiles !== null)
-          .map(f => f.profiles as User);
-        setFollowing(formattedFollowing);
-        
-        // Criar set de IDs que o usuário está seguindo
-        const followingIdsSet = new Set(formattedFollowing.map(u => u.id));
-        setFollowingIds(followingIdsSet);
-      }
+      if (followingError) throw followingError;
+
+      // Processar dados dos seguidores
+      const processedFollowers = followersData?.map(item => ({
+        id: item.profiles?.id || '',
+        nome: item.profiles?.nome || '',
+        avatar_url: item.profiles?.avatar_url || null,
+        bio: item.profiles?.bio || null
+      })).filter(user => user.id) || [];
+
+      // Processar dados dos seguindo
+      const processedFollowing = followingData?.map(item => ({
+        id: item.profiles?.id || '',
+        nome: item.profiles?.nome || '',
+        avatar_url: item.profiles?.avatar_url || null,
+        bio: item.profiles?.bio || null
+      })).filter(user => user.id) || [];
+
+      setFollowers(processedFollowers);
+      setFollowing(processedFollowing);
     } catch (error) {
       console.error('Erro ao buscar dados de seguidores:', error);
     } finally {
@@ -80,42 +84,9 @@ const FollowSection: React.FC = () => {
     }
   };
 
-  const handleFollow = async (targetUserId: string) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('seguidores')
-        .insert({
-          seguidor_id: user.id,
-          seguido_id: targetUserId
-        });
-
-      if (error) throw error;
-
-      // Atualizar estado local
-      setFollowingIds(prev => new Set([...prev, targetUserId]));
-      
-      toast({
-        title: "Usuário seguido!",
-        description: "Você agora está seguindo este usuário.",
-      });
-
-      // Recarregar dados
-      fetchFollowData();
-    } catch (error) {
-      console.error('Erro ao seguir usuário:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível seguir o usuário.",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleUnfollow = async (targetUserId: string) => {
     if (!user) return;
-
+    
     try {
       const { error } = await supabase
         .from('seguidores')
@@ -125,137 +96,99 @@ const FollowSection: React.FC = () => {
 
       if (error) throw error;
 
-      // Atualizar estado local
-      setFollowingIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(targetUserId);
-        return newSet;
-      });
+      setFollowing(prev => prev.filter(u => u.id !== targetUserId));
       
       toast({
-        title: "Deixou de seguir!",
-        description: "Você não está mais seguindo este usuário.",
+        title: "Sucesso!",
+        description: "Você parou de seguir este usuário.",
       });
-
-      // Recarregar dados
-      fetchFollowData();
     } catch (error) {
-      console.error('Erro ao deixar de seguir usuário:', error);
+      console.error('Erro ao deixar de seguir:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível deixar de seguir o usuário.",
+        description: "Não foi possível deixar de seguir este usuário.",
         variant: "destructive",
       });
     }
   };
 
-  const UserList: React.FC<{ users: User[]; title: string; showFollowButton?: boolean }> = ({ 
+  const UserList: React.FC<{ users: User[]; title: string; showUnfollowButton?: boolean }> = ({ 
     users, 
     title, 
-    showFollowButton = false 
-  }) => {
-    const filteredUsers = users.filter(userItem =>
-      userItem.nome.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold">{title} ({users.length})</h3>
-        </div>
-        
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            placeholder="Pesquisar..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        <div className="space-y-3 max-h-96 overflow-y-auto">
-          {filteredUsers.length > 0 ? (
-            filteredUsers.map((userItem) => (
-              <div key={userItem.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage src={userItem.avatar_url || ''} />
-                    <AvatarFallback>
-                      <User className="w-5 h-5" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{userItem.nome}</p>
-                    {userItem.bio && (
-                      <p className="text-sm text-gray-500 line-clamp-1">{userItem.bio}</p>
-                    )}
+    showUnfollowButton = false 
+  }) => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="w-full">
+          Ver {title}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <ScrollArea className="max-h-96">
+          <div className="space-y-4">
+            {users.length > 0 ? (
+              users.map((targetUser) => (
+                <motion.div
+                  key={targetUser.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage src={targetUser.avatar_url || ''} />
+                      <AvatarFallback>
+                        <Users className="w-6 h-6" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-gray-900">{targetUser.nome}</p>
+                      {targetUser.bio && (
+                        <p className="text-sm text-gray-500 line-clamp-1">{targetUser.bio}</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => window.location.href = `/cook/${userItem.id}`}
-                  >
-                    Ver Perfil
-                  </Button>
-                  {showFollowButton && userItem.id !== user?.id && (
-                    followingIds.has(userItem.id) ? (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleUnfollow(userItem.id)}
-                        className="text-red-600 border-red-600 hover:bg-red-50"
-                      >
-                        <UserMinus className="w-4 h-4 mr-1" />
-                        Deixar de Seguir
-                      </Button>
-                    ) : (
-                      <Button 
-                        size="sm"
-                        onClick={() => handleFollow(userItem.id)}
-                        className="bg-fitcooker-orange hover:bg-fitcooker-orange/90"
-                      >
-                        <UserPlus className="w-4 h-4 mr-1" />
-                        Seguir
-                      </Button>
-                    )
+                  
+                  {showUnfollowButton && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleUnfollow(targetUser.id)}
+                      className="text-red-600 border-red-200 hover:bg-red-50"
+                    >
+                      <UserMinus className="w-4 h-4" />
+                    </Button>
                   )}
-                </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <Users className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                <p className="text-gray-500">Nenhum usuário encontrado</p>
               </div>
-            ))
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <Users className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-              <p>Nenhum usuário encontrado</p>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
+            )}
+          </div>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
+  );
 
   if (loading) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            Seguidores
+            <Heart className="w-5 h-5 text-fitcooker-orange" />
+            Conexões
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="animate-pulse space-y-3">
-            {Array(3).fill(0).map((_, i) => (
-              <div key={i} className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                </div>
-              </div>
-            ))}
+          <div className="animate-pulse space-y-4">
+            <div className="h-10 bg-gray-200 rounded"></div>
+            <div className="h-10 bg-gray-200 rounded"></div>
           </div>
         </CardContent>
       </Card>
@@ -263,116 +196,28 @@ const FollowSection: React.FC = () => {
   }
 
   return (
-    <Card>
+    <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Users className="w-5 h-5" />
-          Seguidores
+          <Crown className="w-5 h-5 text-fitcooker-orange" />
+          Conexões
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Prévia de Seguidores */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium">Seguidores ({followers.length})</h3>
-              {followers.length > 3 && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="text-fitcooker-orange border-fitcooker-orange hover:bg-fitcooker-orange hover:text-white"
-                    >
-                      Ver todos
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Seus Seguidores</DialogTitle>
-                    </DialogHeader>
-                    <UserList users={followers} title="Seguidores" showFollowButton={true} />
-                  </DialogContent>
-                </Dialog>
-              )}
-            </div>
-            
-            <div className="space-y-3">
-              {followers.slice(0, 3).map((follower) => (
-                <div key={follower.id} className="flex items-center space-x-3">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={follower.avatar_url || ''} />
-                    <AvatarFallback>
-                      <User className="w-4 h-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{follower.nome}</p>
-                    {follower.bio && (
-                      <p className="text-xs text-gray-500 truncate">{follower.bio}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-              
-              {followers.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">
-                  Você ainda não tem seguidores
-                </p>
-              )}
-            </div>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4 text-center">
+          <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+            <div className="text-2xl font-bold text-blue-700">{followers.length}</div>
+            <div className="text-sm text-blue-600">Seguidores</div>
           </div>
-
-          {/* Prévia de Seguindo */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium">Seguindo ({following.length})</h3>
-              {following.length > 3 && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="text-fitcooker-orange border-fitcooker-orange hover:bg-fitcooker-orange hover:text-white"
-                    >
-                      Ver todos
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Pessoas que Você Segue</DialogTitle>
-                    </DialogHeader>
-                    <UserList users={following} title="Seguindo" showFollowButton={true} />
-                  </DialogContent>
-                </Dialog>
-              )}
-            </div>
-            
-            <div className="space-y-3">
-              {following.slice(0, 3).map((followingUser) => (
-                <div key={followingUser.id} className="flex items-center space-x-3">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={followingUser.avatar_url || ''} />
-                    <AvatarFallback>
-                      <User className="w-4 h-4" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{followingUser.nome}</p>
-                    {followingUser.bio && (
-                      <p className="text-xs text-gray-500 truncate">{followingUser.bio}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-              
-              {following.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">
-                  Você ainda não segue ninguém
-                </p>
-              )}
-            </div>
+          <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+            <div className="text-2xl font-bold text-green-700">{following.length}</div>
+            <div className="text-sm text-green-600">Seguindo</div>
           </div>
+        </div>
+        
+        <div className="space-y-3">
+          <UserList users={followers} title="Seguidores" />
+          <UserList users={following} title="Seguindo" showUnfollowButton={true} />
         </div>
       </CardContent>
     </Card>
